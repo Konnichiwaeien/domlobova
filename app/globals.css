@@ -1,26 +1,26 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
 :root {
-  --background: #FDFBF7; /* Кремовый фон */
-  --foreground: #1A1A1E; /* Темный графит для текста */
+  --background: #FDF9F1; /* Более теплый и нежный кремовый фон */
+  --foreground: #2A2520; /* Возвращаем более темный, насыщенный коричнево-серый цвет для контраста */
   
-  /* Фирменные цвета */
-  --brand-orange: #D34E24; /* Ориентировано на красно-оранжевый кирпич дома */
-  --brand-orange-light: #E86A43;
+  /* Фирменные цвета по референсу */
+  --brand-orange: #EB6C39; /* Яркий, "мандариновый" цвет */
+  --brand-orange-light: #F48C5F;
   --brand-yellow: #ECA42A; /* Теплый желтоватый акцент из окон */
-  --brand-blue: #9CBCE2; /* Голубой с крыши и окон */
-  --brand-blue-light: #C2DAF3;
-  --brand-cream: #FDFBF7;
-  --brand-brown: #1A1A1E; /* Заменили коричневый на дорогой темный графит */
-  --brand-brown-light: #52525B; /* zinc-600 */
+  --brand-blue: #CFE3FA; /* Пастельно-голубой, как у лица */
+  --brand-blue-light: #E1EFFC;
+  --brand-cream: #FDF9F1;
+  --brand-brown: #2A2520; /* Более глубокий цвет для заголовков */
+  --brand-brown-light: #5C5046; 
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui;
-  --font-serif: var(--font-montserrat), ui-sans-serif, system-ui;
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui;
+  --font-heading: var(--font-sofia), var(--font-manrope), ui-sans-serif, system-ui;
   
   --color-brand-orange: var(--brand-orange);
   --color-brand-orange-light: var(--brand-orange-light);
@@ -44,10 +44,66 @@
   body {
     background: var(--background);
     color: var(--foreground);
-    font-family: var(--font-montserrat), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: var(--font-manrope), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6, .font-serif {
-    font-family: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif !important;
+  h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: var(--font-sofia), var(--font-manrope), ui-sans-serif, system-ui, sans-serif !important;
   }
+}
+
+/* GPU compositing hints for animated elements */
+.transform-gpu {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Lazy rendering for off-screen sections */
+@layer utilities {
+  .content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 800px;
+  }
+}
+
+/* Progress bar shimmer sweep */
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-150%) skewX(-15deg); }
+  85% { transform: translateX(350%) skewX(-15deg); }
+  100% { transform: translateX(350%) skewX(-15deg); }
+}
+
+.progress-shimmer {
+  animation: shimmer-sweep 4s ease-in-out infinite;
+  animation-delay: 2.5s;
+}
+
+/* Toast fade-in animation */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Volunteer Swiper Pagination (external container) */
+.volunteer-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.volunteer-bullet {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(74, 63, 53, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 1;
+}
+
+.volunteer-bullet-active {
+  background: var(--brand-orange) !important;
+  width: 32px;
 }
