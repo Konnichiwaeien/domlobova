@@ -68,7 +68,8 @@ const FundsUsage = ({ data }: FundsUsageProps) => {
     "bg-[#FDE1CD]", // Pale peach orange 
     "bg-[#FFA726]"  // Bold vivid orange
   ];
-  const tops = ["top-24", "top-32", "top-40", "top-48", "top-56", "top-64"];
+  const topsMobile = ["top-[64px]", "top-[72px]", "top-[80px]", "top-[88px]", "top-[96px]", "top-[104px]"];
+  const topsDesktop = ["md:top-24", "md:top-32", "md:top-40", "md:top-48", "md:top-56", "md:top-64"];
 
   // Extract wrapper from array if it comes as an array of 1 item
   const blockData = Array.isArray(data) ? data[0] : (data || {});
@@ -83,23 +84,23 @@ const FundsUsage = ({ data }: FundsUsageProps) => {
         desc: need.descr || "",
         color: colors[idx % colors.length],
         img: Array.isArray(need.image) ? need.image[0]?.url : (need.image?.url || `/images/${(idx % 6) + 1}.webp`),
-        top: tops[idx % tops.length],
+        top: topsMobile[idx % topsMobile.length] + " " + topsDesktop[idx % topsDesktop.length],
       }))
     : items;
 
   return (
     <section
       id="funds"
-      className="bg-white py-14 md:py-20 rounded-[3rem] md:rounded-[5rem] mx-2 md:mx-6 my-14 md:my-20 border border-brand-brown/5 shadow-sm relative z-30"
+      className="bg-white py-16 md:py-20 rounded-2xl md:rounded-[3rem] lg:rounded-[5rem] mx-3 md:mx-6 my-14 md:my-20 border border-brand-brown/5 shadow-sm relative z-30"
     >
-      <div className="mx-auto max-w-[1300px] px-4 md:px-8">
-        <div className="mb-10 md:mb-16 text-center">
+      <div className="mx-auto max-w-[1300px] px-5 md:px-8">
+        <div className="mb-8 md:mb-12 lg:mb-16 text-center">
           <div className="mb-6 inline-flex rounded-full bg-white px-6 py-2 shadow-sm border border-brand-brown/5">
             <span className="text-sm font-bold uppercase tracking-widest text-brand-orange">
               Важная поддержка
             </span>
           </div>
-          <h2 className="font-heading text-5xl font-black text-brand-brown md:text-7xl uppercase">
+          <h2 className="font-heading text-4xl md:text-5xl lg:text-7xl font-black text-brand-brown uppercase">
             {renderHighlightedTitle(titleString, "text-brand-orange italic")}
           </h2>
         </div>
@@ -108,28 +109,28 @@ const FundsUsage = ({ data }: FundsUsageProps) => {
           {mappedItems.map((item: any, idx: number) => (
             <div
               key={idx}
-              className={`group sticky ${item.top} mb-12 overflow-hidden rounded-[3rem] ${item.color} shadow-[0_15px_40px_rgba(0,0,0,0.06)] h-auto md:h-[480px] transition-transform duration-500 border border-white/40`}
+              className={`group sticky ${item.top} mb-6 md:mb-10 overflow-hidden rounded-2xl md:rounded-[3rem] ${item.color} shadow-[0_15px_40px_rgba(0,0,0,0.06)] h-auto md:h-[480px] transition-transform duration-500 border border-white/40 transform-gpu`}
             >
               <div className={`flex flex-col ${idx % 2 === 0 ? "md:flex-row-reverse" : "md:flex-row"} h-full`}>
                 {/* Текстовая часть */}
 
-                <div className="relative w-full md:w-1/2 p-10 md:p-14 lg:p-16 flex flex-col justify-center overflow-visible">
+                <div className="relative w-full md:w-1/2 p-5 md:p-8 lg:p-14 flex flex-col justify-center overflow-visible">
                   {/* Huge Watermark Number */}
-                  <div className="absolute -top-8 -left-4 md:-top-12 md:-left-8 font-heading text-[180px] md:text-[240px] lg:text-[280px] font-black text-[#4A3F35]/5 select-none pointer-events-none leading-none tracking-tighter mix-blend-multiply">
+                  <div className="absolute -top-8 -left-4 md:-top-12 md:-left-8 font-heading text-[100px] md:text-[180px] lg:text-[240px] font-black text-[#4A3F35]/5 select-none pointer-events-none leading-none tracking-tighter mix-blend-multiply">
                     {item.num}
                   </div>
 
-                  <div className="relative z-10 mb-6 inline-flex self-start rounded-full bg-white/50 backdrop-blur-sm px-6 py-2 shadow-sm border border-white/50">
+                  <div className="relative z-10 mb-4 md:mb-6 inline-flex self-start rounded-full bg-white/50 backdrop-blur-sm px-4 py-1.5 md:px-6 md:py-2 shadow-sm border border-white/50">
                     <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-[#4A3F35]/80">
                       Направление {item.num}
                     </span>
                   </div>
 
-                  <h3 className="relative z-10 mb-4 md:mb-6 font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-[#4A3F35] leading-tight">
+                  <h3 className="relative z-10 mb-3 md:mb-6 font-heading text-xl md:text-3xl lg:text-4xl font-bold text-[#4A3F35] leading-tight">
                     {item.title}
                   </h3>
 
-                  <p className="relative z-10 text-lg md:text-xl font-medium text-[#4A3F35]/80 leading-relaxed max-w-[90%] mb-10">
+                  <p className="relative z-10 text-base md:text-lg font-medium text-[#4A3F35]/80 leading-relaxed max-w-[90%] mb-6 md:mb-10">
                     {item.desc}
                   </p>
 
@@ -143,11 +144,12 @@ const FundsUsage = ({ data }: FundsUsageProps) => {
 
                 {/* Иллюстрация */}
 
-                <div className="relative w-full md:w-1/2 h-[300px] md:h-full p-4 md:p-6 lg:p-8">
+                <div className="relative w-full md:w-1/2 h-[200px] md:h-full p-3 md:p-5 lg:p-8">
                   <div className="w-full h-full rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl relative">
                     <img
                       src={item.img}
                       alt={item.title}
+                      loading="lazy"
                       className="w-full h-full object-cover transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] scale-105 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 border-[6px] border-white/20 rounded-[2rem] md:rounded-[2.5rem] pointer-events-none mix-blend-overlay z-10"></div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 
@@ -13,9 +13,10 @@ const Stories = ({ stories: customStories }: StoriesProps) => {
 
   const { scrollYProgress } = useScroll({ target: targetRef });
 
-  // Adjusted transform to scroll to the end of the cards rather than a fixed -66%.
-  const scrollNumber = useTransform(scrollYProgress, [0, 1], [0, 100]);
-  const x = useTransform(scrollNumber, (v) => `calc(-${v}% + ${v}vw)`);
+  // Map scroll progress to a numeric value 0-100 to avoid string interpolation errors in Framer Motion
+  const progress = useTransform(scrollYProgress, [0, 1], [0, 100]);
+  // Manually construct the calc string on each frame so Framer Motion doesn't choke on calc()
+  const x = useTransform(progress, (p) => `calc(-${p}% + ${p}vw)`);
 
   const defaultStyling = [
     { color: "bg-brand-yellow/30" },
@@ -73,12 +74,12 @@ const Stories = ({ stories: customStories }: StoriesProps) => {
     <section
       ref={targetRef}
       id="stories"
-      className="relative h-[300vh] bg-[#F9F8F6]"
+      className="relative h-[250vh] bg-[#F9F8F6]"
     >
       <div className="sticky top-0 flex h-screen flex-col overflow-hidden bg-[#F9F8F6]">
         {/* Title area: Fixed at the top, taking up standard space, no absolute positioning */}
-        <div className="w-full flex-none px-6 pt-16 pb-4 md:px-12 md:pt-24 md:pb-8">
-          <h2 className="font-heading text-5xl font-black text-brand-brown md:text-7xl uppercase">
+        <div className="w-full flex-none px-5 pt-14 pb-4 md:px-12 md:pt-20 md:pb-8">
+          <h2 className="font-heading text-4xl md:text-5xl lg:text-7xl font-black text-brand-brown uppercase">
             Истории <br/><span className="text-brand-orange italic">подопечных</span>
           </h2>
         </div>
@@ -88,15 +89,15 @@ const Stories = ({ stories: customStories }: StoriesProps) => {
           {/* We've applied an offset width so it translates exactly the width of the track minus the viewport. */}
           <motion.div
             style={{ x }}
-            className="flex gap-4 md:gap-8 px-6 md:px-12 items-center w-max will-change-transform"
+            className="flex gap-5 md:gap-8 px-5 md:px-12 items-center w-max will-change-transform"
           >
           {stories.map((story, idx) => (
             <div
               key={idx}
-              className="relative flex h-[70vh] w-[90vw] shrink-0 flex-col overflow-hidden rounded-[3rem] bg-white border border-brand-brown/10 shadow-xl shadow-brand-orange/5 md:h-[65vh] md:w-[75vw] lg:w-[60vw] md:flex-row"
+              className="relative flex h-[70vh] w-[85vw] shrink-0 flex-col overflow-hidden rounded-2xl md:rounded-[3rem] bg-white border border-brand-brown/10 shadow-xl shadow-brand-orange/5 md:h-[65vh] md:w-[75vw] lg:w-[60vw] md:flex-row"
             >
               {/* Image half */}
-              <div className="relative h-[40%] md:h-full w-full md:w-1/2 p-4 md:p-6 shrink-0">
+              <div className="relative h-[38%] md:h-full w-full md:w-1/2 p-3 md:p-6 shrink-0">
                 <div className="h-full w-full overflow-hidden rounded-[2rem]">
                   <Image
                     src={story.img}
@@ -104,29 +105,30 @@ const Stories = ({ stories: customStories }: StoriesProps) => {
                     fill
                     sizes="(max-width: 768px) 90vw, (max-width: 1024px) 75vw, 60vw"
                     quality={85}
+                    loading="lazy"
                     className="object-cover transition-transform duration-700 hover:scale-105 will-change-transform"
                   />
                 </div>
               </div>
 
               {/* Text half */}
-              <div className="flex h-[60%] md:h-full w-full flex-col p-5 md:p-10">
+              <div className="flex h-[62%] md:h-full w-full flex-col p-5 md:p-8 lg:p-10">
                 <div
                   className={`mb-2 md:mb-3 shrink-0 self-start rounded-full ${story.color} px-3 py-1 md:px-4 md:py-1.5 text-[10px] md:text-xs font-bold uppercase tracking-widest text-brand-brown`}
                 >
                   {story.age}
                 </div>
 
-                <h3 className="mb-2 md:mb-4 shrink-0 font-heading text-xl md:text-4xl font-bold text-brand-brown">
+                <h3 className="mb-2 md:mb-4 shrink-0 font-heading text-xl md:text-2xl lg:text-4xl font-bold text-brand-brown">
                   {story.name}
                 </h3>
 
-                <p className="text-sm md:text-lg shrink-0 font-medium leading-relaxed text-brand-brown-light italic line-clamp-3 md:line-clamp-none">
+                <p className="text-base md:text-lg shrink-0 font-medium leading-relaxed text-brand-brown-light italic line-clamp-3 md:line-clamp-none">
                   «{story.quote}»
                 </p>
 
                 <div className="mt-2 pt-2 md:mt-4 md:pt-4 border-t border-brand-brown/10 flex-1 overflow-y-auto pr-2 custom-scrollbar min-h-0 pb-4">
-                  <p className="text-[13px] md:text-base leading-relaxed text-brand-brown-light/70">
+                  <p className="text-sm md:text-base leading-relaxed text-brand-brown-light/70">
                     {story.story}
                   </p>
                 </div>

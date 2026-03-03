@@ -152,8 +152,8 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
     : slides;
 
   return (
-    <section id="volunteer" className="relative py-14 md:py-24 overflow-hidden bg-white">
-      <div className="mx-auto max-w-[1200px] px-4 md:px-8">
+    <section id="volunteer" className="relative pt-16 md:pt-20 lg:pt-24 pb-24 md:pb-32 flex flex-col items-center justify-center overflow-hidden bg-[#F9F8F6]">
+      <div className="mx-auto max-w-[1200px] px-5 md:px-8">
         {/* Header */}
         <div className="text-center mb-10 md:mb-14">
           <div className="mb-4 md:mb-6 inline-flex rounded-full bg-brand-orange-light/30 px-6 py-2">
@@ -162,11 +162,11 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
             </span>
           </div>
 
-          <h2 className="font-heading text-4xl md:text-7xl font-black text-brand-brown tracking-tighter mb-6">
+          <h2 className="font-heading text-4xl md:text-5xl lg:text-7xl font-black text-brand-brown tracking-tighter mb-6">
             {renderHighlightedTitle(sectionTitle, "text-brand-orange italic")}
           </h2>
 
-          <p className="text-base md:text-xl text-brand-brown-light font-medium max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base md:text-lg lg:text-xl text-brand-brown-light font-medium max-w-2xl mx-auto leading-relaxed">
             {sectionDescr}
           </p>
         </div>
@@ -203,11 +203,11 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
             spaceBetween={0}
             slidesPerView={1}
             grabCursor={true}
-            className="w-full rounded-3xl md:rounded-[3rem] overflow-hidden"
+            className="w-full rounded-2xl md:rounded-[3rem] overflow-hidden"
           >
             {mappedSlides.map((slide: any, idx: number) => (
               <SwiperSlide key={idx}>
-                <div className="relative h-[400px] md:h-[520px] w-full">
+                <div className="relative h-[340px] md:h-[440px] lg:h-[520px] w-full">
                   {/* Background Image */}
                   <img
                     src={slide.image}
@@ -218,16 +218,16 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
                   <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
 
                   {/* Text overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
-                    <h3 className="font-heading text-2xl md:text-4xl font-black text-white mb-3 drop-shadow-lg">
+                  <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8 lg:p-12">
+                    <h3 className="font-heading text-xl md:text-2xl lg:text-4xl font-black text-white mb-3 drop-shadow-lg">
                       {slide.title}
                     </h3>
-                    <p className="text-white/90 text-sm md:text-lg font-medium max-w-xl leading-relaxed drop-shadow-md mb-6">
+                    <p className="text-white/90 text-sm md:text-base lg:text-lg font-medium max-w-xl leading-relaxed drop-shadow-md mb-5 md:mb-6">
                       {slide.description}
                     </p>
                     <button
                       onClick={openFormModal}
-                      className="inline-flex items-center gap-2 bg-brand-orange hover:bg-brand-orange-light text-white font-bold text-sm uppercase tracking-widest px-8 py-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer"
+                      className="inline-flex items-center gap-2 bg-brand-orange hover:bg-brand-orange-light text-white font-bold text-xs md:text-sm uppercase tracking-widest px-6 md:px-8 py-3 md:py-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl cursor-pointer"
                     >
                       Заполнить заявку
                       <ChevronRight size={18} />

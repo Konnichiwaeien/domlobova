@@ -72,16 +72,16 @@ const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
   ];
 
   return (
-    <section id="campaigns" className="relative z-30 bg-white pt-14 md:pt-20 pb-6 md:pb-12">
-      <div className="mx-auto max-w-[1400px] px-6 md:px-12">
+    <section id="campaigns" className="relative z-30 bg-white pt-16 md:pt-20 pb-10 md:pb-16">
+      <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12">
         
         {/* Section Heading */}
-        <div className="mb-14 md:mb-20 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-10 xl:gap-6">
+        <div className="mb-8 md:mb-12 lg:mb-16 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-10 xl:gap-6">
           <div className="max-w-2xl text-left">
-            <h2 className="font-heading text-5xl md:text-7xl font-black text-brand-brown tracking-tighter leading-[0.9] uppercase">
+            <h2 className="font-heading text-4xl md:text-5xl lg:text-7xl font-black text-brand-brown tracking-tighter leading-[0.9] uppercase">
               {renderHighlightedTitle(title || "ПОДАРИТЬ *НАДЕЖДУ*")}
             </h2>
-            <p className="mt-6 text-xl text-brand-brown-light font-medium leading-relaxed">
+            <p className="mt-4 md:mt-6 text-base md:text-lg lg:text-xl text-brand-brown-light font-medium leading-relaxed">
               {descr || "Каждый ваш перевод — это кирпичик в строительстве большого и теплого дома."}
             </p>
           </div>
@@ -144,7 +144,7 @@ const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="lg:col-span-8 overflow-hidden rounded-[3rem] bg-brand-cream text-brand-brown p-8 md:p-14 relative flex flex-col justify-between group shadow-2xl shadow-brand-brown/10 border border-brand-brown/5 will-change-transform will-change-opacity"
+            className="lg:col-span-8 overflow-hidden rounded-2xl md:rounded-[3rem] bg-brand-cream text-brand-brown p-5 md:p-8 lg:px-14 lg:py-12 relative flex flex-col justify-between group shadow-2xl shadow-brand-brown/10 border border-brand-brown/5 will-change-transform will-change-opacity"
           >
             {/* Subtle bg decoration */}
             <div className="absolute -top-32 -right-32 w-96 h-96 bg-brand-orange/20 blur-xl md:blur-[120px] rounded-full group-hover:bg-brand-orange/30 transition-all duration-1000 pointer-events-none will-change-[filter]" />
@@ -166,25 +166,27 @@ const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
                       Активный сбор
                     </span>
                   </div>
-                  <h3 className="font-heading text-2xl md:text-3xl font-black uppercase tracking-wide text-brand-brown">
+                  <h3 className="font-heading text-xl md:text-3xl font-black uppercase tracking-wide text-brand-brown">
                     {primaryCampaign?.name || "Спецпитание для подопечных"}
                   </h3>
                 </motion.div>
                 
-                {/* Animated Amount */}
-                <div className="flex flex-col mb-8 md:mb-12 relative z-10">
+                <div className="flex flex-col mb-6 md:mb-12 relative z-10">
+                  <span className="text-xs font-black uppercase tracking-[0.2em] text-brand-orange mb-2">Собрано</span>
                   <div className="whitespace-nowrap leading-none">
                     <AnimatedCounter
                       target={current}
                       decimals={0}
                       duration={2.5}
-                      className="font-heading lining-nums tabular-nums text-[12vw] sm:text-7xl md:text-8xl lg:text-9xl font-black text-brand-brown tracking-tighter drop-shadow-sm align-baseline"
+                      className="font-heading lining-nums tabular-nums text-[13vw] sm:text-7xl md:text-8xl lg:text-9xl font-black text-brand-brown tracking-tighter drop-shadow-sm align-baseline"
                     />
-                    <span className="font-heading text-[7vw] sm:text-5xl md:text-6xl lg:text-7xl font-medium text-brand-orange opacity-90 drop-shadow-sm ml-2 md:ml-3 align-baseline">
+                    <span className="font-heading text-[8vw] sm:text-5xl md:text-6xl lg:text-7xl font-medium text-brand-orange opacity-90 drop-shadow-sm ml-1 md:ml-3 align-baseline">
                       ₽
                     </span>
                   </div>
-                  <span className="mt-4 text-xl md:text-2xl font-medium text-brand-brown-light">
+                  <div className="mt-3 md:mt-4 flex items-center gap-3">
+                    <div className="h-px flex-1 bg-brand-brown/10"></div>
+                    <span className="text-base md:text-xl font-bold text-brand-brown-light whitespace-nowrap">
                     {goal > 0 ? (
                       <>
                         из цели{" "}
@@ -200,12 +202,14 @@ const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
                       "без фиксированной цели"
                     )}
                   </span>
+                    <div className="h-px flex-1 bg-brand-brown/10"></div>
+                  </div>
                 </div>
               </div>
 
               <div>
                 {/* Thick Progress Bar */}
-                <div className="relative h-12 md:h-16 w-full overflow-hidden rounded-full bg-white border border-brand-brown/5 p-2 shadow-inner">
+                <div className="relative h-14 md:h-16 lg:h-20 w-full overflow-hidden rounded-full bg-white border border-brand-brown/5 p-1.5 md:p-2 shadow-inner">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={isProgressInView ? { width: `${percent}%` } : { width: 0 }}
@@ -247,18 +251,18 @@ const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
           </motion.div>
 
           {/* Recent Donations Block */}
-          <div className="lg:col-span-4 relative min-h-[450px] lg:min-h-0">
+          <div className="lg:col-span-4 relative min-h-[350px] md:min-h-[450px] lg:min-h-0">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="absolute inset-0 rounded-[3rem] bg-white border border-brand-brown/5 shadow-[0_20px_60px_rgba(74,63,53,0.05)] p-8 md:p-10 flex flex-col overflow-hidden will-change-transform will-change-opacity"
+              className="absolute inset-0 rounded-2xl md:rounded-[3rem] bg-white border border-brand-brown/5 shadow-[0_20px_60px_rgba(74,63,53,0.05)] p-5 md:p-8 lg:p-10 flex flex-col overflow-hidden will-change-transform will-change-opacity"
             >
             <div className="flex items-center justify-between mb-8 pb-6 border-b border-brand-cream relative z-10 shrink-0">
               <div className="flex items-center gap-3">
-                <HeartHandshake className="text-brand-orange w-8 h-8" strokeWidth={1.5} />
-                <h3 className="font-heading text-3xl font-black text-brand-brown">Нас поддержали</h3>
+                <HeartHandshake className="text-brand-orange w-6 h-6 md:w-8 md:h-8" strokeWidth={1.5} />
+                <h3 className="font-heading text-xl md:text-2xl lg:text-3xl font-black text-brand-brown">Нас поддержали</h3>
               </div>
             </div>
             
@@ -274,7 +278,7 @@ const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-brand-cream flex items-center justify-center text-xl shadow-sm border border-brand-brown/5 group-hover:-rotate-6 transition-transform">
+                          <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-brand-cream flex items-center justify-center text-xl shadow-sm border border-brand-brown/5 group-hover:-rotate-6 transition-transform">
                             {donation.icon}
                           </div>
                           <div>

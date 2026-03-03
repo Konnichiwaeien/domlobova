@@ -101,10 +101,10 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
       : otherDonationsData.map(d => ({ ...d, closed: false, imageUrl: null }));
   }, [activeSecondaryCampaigns]);
   return (
-    <section className="relative z-30 bg-white pt-8 md:pt-12 pb-14 md:pb-20 overflow-hidden">
-      <div className="mx-auto max-w-[1400px] px-6 md:px-12">
-        <div className="flex items-center justify-between mb-10 md:mb-14">
-          <h2 className="font-heading text-3xl md:text-5xl font-black text-brand-brown tracking-tighter">
+    <section className="relative z-30 bg-white pt-10 md:pt-16 pb-16 md:pb-20 overflow-hidden">
+      <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12">
+        <div className="flex items-center justify-between mb-8 md:mb-12">
+          <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-black text-brand-brown tracking-tighter">
             ДРУГИЕ <span className="text-brand-orange italic">СБОРЫ</span>
           </h2>
           <div className="hidden md:flex gap-2">
@@ -127,7 +127,7 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
           </div>
         </div>
 
-        <div className="relative w-full overflow-hidden rounded-[3rem]">
+        <div className="relative w-full overflow-hidden rounded-2xl md:rounded-[3rem]">
           <Swiper
             modules={[Navigation]}
             navigation={{
@@ -135,7 +135,7 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
               nextEl: '.swiper-next',
             }}
             spaceBetween={24}
-            slidesPerView={1.2}
+            slidesPerView={1.1}
             breakpoints={{
               768: { slidesPerView: 2.2 },
               1280: { slidesPerView: 3 },
@@ -164,10 +164,10 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: idx * 0.1 }}
-                    className="flex flex-col w-full h-full bg-white rounded-[2.5rem] border border-brand-brown/5 overflow-hidden group hover:shadow-[0_20px_50px_rgba(74,63,53,0.06)] transition-shadow duration-500 cursor-grab active:cursor-grabbing will-change-transform will-change-opacity"
+                    className="flex flex-col w-full h-full bg-white rounded-2xl md:rounded-[2.5rem] border border-brand-brown/5 overflow-hidden group hover:shadow-[0_20px_50px_rgba(74,63,53,0.06)] transition-shadow duration-500 cursor-grab active:cursor-grabbing will-change-transform will-change-opacity"
                   >
                     {/* Header Icon Placeholder */}
-                    <div className={`relative h-48 w-full flex items-center justify-center shrink-0 transition-colors duration-700 overflow-hidden ${donation.color}`}>
+                    <div className={`relative h-36 md:h-48 w-full flex items-center justify-center shrink-0 transition-colors duration-700 overflow-hidden ${donation.color}`}>
                       {donation.imageUrl ? (
                         <Image 
                           src={donation.imageUrl} 
@@ -195,11 +195,11 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
                     </div>
 
                     {/* Content */}
-                    <div className="p-6 md:p-8 flex flex-col flex-1">
-                      <h3 className="font-heading text-2xl font-black text-brand-brown mb-3 group-hover:text-brand-orange transition-colors line-clamp-2">
+                    <div className="p-5 md:p-6 lg:p-8 flex flex-col flex-1">
+                      <h3 className="font-heading text-lg md:text-xl lg:text-2xl font-black text-brand-brown mb-2 md:mb-3 group-hover:text-brand-orange transition-colors line-clamp-2">
                         {donation.title}
                       </h3>
-                      <p className="text-brand-brown-light text-sm font-medium leading-relaxed line-clamp-3 mb-6 flex-1">
+                      <p className="text-brand-brown-light text-sm md:text-base font-medium leading-relaxed line-clamp-3 mb-5 md:mb-6 flex-1">
                         {donation.description}
                       </p>
 

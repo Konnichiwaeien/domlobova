@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import {
   motion,
   useScroll,
   useTransform,
   useSpring,
+  useMotionValueEvent,
   animate,
   useInView,
 } from "framer-motion";
@@ -73,39 +74,95 @@ const getTotalElementsProps = (data: TypingElement[]) => {
   return { total: count };
 };
 
-const ScrollRevealChar = ({ children, progress, index, total }: any) => {
-  // Map this character's specific progress window for a typing effect
-  // We want characters to appear fully black suddenly, but we can do a very fast fade/blur
-  const charProgressLength = 0.05; // 5% width to reveal (faster, tighter)
-  const start = (index / total) * (1 - charProgressLength);
-  const end = start + charProgressLength;
+// --- Optimized Scroll Reveal via CSS Gradient ---
+// Uses a single useTransform + CSS background-clip:text instead of per-character hooks
+
+const ScrollRevealText = ({ text, progress, imageElements }: { text: string; progress: any; imageElements: Map<number, TypingImage> }) => {
+  // Single useTransform for the entire text block — replaces ~400 individual hooks
+  const gradientPos = useTransform(progress, [0, 1], [0, 110]);
+  const [pos, setPos] = useState(0);
   
-  // For typing effect: no Y movement, fast opacity and color change
-  const opacity = useTransform(progress, [start, end], [0.1, 1]);
-  // Use a subtle color shift from very light brown/transparent to solid brand-brown
-  const color = useTransform(progress, [start, end], ["#c4b5a2", "#4A3F35"]);
+  useMotionValueEvent(gradientPos, "change", (v) => {
+    setPos(v);
+  });
+
+  // Split text into words, track positions for images
+  const parts = useMemo(() => {
+    const result: { type: "word" | "image"; content: string; imageData?: TypingImage }[] = [];
+    const segments = text.split("[IMAGE]");
+    let imgIdx = 0;
+    
+    segments.forEach((seg, i) => {
+      if (seg) {
+        // Split segment into words, preserving spaces
+        const words = seg.match(/\S+|\s+/g);
+        if (words) {
+          words.forEach(w => result.push({ type: "word", content: w }));
+        }
+      }
+      if (i < segments.length - 1) {
+        const imgData = imageElements.get(imgIdx);
+        if (imgData) {
+          result.push({ type: "image", content: "", imageData: imgData });
+        }
+        imgIdx++;
+      }
+    });
+    return result;
+  }, [text, imageElements]);
+
+  // Calculate total char count for progress mapping
+  const totalChars = useMemo(() => {
+    return parts.reduce((acc, p) => acc + (p.type === "word" ? p.content.length : 1), 0);
+  }, [parts]);
+
+  let charCounter = 0;
 
   return (
-    <motion.span style={{ opacity, color }} className="inline-block relative z-10 transition-colors">
-      {children}
-    </motion.span>
-  );
-};
+    <>
+      {parts.map((part, idx) => {
+        if (part.type === "image" && part.imageData) {
+          const imgProgress = charCounter / totalChars;
+          charCounter++;
+          const imgOpacity = Math.min(Math.max((pos / 100 - imgProgress) * 5, 0), 1);
+          return (
+            <span 
+              key={`img-${idx}`}
+              style={{ opacity: imgOpacity }}
+              className="inline-block w-[120px] sm:w-[160px] md:w-[200px] lg:w-[240px] h-[48px] sm:h-[64px] md:h-[80px] lg:h-[88px] rounded-full overflow-hidden align-middle shadow-md shadow-brand-brown/10 border-[3px] border-white mx-1 my-0.5 shrink-0 transition-opacity duration-100"
+            >
+              <img src={part.imageData.src} className="h-full w-full object-cover" alt={part.imageData.alt} loading="lazy" />
+            </span>
+          );
+        }
 
-const ScrollRevealImage = ({ item, progress, index, total }: any) => {
-  const charProgressLength = 0.2;
-  const start = (index / total) * (1 - charProgressLength);
-  const end = Math.min(start + charProgressLength * 1.5, 1);
-  
-  const opacity = useTransform(progress, [start, end], [0, 1]);
+        // Text word — use CSS gradient reveal
+        const wordStart = charCounter;
+        charCounter += part.content.length;
+        const wordProgress = wordStart / totalChars * 100;
+        
+        // Determine color based on whether gradient has passed this word
+        const revealAmount = Math.min(Math.max((pos - wordProgress) / 8, 0), 1);
+        const isSpace = part.content.trim() === "";
+        
+        if (isSpace) {
+          return <span key={idx}>{part.content}</span>;
+        }
 
-  return (
-    <motion.span 
-      style={{ opacity }}
-      className="inline-block w-[80px] sm:w-[120px] md:w-[180px] lg:w-[220px] h-[36px] sm:h-[48px] md:h-[64px] lg:h-[72px] rounded-full overflow-hidden align-middle shadow-md shadow-brand-brown/10 border-[3px] border-white mx-1 my-0.5 shrink-0"
-    >
-      <img src={item.src} className="h-full w-full object-cover" alt={item.alt}/>
-    </motion.span>
+        return (
+          <span 
+            key={idx} 
+            className="inline-block whitespace-pre"
+            style={{
+              color: `color-mix(in srgb, #4A3F35 ${revealAmount * 100}%, #c4b5a2)`,
+              opacity: 0.1 + revealAmount * 0.9,
+            }}
+          >
+            {part.content}
+          </span>
+        );
+      })}
+    </>
   );
 };
 
@@ -146,26 +203,34 @@ interface AboutProps {
 const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => {
   const containerRef = useRef(null);
   
-  // Parallax Collage Hooks
+  // Detect mobile for lighter parallax
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // Parallax Collage Hooks — reduced ranges on mobile
   const collageRef = useRef(null);
   const { scrollYProgress: collageProgress } = useScroll({
     target: collageRef,
     offset: ["start end", "end start"],
   });
 
-  const y1 = useTransform(collageProgress, [0, 1], [300, -300]);
-  const y2 = useTransform(collageProgress, [0, 1], [500, -500]);
-  const y3 = useTransform(collageProgress, [0, 1], [200, -300]);
-  const y4 = useTransform(collageProgress, [0, 1], [400, -600]);
-  const collageScale = useTransform(collageProgress, [0.2, 0.8], [0.85, 1.1]);
+  const y1 = useTransform(collageProgress, [0, 1], isMobile ? [40, -40] : [300, -300]);
+  const y2 = useTransform(collageProgress, [0, 1], isMobile ? [60, -60] : [500, -500]);
+  const y3 = useTransform(collageProgress, [0, 1], isMobile ? [30, -30] : [200, -300]);
+  const y4 = useTransform(collageProgress, [0, 1], isMobile ? [50, -50] : [400, -600]);
+  const collageScale = useTransform(collageProgress, [0.2, 0.8], isMobile ? [0.95, 1.05] : [0.85, 1.1]);
   const collageOpacity = useTransform(collageProgress, [0.2, 0.5, 0.8], [0.5, 1, 0.8]);
 
-  // Text Reveal Scroll (Typing effect mapped to scroll)
+  // Text Reveal Scroll — optimized: single progress value for CSS gradient
   const textRef = useRef(null);
   const { scrollYProgress: textProgress } = useScroll({
     target: textRef,
-    // Start revealing when the top of the text block is 80% down the screen
-    // Finish revealing when the bottom of the text block is 40% down the screen
     offset: ["start 80%", "end 60%"],
   });
 
@@ -175,17 +240,24 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
     restDelta: 0.001
   });
 
-  const parsedTypingData = parseTypingText(descr, photos);
-  const { total: totalTextElements } = getTotalElementsProps(parsedTypingData);
-  let elementCounter = 0;
+  // Build image elements map for ScrollRevealText
+  const imageElements = useMemo(() => {
+    const map = new Map<number, TypingImage>();
+    if (photos) {
+      photos.forEach((photo, idx) => {
+        map.set(idx, { type: "img", src: photo.url, alt: `Фото ${idx + 1}` });
+      });
+    }
+    return map;
+  }, [photos]);
 
   return (
-    <section id="about" className="relative bg-white pt-14 md:pt-20 pb-0 overflow-hidden z-10 text-brand-brown">
-      <div className="mx-auto max-w-[1400px] px-6 md:px-12 relative z-20">
+    <section id="about" className="relative bg-white pt-16 md:pt-20 lg:pt-24 pb-0 overflow-hidden z-10 text-brand-brown">
+      <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12 relative z-20">
         <div className="flex flex-col gap-10 md:gap-14">
           <div className="text-center">
             <h2 className="mb-6 inline-flex rounded-full bg-brand-orange-light/30 px-6 py-2 shadow-sm border border-brand-orange/10"><span className="text-sm font-bold uppercase tracking-widest text-brand-orange">Дом милосердия кузнеца Лобова</span></h2>
-            <h3 className="font-heading text-6xl font-black text-brand-brown md:text-8xl tracking-tighter mx-auto max-w-4xl uppercase">
+            <h3 className="font-heading text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-black text-brand-brown tracking-tighter mx-auto max-w-4xl uppercase">
               {renderHighlightedTitle(title)}
             </h3>
           </div>
@@ -196,17 +268,17 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 1 }}
-              className="grid grid-cols-2 md:grid-cols-4 w-full max-w-5xl mx-auto gap-6 sm:gap-8 lg:gap-12 mb-2 mt-2 md:mt-4"
+              className="grid grid-cols-2 md:grid-cols-4 w-full max-w-5xl mx-auto gap-4 md:gap-8 lg:gap-12 mb-2 mt-2 md:mt-4"
             >
               {stats.map((stat, idx) => (
                 <div key={idx} className="w-full flex flex-col items-center justify-center group">
                   <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-brand-orange/10 flex items-center justify-center mb-4 text-brand-orange group-hover:bg-brand-orange group-hover:text-white transition-colors duration-500">
                     <HeartHandshake className="w-6 h-6 md:w-8 md:h-8" />
                   </div>
-                  <span className="font-heading lining-nums text-4xl lg:text-5xl xl:text-6xl font-black text-brand-brown group-hover:text-brand-orange transition-colors duration-500 mb-2 flex items-center justify-center text-center">
+                  <span className="font-heading lining-nums text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-brand-brown group-hover:text-brand-orange transition-colors duration-500 mb-2 flex items-center justify-center text-center">
                     <AnimatedCounter value={stat.value || 0} suffix={stat.suffix || ""} />
                   </span>
-                  <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-bold text-brand-brown/60 text-center max-w-[150px]">
+                  <span className="text-xs md:text-sm uppercase tracking-[0.2em] font-bold text-brand-brown/60 text-center max-w-[150px]">
                     {stat.label}
                   </span>
                 </div>
@@ -214,52 +286,19 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
             </motion.div>
           )}
 
-          {/* Text inline image reveal */}
-          <div ref={textRef} className="max-w-[1200px] mx-auto pb-4 md:pb-6 pt-0 flex flex-col justify-center min-h-[40vh]">
-            <div className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-[64px] leading-[1.4] lg:leading-[1.4] font-medium text-brand-brown text-center md:text-left">
-              {parsedTypingData.map((item, idx) => {
-                if (typeof item === "string") {
-                  return (
-                    <span key={idx} className="inline-block whitespace-pre">
-                      {item.split("").map((char, cIdx) => {
-                        const currentIndex = elementCounter++;
-                        // For pure spaces, we can just render them directly without animation
-                        // this strongly prevents layout shifts.
-                        if (char === " ") {
-                           return <span key={cIdx}> </span>;
-                        }
-                        
-                        return (
-                          <ScrollRevealChar 
-                            key={cIdx} 
-                            progress={smoothProgress} 
-                            index={currentIndex} 
-                            total={totalTextElements}
-                          >
-                            {char}
-                          </ScrollRevealChar>
-                        );
-                      })}
-                    </span>
-                  );
-                } else {
-                  const currentIndex = elementCounter++;
-                  return (
-                    <ScrollRevealImage 
-                      key={idx} 
-                      item={item} 
-                      progress={smoothProgress} 
-                      index={currentIndex} 
-                      total={totalTextElements} 
-                    />
-                  );
-                }
-              })}
+          {/* Text inline image reveal — optimized: single useTransform + CSS color-mix */}
+          <div ref={textRef} className="max-w-[1200px] mx-auto pb-4 md:pb-6 pt-0 flex flex-col justify-center min-h-[40vh] transform-gpu">
+            <div className="font-heading text-2xl sm:text-3xl md:text-4xl lg:text-[56px] leading-[1.5] lg:leading-[1.4] font-medium text-brand-brown text-center md:text-left">
+              <ScrollRevealText
+                text={descr || ""}
+                progress={smoothProgress}
+                imageElements={imageElements}
+              />
             </div>
           </div>
 
           {/* Refined Interactive Bento Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pb-6 md:pb-10 relative z-30 px-2 md:px-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 pb-6 md:pb-10 relative z-30 px-0 md:px-0">
             {features && features.length > 0 ? (
               features.map((feature, idx) => {
                 // Determine icon and colors based on index to maintain the existing design feel
@@ -281,19 +320,19 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: idx * 0.1 }}
-                    className={`group relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem] ${style.bgColor} border border-brand-brown/5 h-[280px] md:h-[330px] cursor-pointer transform-gpu ${isLastAndOdd ? 'md:col-span-2' : ''}`}
+                    className={`group relative overflow-hidden rounded-2xl md:rounded-[2.5rem] ${style.bgColor} border border-brand-brown/5 h-[420px] md:h-[400px] cursor-pointer transform-gpu ${isLastAndOdd ? 'md:col-span-2' : ''}`}
                   >
                 {/* Hover shadow layer — separated from Framer Motion to avoid flicker */}
-                <div className="absolute inset-0 rounded-[2rem] md:rounded-[2.5rem] shadow-lg group-hover:shadow-xl transition-shadow duration-700 pointer-events-none z-20" />
+                <div className="absolute inset-0 rounded-2xl md:rounded-[2.5rem] shadow-lg group-hover:shadow-xl transition-shadow duration-700 pointer-events-none z-20" />
 
                 {/* Background Image Always Visible */}
-                <div className="absolute inset-0 z-0 overflow-hidden rounded-[2rem] md:rounded-[2.5rem] pointer-events-none transform-gpu">
+                <div className="absolute inset-0 z-0 overflow-hidden rounded-2xl md:rounded-[2.5rem] pointer-events-none transform-gpu">
                   <img src={imgSrc} className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] select-none" alt={feature.title}/>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10 pointer-events-none" />
                 </div>
                 
                 {/* Card Content */}
-                <div className="relative z-10 w-full h-full p-6 md:p-8 flex flex-col justify-between">
+                <div className="relative z-10 w-full h-full p-5 md:p-8 flex flex-col justify-between">
                   {/* Top: Icons */}
                   <div className="flex justify-between items-start">
                     <div className={`inline-flex rounded-full p-4 bg-white/10 backdrop-blur-md shadow-sm border border-white/10 text-white group-hover:bg-white/20 transition-colors duration-700`}>
@@ -306,10 +345,10 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
 
                   {/* Bottom: Text */}
                   <div className="transform translate-y-3 group-hover:translate-y-0 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
-                    <h4 className="font-heading text-2xl md:text-3xl lg:text-4xl font-black mb-2 md:mb-3 text-white">
+                    <h4 className="font-heading text-2xl md:text-2xl lg:text-3xl font-black mb-2 md:mb-3 text-white">
                       {feature.title}
                     </h4>
-                    <p className="text-sm md:text-base lg:text-lg text-white/90 leading-tight md:leading-relaxed font-medium transition-colors duration-500 line-clamp-2 sm:line-clamp-3 md:line-clamp-none">
+                    <p className="text-base md:text-base lg:text-lg text-white/90 leading-relaxed md:leading-relaxed font-medium transition-colors duration-500 line-clamp-4 md:line-clamp-none">
                       {feature.descr}
                     </p>
                   </div>
@@ -359,21 +398,21 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
                 </MagneticButton>
               </motion.div>
 
-              {/* Parallax Floating Images */}
-              <motion.div style={{ y: y1 }} className="absolute z-10 w-[40vw] max-w-[280px] aspect-[3/4] rounded-[2rem] overflow-hidden shadow-2xl rotate-[-4deg] left-[2%] md:left-[8%] top-[8%] border-[6px] border-white/30">
-                <img src={promo?.images?.[0]?.url || "/images/3.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-all duration-500" alt="Жизнь"/>
+              {/* Parallax Floating Images — will-change + lazy loading */}
+              <motion.div style={{ y: y1, willChange: "transform" }} className="absolute z-10 w-[40vw] max-w-[280px] aspect-[3/4] rounded-[2rem] overflow-hidden shadow-2xl rotate-[-4deg] left-[2%] md:left-[8%] top-[8%] border-[6px] border-white/30 transform-gpu">
+                <img src={promo?.images?.[0]?.url || "/images/3.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-all duration-500" alt="Жизнь" loading="lazy"/>
               </motion.div>
 
-              <motion.div style={{ y: y2 }} className="absolute z-10 w-[35vw] max-w-[240px] aspect-square rounded-[2rem] overflow-hidden shadow-2xl rotate-[5deg] right-[2%] md:right-[15%] bottom-[12%] border-[6px] border-white/30">
-                <img src={promo?.images?.[1]?.url || "/images/4.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-all duration-500" alt="Без боли"/>
+              <motion.div style={{ y: y2, willChange: "transform" }} className="absolute z-10 w-[35vw] max-w-[240px] aspect-square rounded-[2rem] overflow-hidden shadow-2xl rotate-[5deg] right-[2%] md:right-[15%] bottom-[12%] border-[6px] border-white/30 transform-gpu">
+                <img src={promo?.images?.[1]?.url || "/images/4.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-all duration-500" alt="Без боли" loading="lazy"/>
               </motion.div>
 
-              <motion.div style={{ y: y3 }} className="absolute z-10 w-[45vw] max-w-[320px] aspect-[4/3] rounded-[2rem] overflow-hidden shadow-2xl rotate-[6deg] right-[5%] md:right-[8%] top-[18%] border-[6px] border-white/30">
-                <img src={promo?.images?.[2]?.url || "/images/5.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-all duration-500" alt="Страха и одиночества"/>
+              <motion.div style={{ y: y3, willChange: "transform" }} className="absolute z-10 w-[45vw] max-w-[320px] aspect-[4/3] rounded-[2rem] overflow-hidden shadow-2xl rotate-[6deg] right-[5%] md:right-[8%] top-[18%] border-[6px] border-white/30 transform-gpu">
+                <img src={promo?.images?.[2]?.url || "/images/5.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-all duration-500" alt="Страха и одиночества" loading="lazy"/>
               </motion.div>
 
-              <motion.div style={{ y: y4 }} className="absolute z-10 w-[30vw] max-w-[190px] aspect-[3/4] rounded-[2rem] overflow-hidden shadow-2xl rotate-[-8deg] left-[10%] md:left-[22%] bottom-[8%] border-[6px] border-white/30">
-                <img src={promo?.images?.[3]?.url || "/images/6.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-all duration-500" alt="Помощь"/>
+              <motion.div style={{ y: y4, willChange: "transform" }} className="absolute z-10 w-[30vw] max-w-[190px] aspect-[3/4] rounded-[2rem] overflow-hidden shadow-2xl rotate-[-8deg] left-[10%] md:left-[22%] bottom-[8%] border-[6px] border-white/30 transform-gpu">
+                <img src={promo?.images?.[3]?.url || "/images/6.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-all duration-500" alt="Помощь" loading="lazy"/>
               </motion.div>
 
             </div>

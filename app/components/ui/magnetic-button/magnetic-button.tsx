@@ -1,7 +1,11 @@
 "use client";
 
 import React, { useRef } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { motion, useMotionValue, useSpring, HTMLMotionProps } from "framer-motion";
+
+interface MagneticButtonProps extends HTMLMotionProps<"button"> {
+  children: React.ReactNode;
+}
 
 const MagneticButton = ({
   children,
@@ -9,13 +13,8 @@ const MagneticButton = ({
   onClick,
   type = "button",
   disabled = false,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  onClick?: (e: any) => void;
-  type?: "button" | "submit" | "reset";
-  disabled?: boolean;
-}) => {
+  ...props
+}: MagneticButtonProps) => {
   const ref = useRef<HTMLButtonElement>(null);
 
   const x = useMotionValue(0);
@@ -58,6 +57,7 @@ const MagneticButton = ({
       style={{ x: mouseXSpring, y: mouseYSpring }}
       whileTap={{ scale: 0.95 }}
       className={className}
+      {...props}
     >
       {children}
     </motion.button>

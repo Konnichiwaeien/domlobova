@@ -199,15 +199,15 @@ export const FormDonation = () => {
 
   const inputClassName = (hasError: boolean) =>
     cn(
-      'w-full rounded-[2rem] border-2 py-5 pl-12 pr-6 text-xl font-bold outline-none transition-all duration-300 ease-in-out',
+      'w-full rounded-xl md:rounded-2xl border-2 py-5 pl-12 pr-6 text-xl font-bold outline-none transition-all duration-300 ease-in-out',
       hasError
         ? 'border-red-300 bg-red-50 text-red-900 placeholder:text-red-300 focus:border-red-500'
-        : 'border-transparent bg-brand-cream text-brand-brown placeholder:text-brand-brown-light/60 hover:border-brand-orange/30 focus:bg-white focus:border-brand-yellow focus:ring-4 focus:ring-brand-yellow/10 disabled:opacity-60 disabled:cursor-not-allowed'
+        : 'border-transparent bg-brand-cream text-brand-brown placeholder:text-brand-brown-light/60 hover:border-brand-orange/30 focus:outline-none focus:bg-white focus:border-brand-yellow focus-visible:ring-4 focus-visible:ring-brand-orange/50 disabled:opacity-60 disabled:cursor-not-allowed'
     );
 
   if (status === 'success') {
     return (
-      <div className="relative rounded-[3rem] bg-white p-8 md:p-16 shadow-2xl shadow-brand-orange/10 border border-brand-brown/10 text-center">
+      <div className="relative rounded-[3rem] bg-white p-5 md:p-8 lg:p-14 shadow-2xl shadow-brand-orange/10 border border-brand-brown/10 text-center">
         <div className="mb-8 flex h-32 w-32 items-center mx-auto justify-center rounded-full bg-brand-orange text-white animate-bounce">
           <Heart className="h-16 w-16" strokeWidth={1.5} fill="currentColor" />
         </div>
@@ -228,12 +228,12 @@ export const FormDonation = () => {
   }
 
   return (
-    <div className="bg-white rounded-[3rem] p-8 md:p-16 shadow-2xl border border-brand-brown/10 mx-auto w-full relative z-20">
-      <h3 className="text-3xl md:text-5xl font-heading font-black text-brand-brown mb-4 text-center leading-tight">
+    <div className="bg-white rounded-2xl md:rounded-[3rem] p-5 md:p-8 lg:p-14 shadow-2xl border border-brand-brown/10 mx-auto w-full relative z-20">
+      <h3 className="text-xl md:text-3xl lg:text-5xl font-heading font-black text-brand-brown mb-4 text-center leading-tight">
         Выберите сумму пожертвования
       </h3>
 
-      <p className="text-lg md:text-xl text-brand-brown-light mb-10 max-w-lg mx-auto font-medium text-center">
+      <p className="text-base md:text-lg lg:text-xl text-brand-brown-light mb-8 md:mb-10 max-w-lg mx-auto font-medium text-center">
         Каждое пожертвование помогает обеспечивать подопечных Дома Лобова достойным уходом и заботой
       </p>
 
@@ -286,7 +286,7 @@ export const FormDonation = () => {
                 onClick={() => handleTierSelect(tier.amount)}
                 whileTap={{ scale: 0.98 }}
                 className={cn(
-                  'relative flex items-center sm:flex-col sm:justify-center rounded-[2rem] border-2 outline-none transition-all duration-300 ease-in-out cursor-pointer p-6 gap-4',
+                  'relative flex items-center sm:flex-col sm:justify-center rounded-xl md:rounded-2xl border-2 outline-none transition-all duration-300 ease-in-out cursor-pointer p-5 md:p-6 gap-4',
                   isSelected
                     ? 'border-brand-orange bg-brand-orange-light/10 ring-4 ring-brand-orange/10 shadow-sm'
                     : 'border-brand-brown/5 bg-brand-cream hover:border-brand-orange/30 hover:bg-white'
@@ -387,11 +387,18 @@ export const FormDonation = () => {
                           className={inputClassName(!!errors.name)}
                       />
                       </div>
-                      {errors.name && (
-                      <p className="text-red-500 text-sm font-bold ml-2">
-                          {errors.name.message}
-                      </p>
-                      )}
+                      <AnimatePresence>
+                        {errors.name && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="text-red-500 text-sm font-bold flex items-center gap-2 mt-2 ml-2"
+                        >
+                            <AlertCircle size={16} /> {errors.name.message}
+                        </motion.div>
+                        )}
+                      </AnimatePresence>
 
                       {/* Email */}
                       <div className="relative group">
@@ -406,11 +413,18 @@ export const FormDonation = () => {
                           className={inputClassName(!!errors.email)}
                       />
                       </div>
-                      {errors.email && (
-                      <p className="text-red-500 text-sm font-bold ml-2">
-                          {errors.email.message}
-                      </p>
-                      )}
+                      <AnimatePresence>
+                        {errors.email && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="text-red-500 text-sm font-bold flex items-center gap-2 mt-2 ml-2"
+                        >
+                            <AlertCircle size={16} /> {errors.email.message}
+                        </motion.div>
+                        )}
+                      </AnimatePresence>
                       
                       {/* Phone */}
                       <div className="relative group">
@@ -428,8 +442,17 @@ export const FormDonation = () => {
 
                       {/* Анонимность вниз под поля */}
                       <div
-                          className="flex items-center gap-3 cursor-pointer group select-none ml-2 pt-2"
+                          className="flex items-center gap-3 cursor-pointer group select-none ml-2 pt-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50 rounded-lg"
                           onClick={toggleAnonymous}
+                          role="checkbox"
+                          tabIndex={0}
+                          aria-checked={isAnonymous}
+                          onKeyDown={(e) => { 
+                            if (e.key === 'Enter' || e.key === ' ') { 
+                              e.preventDefault(); 
+                              toggleAnonymous(); 
+                            } 
+                          }}
                       >
                           <div
                           className={cn(
@@ -468,7 +491,7 @@ export const FormDonation = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     className={cn(
-                    'rounded-[2rem] p-8 md:p-10 border flex flex-col gap-6 items-center text-center relative overflow-hidden transition-all duration-300 h-full justify-center',
+                    'rounded-2xl md:rounded-[2rem] p-5 md:p-8 border flex flex-col gap-6 items-center text-center relative overflow-hidden transition-all duration-300 h-full justify-center',
                     impact.style
                     )}
                 >
@@ -495,8 +518,17 @@ export const FormDonation = () => {
           
           {/* Чекбокс согласия */}
           <div
-            className="flex items-start gap-3 cursor-pointer group select-none max-w-xl w-full"
+            className="flex items-start gap-3 cursor-pointer group select-none max-w-xl w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50 rounded-lg p-1"
             onClick={() => setConsent(!consent)}
+            role="checkbox"
+            tabIndex={0}
+            aria-checked={consent}
+            onKeyDown={(e) => { 
+              if (e.key === 'Enter' || e.key === ' ') { 
+                e.preventDefault(); 
+                setConsent(!consent); 
+              } 
+            }}
           >
             <div
               className={cn(
@@ -538,7 +570,7 @@ export const FormDonation = () => {
           <button
             type="submit"
             disabled={isLoading || !consent || ((!isAnonymous) && !!errors.name)}
-            className="w-full max-w-xl rounded-[2.5rem] bg-brand-brown py-6 md:py-8 text-center text-xl md:text-2xl font-black uppercase tracking-widest text-white transition-all hover:bg-brand-orange disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer shadow-xl shadow-brand-brown/20"
+            className="w-full max-w-xl rounded-xl md:rounded-2xl bg-brand-brown py-4 md:py-6 text-center text-xl md:text-2xl font-black uppercase tracking-widest text-white transition-all hover:bg-brand-orange disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer shadow-xl shadow-brand-brown/20"
           >
             {isLoading ? (
               <Loader2 className="animate-spin mr-2 h-8 w-8" />

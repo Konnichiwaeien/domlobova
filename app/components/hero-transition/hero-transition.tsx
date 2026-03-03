@@ -46,8 +46,8 @@ export const HeroTransition = ({ titleTop, titleBottom, heroDescription, welcome
       <div className="sticky top-0 left-0 w-full h-screen overflow-hidden bg-black">
         {/* Layer 1: Background Hero Video */}
         <motion.div
-          style={{ opacity: heroOpacity, scale: heroScale }}
-          className="absolute inset-0 z-0 origin-center"
+          style={{ opacity: heroOpacity, scale: heroScale, willChange: "transform, opacity" }}
+          className="absolute inset-0 z-0 origin-center transform-gpu"
         >
           <video
             autoPlay
@@ -95,20 +95,22 @@ export const HeroTransition = ({ titleTop, titleBottom, heroDescription, welcome
                 transition={{ duration: 1, delay: 0.8 }}
                 className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
               >
-                <button 
-                  onClick={() => handleScrollTo('#donate')}
-                  className="group relative flex items-center justify-center gap-2 px-10 py-4 rounded-full text-white font-bold text-lg cursor-pointer overflow-hidden transition-all hover:scale-105 active:scale-95 focus:outline-none focus:ring-4 focus:ring-[#FF5C1C]/40 shadow-[0_0_20px_rgba(227,94,36,0.4)] bg-[#FF5C1C]"
+                <a 
+                  href="#donate"
+                  onClick={(e) => { e.preventDefault(); handleScrollTo('#donate'); }}
+                  className="group relative flex items-center justify-center gap-2 px-10 py-4 rounded-full text-white font-bold text-lg cursor-pointer overflow-hidden transition-all hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#FF5C1C]/40 shadow-[0_0_20px_rgba(227,94,36,0.4)] bg-[#FF5C1C]"
                 >
                   <Heart className="w-5 h-5 fill-white" />
                   <span>Помочь фонду</span>
-                </button>
-                <button 
-                  onClick={() => handleScrollTo('#about')}
-                  className="group flex items-center justify-center gap-2 px-10 py-4 rounded-full font-semibold text-lg cursor-pointer border border-white/40 text-white hover:bg-white/10 active:scale-95 focus:outline-none focus:ring-4 focus:ring-white/30 backdrop-blur-sm transition-all"
+                </a>
+                <a 
+                  href="#about"
+                  onClick={(e) => { e.preventDefault(); handleScrollTo('#about'); }}
+                  className="group flex items-center justify-center gap-2 px-10 py-4 rounded-full font-semibold text-lg cursor-pointer border border-white/40 text-white hover:bg-white/10 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/30 backdrop-blur-sm transition-all"
                 >
                   <BookHeart className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
                   <span>Узнать больше</span>
-                </button>
+                </a>
               </motion.div>
             </motion.div>
           </div>
@@ -116,7 +118,7 @@ export const HeroTransition = ({ titleTop, titleBottom, heroDescription, welcome
 
         {/* Layer 2: Next Block Masked - The "House Mask" Effect */}
         <motion.div
-          className="absolute inset-0 z-10 bg-brand-cream flex flex-col items-center justify-center pointer-events-none"
+          className="absolute inset-0 z-10 bg-brand-cream flex flex-col items-center justify-center pointer-events-none transform-gpu"
           style={{
             // A precise SVG encoding for a house icon (filled black) acting as the mask
             WebkitMaskImage: `url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyNCAyNCc+PHBhdGggZmlsbD0nYmxhY2snIGQ9J00xMiAzIEwyIDEyIEg1IFYyMSBIMTkgVjEyIEgyMiBMMTYgNi42IFYzIEgxMyBWMy45IEwxMiAzIFonLz48L3N2Zz4=')`,
@@ -137,7 +139,7 @@ export const HeroTransition = ({ titleTop, titleBottom, heroDescription, welcome
             transition={{ duration: 1 }}
             viewport={{ once: true, amount: 0.5 }}
             style={{ pointerEvents: layer2PointerEvents }}
-            className="text-center px-6 max-w-4xl pt-10 flex flex-col items-center"
+            className="text-center px-5 md:px-8 max-w-4xl pt-10 flex flex-col items-center"
           >
             <motion.div 
               initial={{ opacity: 0, scale: 0.8 }}
@@ -162,7 +164,7 @@ export const HeroTransition = ({ titleTop, titleBottom, heroDescription, welcome
                 initial={{ y: "100%" }}
                 whileInView={{ y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-                className="font-heading text-5xl md:text-7xl font-black text-brand-brown tracking-tighter"
+                className="font-heading text-4xl md:text-5xl lg:text-7xl font-black text-brand-brown tracking-tighter"
               >
                 {welcomeTitle}
               </motion.h2>
@@ -179,7 +181,7 @@ export const HeroTransition = ({ titleTop, titleBottom, heroDescription, welcome
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.8 }}
-              className="text-2xl font-medium text-brand-brown-light leading-relaxed max-w-3xl"
+              className="text-base md:text-xl lg:text-2xl font-medium text-brand-brown-light leading-relaxed max-w-3xl"
             >
               {welcomeDescription}
             </motion.p>

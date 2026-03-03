@@ -37,9 +37,10 @@ const Header = () => {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 pt-6 px-6 md:px-12`}
       >
         <div className={`flex w-full items-center justify-between`}>
-          <div
+          <button
             onClick={() => scrollTo("hero")}
-            className="group flex cursor-pointer items-center gap-3 relative h-16 sm:h-20 lg:h-24 w-auto"
+            aria-label="Наверх"
+            className="group flex cursor-pointer items-center gap-3 relative h-16 sm:h-20 lg:h-24 w-auto focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 rounded-lg"
           >
             <img
               src="/logo-dark.svg"
@@ -51,12 +52,12 @@ const Header = () => {
               alt="Дом Лобова"
               className={`absolute left-0 top-0 h-16 sm:h-20 lg:h-24 w-auto object-contain transition-opacity duration-700 ${isScrolled && !isOpen ? "opacity-0" : "opacity-100"}`}
             />
-          </div>
+          </button>
 
           <div className="flex items-center gap-4">
             <MagneticButton
               onClick={() => scrollTo("donate")}
-              className={`group hidden md:flex cursor-pointer items-center gap-2 rounded-full px-8 py-4 text-sm font-bold uppercase tracking-widest transition-all duration-700 ${isScrolled && !isOpen ? "bg-brand-orange text-white shadow-xl hover:shadow-brand-orange/40" : "bg-brand-cream text-brand-brown hover:bg-brand-orange hover:text-white"}`}
+              className={`group hidden md:flex cursor-pointer items-center gap-2 rounded-full px-8 py-4 text-sm font-bold uppercase tracking-widest transition-all duration-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 ${isScrolled && !isOpen ? "bg-brand-orange text-white shadow-xl hover:shadow-brand-orange/40" : "bg-brand-cream text-brand-brown hover:bg-brand-orange hover:text-white"}`}
             >
               <Heart className={`w-5 h-5 transition-colors duration-500 ${isScrolled && !isOpen ? "text-white" : "text-brand-orange group-hover:text-white"}`} />
               Поддержать
@@ -64,7 +65,9 @@ const Header = () => {
 
             <MagneticButton
               onClick={() => setIsOpen(!isOpen)}
-              className={`flex h-14 w-14 cursor-pointer items-center justify-center rounded-full transition-all duration-700 ${isScrolled && !isOpen ? "bg-brand-orange text-white shadow-xl hover:shadow-brand-orange/40" : "bg-brand-cream text-brand-brown hover:bg-brand-orange hover:text-white"}`}
+              aria-label={isOpen ? "Закрыть меню" : "Открыть меню"}
+              aria-expanded={isOpen}
+              className={`flex h-14 w-14 cursor-pointer items-center justify-center rounded-full transition-all duration-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 ${isScrolled && !isOpen ? "bg-brand-orange text-white shadow-xl hover:shadow-brand-orange/40" : "bg-brand-cream text-brand-brown hover:bg-brand-orange hover:text-white"}`}
             >
               {isOpen ? <X /> : <Menu />}
             </MagneticButton>

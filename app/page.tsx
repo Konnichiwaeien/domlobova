@@ -14,6 +14,7 @@ const FundsUsage = dynamic(() => import("./components/sections/funds-usage").the
 const DonationBlock = dynamic(() => import("./components/sections/donation-block").then(mod => mod.DonationBlock));
 const VolunteerSection = dynamic(() => import("./components/sections/volunteer").then(mod => mod.VolunteerSection));
 const Footer = dynamic(() => import("./components/sections/footer").then(mod => mod.Footer));
+const Preloader = dynamic(() => import("./components/ui/preloader/preloader").then(mod => mod.Preloader));
 
 import { getLandingData } from "./services/landing.service";
 
@@ -37,6 +38,7 @@ export default async function Home() {
 
   return (
     <SmoothScroll>
+      <Preloader />
       <div className="min-h-screen bg-brand-cream font-sans selection:bg-brand-yellow selection:text-brand-brown">
         <Header />
 
