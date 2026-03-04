@@ -9,6 +9,7 @@ import {
   useMotionValueEvent,
   animate,
   useInView,
+  type MotionValue,
 } from "framer-motion";
 import {
   Heart,
@@ -17,6 +18,8 @@ import {
   ShieldCheck,
   Users,
   Star,
+  Clock,
+  Home,
 } from "lucide-react";
 import { MagneticButton } from "../../ui/magnetic-button";
 import { renderHighlightedTitle } from "../../../utils/text-parser";
@@ -80,89 +83,81 @@ const getTotalElementsProps = (data: TypingElement[]) => {
 const ScrollRevealText = ({ text, progress, imageElements }: { text: string; progress: any; imageElements: Map<number, TypingImage> }) => {
   // Single useTransform for the entire text block — replaces ~400 individual hooks
   const gradientPos = useTransform(progress, [0, 1], [0, 110]);
-  const [pos, setPos] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
   
+  // PERF: Update CSS custom property directly — zero React re-renders during scroll
   useMotionValueEvent(gradientPos, "change", (v) => {
-    setPos(v);
+    containerRef.current?.style.setProperty("--reveal-pos", String(v));
   });
 
   // Split text into words, track positions for images
   const parts = useMemo(() => {
-    const result: { type: "word" | "image"; content: string; imageData?: TypingImage }[] = [];
+    const result: { type: "word" | "image"; content: string; imageData?: TypingImage; charOffset: number }[] = [];
     const segments = text.split("[IMAGE]");
     let imgIdx = 0;
+    let charCount = 0;
     
     segments.forEach((seg, i) => {
       if (seg) {
-        // Split segment into words, preserving spaces
         const words = seg.match(/\S+|\s+/g);
         if (words) {
-          words.forEach(w => result.push({ type: "word", content: w }));
+          words.forEach(w => {
+            result.push({ type: "word", content: w, charOffset: charCount });
+            charCount += w.length;
+          });
         }
       }
       if (i < segments.length - 1) {
         const imgData = imageElements.get(imgIdx);
         if (imgData) {
-          result.push({ type: "image", content: "", imageData: imgData });
+          result.push({ type: "image", content: "", imageData: imgData, charOffset: charCount });
         }
+        charCount++;
         imgIdx++;
       }
     });
-    return result;
+    return { items: result, totalChars: charCount };
   }, [text, imageElements]);
 
-  // Calculate total char count for progress mapping
-  const totalChars = useMemo(() => {
-    return parts.reduce((acc, p) => acc + (p.type === "word" ? p.content.length : 1), 0);
-  }, [parts]);
-
-  let charCounter = 0;
-
   return (
-    <>
-      {parts.map((part, idx) => {
+    <div ref={containerRef} style={{ ["--reveal-pos" as string]: "0" }}>
+      {parts.items.map((part, idx) => {
+        const progressPct = (part.charOffset / parts.totalChars) * 100;
+        
         if (part.type === "image" && part.imageData) {
-          const imgProgress = charCounter / totalChars;
-          charCounter++;
-          const imgOpacity = Math.min(Math.max((pos / 100 - imgProgress) * 5, 0), 1);
           return (
             <span 
               key={`img-${idx}`}
-              style={{ opacity: imgOpacity }}
-              className="inline-block w-[120px] sm:w-[160px] md:w-[200px] lg:w-[240px] h-[48px] sm:h-[64px] md:h-[80px] lg:h-[88px] rounded-full overflow-hidden align-middle shadow-md shadow-brand-brown/10 border-[3px] border-white mx-1 my-0.5 shrink-0 transition-opacity duration-100"
+              className="inline-block w-[120px] sm:w-[160px] md:w-[200px] lg:w-[240px] h-[48px] sm:h-[64px] md:h-[80px] lg:h-[88px] rounded-full overflow-hidden align-middle shadow-md shadow-brand-brown/10 border-[3px] border-white mx-1 my-0.5 shrink-0"
+              style={{
+                opacity: `clamp(0, (var(--reveal-pos) - ${progressPct}) * 0.05, 1)`,
+              } as React.CSSProperties}
             >
               <img src={part.imageData.src} className="h-full w-full object-cover" alt={part.imageData.alt} loading="lazy" />
             </span>
           );
         }
 
-        // Text word — use CSS gradient reveal
-        const wordStart = charCounter;
-        charCounter += part.content.length;
-        const wordProgress = wordStart / totalChars * 100;
-        
-        // Determine color based on whether gradient has passed this word
-        const revealAmount = Math.min(Math.max((pos - wordProgress) / 8, 0), 1);
         const isSpace = part.content.trim() === "";
-        
         if (isSpace) {
           return <span key={idx}>{part.content}</span>;
         }
 
+        // PERF: Use CSS calc() with --reveal-pos custom property
+        // This avoids any React re-render — styles update purely via CSS
         return (
           <span 
             key={idx} 
-            className="inline-block whitespace-pre"
+            className="inline-block whitespace-pre scroll-reveal-word"
             style={{
-              color: `color-mix(in srgb, #4A3F35 ${revealAmount * 100}%, #c4b5a2)`,
-              opacity: 0.1 + revealAmount * 0.9,
+              ["--word-offset" as string]: String(progressPct),
             }}
           >
             {part.content}
           </span>
         );
       })}
-    </>
+    </div>
   );
 };
 
@@ -252,12 +247,12 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
   }, [photos]);
 
   return (
-    <section id="about" className="relative bg-white pt-16 md:pt-20 lg:pt-24 pb-0 overflow-hidden z-10 text-brand-brown">
+    <section id="about" className="relative bg-white pt-8 md:pt-16 lg:pt-24 pb-0 overflow-hidden z-10 text-brand-brown">
       <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12 relative z-20">
         <div className="flex flex-col gap-10 md:gap-14">
           <div className="text-center">
-            <h2 className="mb-6 inline-flex rounded-full bg-brand-orange-light/30 px-6 py-2 shadow-sm border border-brand-orange/10"><span className="text-sm font-bold uppercase tracking-widest text-brand-orange">Дом милосердия кузнеца Лобова</span></h2>
-            <h3 className="font-heading text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-black text-brand-brown tracking-tighter mx-auto max-w-4xl uppercase">
+            <h2 className="mb-6 inline-flex rounded-full bg-brand-orange-light/30 px-4 py-1.5 md:px-6 md:py-2 shadow-sm border border-brand-orange/10"><span className="text-[10px] md:text-sm font-bold uppercase tracking-widest text-brand-orange">Дом милосердия кузнеца Лобова</span></h2>
+            <h3 className="font-heading text-5xl md:text-5xl lg:text-7xl xl:text-8xl font-black text-brand-brown tracking-tighter mx-auto max-w-4xl uppercase">
               {renderHighlightedTitle(title)}
             </h3>
           </div>
@@ -272,8 +267,12 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
             >
               {stats.map((stat, idx) => (
                 <div key={idx} className="w-full flex flex-col items-center justify-center group">
-                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-brand-orange/10 flex items-center justify-center mb-4 text-brand-orange group-hover:bg-brand-orange group-hover:text-white transition-colors duration-500">
-                    <HeartHandshake className="w-6 h-6 md:w-8 md:h-8" />
+                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-brand-orange/10 flex items-center justify-center mb-4 text-brand-orange group-hover:bg-brand-orange group-hover:text-white transition-colors duration-500">
+                    {(() => {
+                      const icons = [HeartHandshake, Users, Clock, Home];
+                      const Icon = icons[idx % icons.length];
+                      return <Icon className="w-7 h-7 md:w-8 md:h-8" />;
+                    })()}
                   </div>
                   <span className="font-heading lining-nums text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-brand-brown group-hover:text-brand-orange transition-colors duration-500 mb-2 flex items-center justify-center text-center">
                     <AnimatedCounter value={stat.value || 0} suffix={stat.suffix || ""} />
@@ -335,17 +334,17 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
                 <div className="relative z-10 w-full h-full p-5 md:p-8 flex flex-col justify-between">
                   {/* Top: Icons */}
                   <div className="flex justify-between items-start">
-                    <div className={`inline-flex rounded-full p-4 bg-white/10 backdrop-blur-md shadow-sm border border-white/10 text-white group-hover:bg-white/20 transition-colors duration-700`}>
+                    <div className={`inline-flex rounded-full p-4 bg-black/20 shadow-sm border border-white/10 text-white group-hover:bg-black/30 transition-colors duration-700`}>
                       <Icon className="h-6 w-6 md:h-8 md:w-8" strokeWidth={1.5} />
                     </div>
-                    <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white/50 group-hover:bg-white/20 group-hover:text-white group-hover:-rotate-45 group-hover:backdrop-blur-md transition-all duration-500 delay-100">
+                    <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white/50 group-hover:bg-white/20 group-hover:text-white group-hover:-rotate-45 transition-[background,color,transform] duration-500 delay-100">
                       <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
                     </div>
                   </div>
 
                   {/* Bottom: Text */}
                   <div className="transform translate-y-3 group-hover:translate-y-0 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
-                    <h4 className="font-heading text-2xl md:text-2xl lg:text-3xl font-black mb-2 md:mb-3 text-white">
+                    <h4 className="font-heading text-[1.7rem] md:text-2xl lg:text-3xl font-black mb-2 md:mb-3 text-white">
                       {feature.title}
                     </h4>
                     <p className="text-base md:text-base lg:text-lg text-white/90 leading-relaxed md:leading-relaxed font-medium transition-colors duration-500 line-clamp-4 md:line-clamp-none">
@@ -400,19 +399,19 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
 
               {/* Parallax Floating Images — will-change + lazy loading */}
               <motion.div style={{ y: y1, willChange: "transform" }} className="absolute z-10 w-[40vw] max-w-[280px] aspect-[3/4] rounded-[2rem] overflow-hidden shadow-2xl rotate-[-4deg] left-[2%] md:left-[8%] top-[8%] border-[6px] border-white/30 transform-gpu">
-                <img src={promo?.images?.[0]?.url || "/images/3.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-all duration-500" alt="Жизнь" loading="lazy"/>
+                <img src={promo?.images?.[0]?.url || "/images/3.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-[filter] duration-500" alt="Жизнь" loading="lazy"/>
               </motion.div>
 
               <motion.div style={{ y: y2, willChange: "transform" }} className="absolute z-10 w-[35vw] max-w-[240px] aspect-square rounded-[2rem] overflow-hidden shadow-2xl rotate-[5deg] right-[2%] md:right-[15%] bottom-[12%] border-[6px] border-white/30 transform-gpu">
-                <img src={promo?.images?.[1]?.url || "/images/4.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-all duration-500" alt="Без боли" loading="lazy"/>
+                <img src={promo?.images?.[1]?.url || "/images/4.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-[filter] duration-500" alt="Без боли" loading="lazy"/>
               </motion.div>
 
               <motion.div style={{ y: y3, willChange: "transform" }} className="absolute z-10 w-[45vw] max-w-[320px] aspect-[4/3] rounded-[2rem] overflow-hidden shadow-2xl rotate-[6deg] right-[5%] md:right-[8%] top-[18%] border-[6px] border-white/30 transform-gpu">
-                <img src={promo?.images?.[2]?.url || "/images/5.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-all duration-500" alt="Страха и одиночества" loading="lazy"/>
+                <img src={promo?.images?.[2]?.url || "/images/5.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-[filter] duration-500" alt="Страха и одиночества" loading="lazy"/>
               </motion.div>
 
               <motion.div style={{ y: y4, willChange: "transform" }} className="absolute z-10 w-[30vw] max-w-[190px] aspect-[3/4] rounded-[2rem] overflow-hidden shadow-2xl rotate-[-8deg] left-[10%] md:left-[22%] bottom-[8%] border-[6px] border-white/30 transform-gpu">
-                <img src={promo?.images?.[3]?.url || "/images/6.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-all duration-500" alt="Помощь" loading="lazy"/>
+                <img src={promo?.images?.[3]?.url || "/images/6.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-[filter] duration-500" alt="Помощь" loading="lazy"/>
               </motion.div>
 
             </div>

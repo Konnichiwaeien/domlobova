@@ -1,7 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-
 const LiquidBlob = ({
   color,
   size,
@@ -17,8 +15,8 @@ const LiquidBlob = ({
   right?: string;
   delay?: number;
 }) => (
-  <motion.div
-    className="absolute rounded-full opacity-60 mix-blend-multiply blur-[80px] pointer-events-none z-0"
+  <div
+    className="absolute rounded-full opacity-60 mix-blend-multiply blur-[80px] pointer-events-none z-0 transform-gpu"
     style={{
       backgroundColor: color,
       width: size,
@@ -26,13 +24,8 @@ const LiquidBlob = ({
       top,
       left,
       right,
+      animation: `blob-float ${10 + delay}s ease-in-out infinite`,
     }}
-    animate={{
-      x: [0, 50, -20, 0],
-      y: [0, -40, 30, 0],
-      scale: [1, 1.2, 0.9, 1],
-    }}
-    transition={{ duration: 10 + delay, repeat: Infinity, ease: "easeInOut" }}
   />
 );
 

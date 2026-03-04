@@ -49,8 +49,9 @@ const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
   // Find primary active campaign
   const primaryCampaign = partners?.find((c) => c.active && c.primary) || null;
 
-  const goal = primaryCampaign?.goal || 0;
-  const current = primaryCampaign?.current || 0;
+
+  const goal = Number(primaryCampaign?.goal) || 0;
+  const current = Number(primaryCampaign?.current) || 0;
   
   // Prevent division by zero or NaN for progress percent
   const percent = goal > 0 ? Math.min((current / goal) * 100, 100) : (current > 0 ? 100 : 0);
@@ -72,7 +73,7 @@ const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
   ];
 
   return (
-    <section id="campaigns" className="relative z-30 bg-white pt-16 md:pt-20 pb-10 md:pb-16">
+    <section id="campaigns" className="relative z-30 bg-white pt-16 md:pt-20 pb-8 md:pb-10">
       <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12">
         
         {/* Section Heading */}
@@ -144,11 +145,11 @@ const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="lg:col-span-8 overflow-hidden rounded-2xl md:rounded-[3rem] bg-brand-cream text-brand-brown p-5 md:p-8 lg:px-14 lg:py-12 relative flex flex-col justify-between group shadow-2xl shadow-brand-brown/10 border border-brand-brown/5 will-change-transform will-change-opacity"
+            className="lg:col-span-8 overflow-hidden rounded-2xl md:rounded-[3rem] bg-brand-cream text-brand-brown p-5 md:p-8 lg:px-14 lg:py-12 relative flex flex-col justify-between group shadow-2xl shadow-brand-brown/10 border border-brand-brown/5"
           >
-            {/* Subtle bg decoration */}
-            <div className="absolute -top-32 -right-32 w-96 h-96 bg-brand-orange/20 blur-xl md:blur-[120px] rounded-full group-hover:bg-brand-orange/30 transition-all duration-1000 pointer-events-none will-change-[filter]" />
-            <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-brand-yellow/10 blur-xl md:blur-[100px] rounded-full group-hover:bg-brand-yellow/20 transition-all duration-1000 pointer-events-none will-change-[filter]" />
+            {/* Subtle bg decoration — PERF: using radial-gradient instead of blur filter */}
+            <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(235,108,57,0.20) 0%, transparent 70%)' }} />
+            <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(236,164,42,0.10) 0%, transparent 70%)' }} />
             
             <div ref={progressRef} className="relative z-10 flex flex-col h-full justify-between">
               <div>
@@ -160,8 +161,8 @@ const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
                   transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                   className="flex flex-col gap-3 mb-8"
                 >
-                  <div className="flex items-center gap-2.5 bg-brand-orange/10 backdrop-blur-md border border-brand-orange/20 rounded-full px-5 py-2.5 shadow-sm shadow-brand-orange/5 w-fit">
-                    <Sparkles className="w-4 h-4 text-brand-orange animate-pulse" />
+                  <div className="flex items-center gap-2.5 bg-brand-orange/10 border border-brand-orange/20 rounded-full px-5 py-2.5 shadow-sm shadow-brand-orange/5 w-fit">
+                    <Sparkles className="w-4 h-4 text-brand-orange" />
                     <span className="text-xs font-black uppercase tracking-[0.2em] text-brand-orange">
                       Активный сбор
                     </span>
@@ -257,7 +258,7 @@ const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="absolute inset-0 rounded-2xl md:rounded-[3rem] bg-white border border-brand-brown/5 shadow-[0_20px_60px_rgba(74,63,53,0.05)] p-5 md:p-8 lg:p-10 flex flex-col overflow-hidden will-change-transform will-change-opacity"
+              className="absolute inset-0 rounded-2xl md:rounded-[3rem] bg-white border border-brand-brown/5 shadow-[0_20px_60px_rgba(74,63,53,0.05)] p-5 md:p-8 lg:p-10 flex flex-col overflow-hidden"
             >
             <div className="flex items-center justify-between mb-8 pb-6 border-b border-brand-cream relative z-10 shrink-0">
               <div className="flex items-center gap-3">

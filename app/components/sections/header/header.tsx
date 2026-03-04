@@ -1,30 +1,75 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { Heart, Menu, X, ArrowRight } from "lucide-react";
 import { MagneticButton } from "../../ui/magnetic-button";
+import { useLenis } from "lenis/react";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const rafRef = useRef(0);
+  const [hidden, setHidden] = useState(false);
+  const [heroHeight, setHeroHeight] = useState(0);
+
+  const { scrollY } = useScroll();
+
+  // Dynamically measure the hero section height
+  const measureHero = useCallback(() => {
+    const heroEl = document.querySelector('.relative.h-\\[300vh\\]') as HTMLElement | null;
+    if (heroEl) {
+      setHeroHeight(heroEl.offsetTop + heroEl.offsetHeight);
+    }
+  }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (rafRef.current) return;
-      rafRef.current = requestAnimationFrame(() => {
-        setIsScrolled(window.scrollY > 50);
-        rafRef.current = 0;
-      });
-    };
+    measureHero();
+    window.addEventListener('resize', measureHero);
+    return () => window.removeEventListener('resize', measureHero);
+  }, [measureHero]);
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const previous = scrollY.getPrevious() ?? 0;
+    // Activate when the second block inside hero is revealed (~30% of hero scroll)
+    const heroEnd = heroHeight || window.innerHeight * 3;
+    const threshold = heroEnd * 0.3;
+
+    // Background + shrink only after scrolling past the hero section
+    if (latest > threshold) {
+      if (!isScrolled) setIsScrolled(true);
+    } else {
+      if (isScrolled) setIsScrolled(false);
+    }
+
+    // Hide on scroll-down / show on scroll-up — only after the hero
+    if (latest > threshold) {
+      if (latest > previous) {
+        if (!hidden) setHidden(true);
+      } else {
+        if (hidden) setHidden(false);
+      }
+    } else {
+      // In hero zone — always visible, never hidden
+      if (hidden) setHidden(false);
+    }
+  });
+
+  const lenis = useLenis();
+
+  // Lock body scroll AND stop Lenis when menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      lenis?.stop();
+    } else {
+      document.body.style.overflow = '';
+      lenis?.start();
+    }
     return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      document.body.style.overflow = '';
+      lenis?.start();
     };
-  }, []);
+  }, [isOpen, lenis]);
 
   const scrollTo = (id: string) => {
     setIsOpen(false);
@@ -33,33 +78,55 @@ const Header = () => {
 
   return (
     <>
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 pt-6 px-6 md:px-12`}
+      <motion.header
+        variants={{
+          visible: { y: 0 },
+          hidden: { y: "-100%" },
+        }}
+        animate={hidden && !isOpen ? "hidden" : "visible"}
+        transition={{ duration: 0.35, ease: "easeInOut" }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-[background,padding,box-shadow] duration-500 px-4 md:px-12 ${
+          isScrolled && !isOpen ? "bg-[#F9F8F6] shadow-md py-3 md:py-4" : "bg-transparent py-4 md:py-8"
+        }`}
       >
         <div className={`flex w-full items-center justify-between`}>
           <button
             onClick={() => scrollTo("hero")}
             aria-label="Наверх"
-            className="group flex cursor-pointer items-center gap-3 relative h-16 sm:h-20 lg:h-24 w-auto focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 rounded-lg"
+            className="group flex cursor-pointer items-center gap-3 relative w-auto focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 rounded-lg"
           >
             <img
               src="/logo-dark.svg"
               alt="Дом Лобова"
-              className={`h-16 sm:h-20 lg:h-24 w-auto object-contain transition-opacity duration-700 ${isScrolled && !isOpen ? "opacity-100" : "opacity-0"}`}
+              className={`w-auto object-contain transition-[opacity,height] duration-500 ${
+                isScrolled && !isOpen ? "opacity-100 h-12 sm:h-14 lg:h-16" : "opacity-0 h-16 sm:h-20 lg:h-24"
+              }`}
             />
             <img
               src="/logo-light.svg"
               alt="Дом Лобова"
-              className={`absolute left-0 top-0 h-16 sm:h-20 lg:h-24 w-auto object-contain transition-opacity duration-700 ${isScrolled && !isOpen ? "opacity-0" : "opacity-100"}`}
+              className={`absolute left-0 top-0 w-auto object-contain transition-[opacity,height] duration-500 ${
+                isScrolled && !isOpen ? "opacity-0 h-12 sm:h-14 lg:h-16" : "opacity-100 h-16 sm:h-20 lg:h-24"
+              }`}
             />
           </button>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 md:gap-4">
             <MagneticButton
               onClick={() => scrollTo("donate")}
-              className={`group hidden md:flex cursor-pointer items-center gap-2 rounded-full px-8 py-4 text-sm font-bold uppercase tracking-widest transition-all duration-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 ${isScrolled && !isOpen ? "bg-brand-orange text-white shadow-xl hover:shadow-brand-orange/40" : "bg-brand-cream text-brand-brown hover:bg-brand-orange hover:text-white"}`}
+              className={`group hidden md:flex cursor-pointer items-center gap-2 rounded-full font-bold uppercase tracking-widest transition-[background,color,box-shadow,padding] duration-500 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 ${
+                isScrolled && !isOpen
+                  ? "bg-brand-orange text-white shadow-md hover:shadow-brand-orange/40 px-6 md:px-7 py-3 md:py-3.5 text-xs md:text-sm"
+                  : "bg-brand-cream text-brand-brown hover:bg-brand-orange hover:text-white px-6 md:px-8 py-3 md:py-4 text-sm"
+              }`}
             >
-              <Heart className={`w-5 h-5 transition-colors duration-500 ${isScrolled && !isOpen ? "text-white" : "text-brand-orange group-hover:text-white"}`} />
+              <Heart
+                className={`transition-[color,width,height] duration-500 ${
+                  isScrolled && !isOpen
+                    ? "text-white w-4 h-4 md:w-5 md:h-5"
+                    : "text-brand-orange group-hover:text-white w-5 h-5"
+                }`}
+              />
               Поддержать
             </MagneticButton>
 
@@ -67,13 +134,17 @@ const Header = () => {
               onClick={() => setIsOpen(!isOpen)}
               aria-label={isOpen ? "Закрыть меню" : "Открыть меню"}
               aria-expanded={isOpen}
-              className={`flex h-14 w-14 cursor-pointer items-center justify-center rounded-full transition-all duration-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 ${isScrolled && !isOpen ? "bg-brand-orange text-white shadow-xl hover:shadow-brand-orange/40" : "bg-brand-cream text-brand-brown hover:bg-brand-orange hover:text-white"}`}
+              className={`flex cursor-pointer items-center justify-center rounded-full transition-[background,color,box-shadow] duration-500 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 ${
+                isScrolled && !isOpen
+                  ? "bg-brand-orange text-white shadow-md hover:shadow-brand-orange/40 h-12 w-12 sm:h-14 sm:w-14"
+                  : "bg-brand-cream text-brand-brown hover:bg-brand-orange hover:text-white h-12 w-12 sm:h-14 sm:w-14"
+              }`}
             >
-              {isOpen ? <X /> : <Menu />}
+              {isOpen ? <X className={isScrolled ? "w-5 h-5" : "w-6 h-6"} /> : <Menu className={isScrolled ? "w-5 h-5" : "w-6 h-6"} />}
             </MagneticButton>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       <AnimatePresence>
         {isOpen && (
@@ -84,11 +155,11 @@ const Header = () => {
             transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
             className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-brand-orange px-6 text-brand-cream"
           >
-            <div className="flex flex-col items-start gap-6 sm:gap-8 text-4xl sm:text-6xl md:text-7xl font-heading font-medium w-full max-w-2xl mx-auto pl-4">
+            <div className="flex flex-col items-start gap-6 sm:gap-8 text-3xl sm:text-5xl md:text-6xl font-heading font-medium w-full max-w-2xl mx-auto pl-4">
               {[
                 { label: "О нас", id: "about" },
-                { label: "Истории", id: "stories" },
-                { label: "На что нужны средства", id: "funds" },
+                { label: "Истории подопечных", id: "stories" },
+                { label: "Наши потребности", id: "funds" },
                 { label: "Сборы", id: "campaigns" },
                 { label: "Волонтерство", id: "volunteer" },
                 { label: "Контакты", id: "contacts" },

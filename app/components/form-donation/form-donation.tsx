@@ -6,6 +6,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
+import Confetti from 'react-confetti';
+import { useWindowSize } from 'react-use';
 import {
   Heart,
   AtSign,
@@ -138,6 +140,8 @@ export const FormDonation = () => {
   const [consent, setConsent] = useState(false);
   const [showOffer, setShowOffer] = useState(false);
   const [showPersonalData, setShowPersonalData] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { width, height } = useWindowSize();
 
   const {
     register,
@@ -190,11 +194,62 @@ export const FormDonation = () => {
 
   const onSubmit = async (data: DonationFormValues) => {
     setIsLoading(true);
-    // Для демо-целей показываем сообщение об успешной оплате через 2 секунды.
-    setTimeout(() => {
-      setStatus('success');
+    setErrorMessage(null);
+
+    try {
+      // Ensure CloudPayments script is loaded
+      if (typeof window === 'undefined' || !window.cp) {
+        throw new Error('CloudPayments widget не загружен. Обновите страницу.');
+      }
+
+      const widget = new window.cp.CloudPayments();
+
+      const intentParams: CloudPaymentsIntentParams = {
+        publicTerminalId: process.env.NEXT_PUBLIC_CLOUDPAYMENTS_PUBLIC_ID || 'test_api_00000000000000000000002',
+        description: 'Пожертвование в Дом милосердия кузнеца Лобова',
+        amount: data.amount,
+        currency: 'RUB',
+        paymentSchema: 'Single',
+        skin: 'modern',
+        autoClose: 3,
+        email: data.isAnonymous ? undefined : data.email,
+        emailBehavior: data.isAnonymous ? 'Hidden' : 'Optional',
+        userInfo: {
+          firstName: data.isAnonymous ? 'Анонимный' : (data.name || ''),
+          phone: data.isAnonymous ? '' : (data.phone || ''),
+          email: data.isAnonymous ? '' : (data.email || ''),
+        },
+        metadata: {
+          donorName: data.isAnonymous ? 'Анонимный благотворитель' : data.name,
+          donorEmail: data.isAnonymous ? '' : data.email,
+          donorPhone: data.isAnonymous ? '' : data.phone,
+          isAnonymous: data.isAnonymous,
+          isRecurring: data.isRecurring,
+        },
+      };
+
+      // Add recurrent params if monthly donation selected
+      if (data.isRecurring) {
+        intentParams.recurrent = {
+          interval: 'Month',
+          period: 1,
+        };
+      }
+
+      const result = await widget.start(intentParams);
+
+      if (result?.success) {
+        setStatus('success');
+      } else {
+        // Widget was closed without payment
+        setIsLoading(false);
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Произошла ошибка при оплате';
+      setErrorMessage(message);
       setIsLoading(false);
-    }, 2000);
+      setTimeout(() => setErrorMessage(null), 5000);
+    }
   };
 
   const inputClassName = (hasError: boolean) =>
@@ -205,30 +260,102 @@ export const FormDonation = () => {
         : 'border-transparent bg-brand-cream text-brand-brown placeholder:text-brand-brown-light/60 hover:border-brand-orange/30 focus:outline-none focus:bg-white focus:border-brand-yellow focus-visible:ring-4 focus-visible:ring-brand-orange/50 disabled:opacity-60 disabled:cursor-not-allowed'
     );
 
-  if (status === 'success') {
-    return (
-      <div className="relative rounded-[3rem] bg-white p-5 md:p-8 lg:p-14 shadow-2xl shadow-brand-orange/10 border border-brand-brown/10 text-center">
-        <div className="mb-8 flex h-32 w-32 items-center mx-auto justify-center rounded-full bg-brand-orange text-white animate-bounce">
-          <Heart className="h-16 w-16" strokeWidth={1.5} fill="currentColor" />
-        </div>
-        <h3 className="font-heading text-4xl md:text-5xl font-bold text-brand-brown mb-4">
-          Спасибо!
-        </h3>
-        <p className="mt-6 text-xl font-medium text-brand-brown-light">
-          Вы сделали этот мир чуточку светлее.
-        </p>
-        <button
-          onClick={() => setStatus('idle')}
-          className="mt-10 rounded-full bg-brand-cream px-10 py-5 text-sm font-bold uppercase tracking-widest text-brand-orange hover:bg-brand-yellow/30 transition-colors cursor-pointer"
-        >
-          Вернуться
-        </button>
-      </div>
-    );
-  }
+
 
   return (
-    <div className="bg-white rounded-2xl md:rounded-[3rem] p-5 md:p-8 lg:p-14 shadow-2xl border border-brand-brown/10 mx-auto w-full relative z-20">
+    <div className="bg-white rounded-2xl md:rounded-[3rem] p-5 md:p-8 lg:p-14 shadow-2xl border border-brand-brown/10 mx-auto w-full relative z-20 overflow-hidden">
+      
+      {/* Thank You Modal Overlay */}
+      <AnimatePresence>
+        {status === 'success' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-sm"
+          >
+            <Confetti
+              width={width}
+              height={height}
+              recycle={false}
+              numberOfPieces={400}
+              gravity={0.15}
+              colors={['#FF7A00', '#E07A5F', '#F4A261', '#E9C46A']}
+              className="!fixed !z-[60]"
+            />
+            
+            <motion.div
+              initial={{ scale: 0.8, y: 50, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              transition={{ type: 'spring', delay: 0.1, duration: 0.8, bounce: 0.4 }}
+              className="relative rounded-[3rem] bg-white p-8 md:p-12 shadow-2xl shadow-brand-orange/10 border border-brand-orange/20 text-center max-w-lg w-[calc(100%-2rem)] mx-auto z-50 flex flex-col items-center"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1, rotate: [0, 10, -10, 0] }}
+                transition={{ type: 'spring', delay: 0.3, bounce: 0.6 }}
+                className="mb-8 flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-brand-orange to-[#E07A5F] text-white shadow-lg shadow-brand-orange/30 relative"
+              >
+                <motion.div
+                   animate={{ scale: [1, 1.2, 1] }}
+                   transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                >
+                  <Heart className="h-14 w-14" strokeWidth={2} fill="currentColor" />
+                </motion.div>
+                
+                {/* Floating mini hearts */}
+                {[...Array(3)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 0, scale: 0 }}
+                    animate={{ opacity: [0, 1, 0], y: -50 - (i * 20), x: (i % 2 === 0 ? 20 : -20) * (i + 1), scale: [0.5, 1, 0.5] }}
+                    transition={{ repeat: Infinity, duration: 2.5, delay: i * 0.4, ease: "easeOut" }}
+                    className="absolute text-brand-orange"
+                  >
+                    <Heart className="h-6 w-6" fill="currentColor" />
+                  </motion.div>
+                ))}
+              </motion.div>
+              
+              <h3 className="font-heading text-4xl md:text-5xl font-black text-brand-brown mb-4">
+                Спасибо!
+              </h3>
+              
+              <p className="mt-4 text-lg font-medium text-brand-brown-light leading-relaxed">
+                Ваше пожертвование успешно отправлено. <br className="hidden sm:block" />Вы сделали этот мир чуточку светлее!
+              </p>
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setStatus('idle')}
+                className="mt-10 rounded-full bg-brand-cream px-10 py-5 w-full text-base font-bold uppercase tracking-widest text-brand-orange hover:bg-brand-yellow/30 hover:text-brand-brown transition-colors cursor-pointer border border-brand-orange/10"
+              >
+                Вернуться
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Error toast */}
+      <AnimatePresence>
+        {errorMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute top-4 left-4 right-4 z-50 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-4 shadow-lg"
+          >
+            <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
+            <p className="text-sm font-bold text-red-700 flex-1">{errorMessage}</p>
+            <button onClick={() => setErrorMessage(null)} className="text-red-400 hover:text-red-600 cursor-pointer shrink-0">
+              ✕
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <h3 className="text-xl md:text-3xl lg:text-5xl font-heading font-black text-brand-brown mb-4 text-center leading-tight">
         Выберите сумму пожертвования
       </h3>

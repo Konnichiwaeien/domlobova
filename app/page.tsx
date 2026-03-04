@@ -33,7 +33,6 @@ export default async function Home() {
   const landingSlug = process.env.NEXT_PUBLIC_SITE_SLUG || "domlobova";
   const landing = await getLandingData(landingSlug);
 
-  console.log(landing);
   
 
   return (

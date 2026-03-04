@@ -21,7 +21,7 @@ const PhotoMarquee = ({ photos }: PhotoMarqueeProps) => {
   const loopPhotos = [...displayPhotos, ...displayPhotos];
 
   return (
-    <section className="relative z-40 bg-brand-cream py-10 md:py-16 overflow-hidden pointer-events-none">
+    <section className="relative z-40 bg-brand-cream py-2 md:py-16 overflow-hidden pointer-events-none">
       <div className="w-full flex">
         <motion.div
           animate={{ x: ["0%", "-50%"] }}
@@ -31,13 +31,13 @@ const PhotoMarquee = ({ photos }: PhotoMarqueeProps) => {
           {loopPhotos.map((src, i) => (
             <div
               key={i}
-              className="relative h-[220px] w-[300px] md:h-[280px] md:w-[400px] shrink-0 overflow-hidden rounded-2xl md:rounded-[2rem] shadow-xl shadow-brand-brown/5 border border-brand-brown/5 group cursor-pointer transform-gpu"
+              className="relative h-[320px] w-[440px] md:h-[280px] md:w-[400px] shrink-0 overflow-hidden rounded-2xl md:rounded-[2rem] shadow-xl shadow-brand-brown/5 border border-brand-brown/5 group cursor-pointer transform-gpu"
             >
               <img
                 src={src}
                 alt=""
                 loading="lazy"
-                className="h-full w-full object-cover transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:grayscale-0 group-hover:scale-110"
+                className="h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
             </div>

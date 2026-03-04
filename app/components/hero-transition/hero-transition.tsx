@@ -106,7 +106,7 @@ export const HeroTransition = ({ titleTop, titleBottom, heroDescription, welcome
                 <a 
                   href="#about"
                   onClick={(e) => { e.preventDefault(); handleScrollTo('#about'); }}
-                  className="group flex items-center justify-center gap-2 px-10 py-4 rounded-full font-semibold text-lg cursor-pointer border border-white/40 text-white hover:bg-white/10 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/30 backdrop-blur-sm transition-all"
+                  className="group flex items-center justify-center gap-2 px-10 py-4 rounded-full font-semibold text-lg cursor-pointer border border-white/40 text-white hover:bg-white/10 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/30 transition-[background,transform] duration-300"
                 >
                   <BookHeart className="w-5 h-5 text-white/80 group-hover:text-white transition-colors" />
                   <span>Узнать больше</span>

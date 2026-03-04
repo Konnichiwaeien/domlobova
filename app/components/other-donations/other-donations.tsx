@@ -71,12 +71,19 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
 
-  const activeSecondaryCampaigns = campaigns?.filter((c) => c.active && !c.primary) || [];
+  // Show all non-primary campaigns, sorted: active first, closed last
+  const secondaryCampaigns = useMemo(() => {
+    return (campaigns?.filter((c) => !c.primary) || [])
+      .sort((a, b) => {
+        if (a.closed === b.closed) return 0;
+        return a.closed ? 1 : -1;
+      });
+  }, [campaigns]);
   
   // Use our real campaigns if available, otherwise fallback to the dummy data
   const mappedCampaigns = useMemo(() => {
-    return activeSecondaryCampaigns.length > 0 
-      ? activeSecondaryCampaigns.map((c, idx) => {
+    return secondaryCampaigns.length > 0 
+      ? secondaryCampaigns.map((c, idx) => {
           // Find a cool color and icon based on index to keep the visual variety
           const colorIdx = idx % otherDonationsData.length;
           const color = otherDonationsData[colorIdx].color;
@@ -99,9 +106,9 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
           };
         })
       : otherDonationsData.map(d => ({ ...d, closed: false, imageUrl: null }));
-  }, [activeSecondaryCampaigns]);
+  }, [secondaryCampaigns]);
   return (
-    <section className="relative z-30 bg-white pt-10 md:pt-16 pb-16 md:pb-20 overflow-hidden">
+    <section className="relative z-30 bg-white pt-4 md:pt-6 pb-8 md:pb-10 overflow-hidden">
       <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12">
         <div className="flex items-center justify-between mb-8 md:mb-12">
           <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-black text-brand-brown tracking-tighter">
@@ -164,10 +171,10 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: idx * 0.1 }}
-                    className="flex flex-col w-full h-full bg-white rounded-2xl md:rounded-[2.5rem] border border-brand-brown/5 overflow-hidden group hover:shadow-[0_20px_50px_rgba(74,63,53,0.06)] transition-shadow duration-500 cursor-grab active:cursor-grabbing will-change-transform will-change-opacity"
+                    className="flex flex-col w-full h-full bg-white rounded-2xl md:rounded-[2.5rem] border border-brand-brown/5 overflow-hidden group hover:shadow-[0_20px_50px_rgba(74,63,53,0.06)] transition-shadow duration-500 cursor-grab active:cursor-grabbing"
                   >
                     {/* Header Icon Placeholder */}
-                    <div className={`relative h-36 md:h-48 w-full flex items-center justify-center shrink-0 transition-colors duration-700 overflow-hidden ${donation.color}`}>
+                    <div className={`relative h-36 md:h-48 w-full flex items-center justify-center shrink-0 transition-colors duration-700 overflow-hidden rounded-b-2xl md:rounded-b-[2.5rem] ${donation.color}`}>
                       {donation.imageUrl ? (
                         <Image 
                           src={donation.imageUrl} 
@@ -181,14 +188,14 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
                       )}
                       
                       {isCompleted && (
-                        <div className="absolute inset-0 flex items-center justify-center backdrop-blur-[2px] z-10 bg-brand-brown/10">
-                          <span className="text-white font-bold uppercase tracking-widest text-sm bg-white/20 px-4 py-2 rounded-full backdrop-blur-md border border-white/20">
+                        <div className="absolute inset-0 flex items-center justify-center z-10 bg-brand-brown/20">
+                          <span className="text-white font-bold uppercase tracking-widest text-sm bg-black/30 px-4 py-2 rounded-full border border-white/20">
                             Сбор закрыт
                           </span>
                         </div>
                       )}
                       {!isCompleted && goal > 0 && (
-                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest text-brand-orange border border-white overflow-hidden shadow-sm">
+                        <div className="absolute top-4 right-4 bg-white/90 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest text-brand-orange border border-white overflow-hidden shadow-sm">
                           Осталось {Math.max(goal - current, 0).toLocaleString("ru-RU")} ₽
                         </div>
                       )}

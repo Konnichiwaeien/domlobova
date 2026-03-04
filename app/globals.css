@@ -55,8 +55,15 @@
 /* GPU compositing hints for animated elements */
 .transform-gpu {
   transform: translateZ(0);
-  will-change: transform;
   backface-visibility: hidden;
+}
+
+/* PERF: ScrollRevealText — CSS-only word reveal via custom properties */
+/* --reveal-pos is set by JS on the container, --word-offset is per-word */
+.scroll-reveal-word {
+  --reveal-amount: clamp(0, calc((var(--reveal-pos, 0) - var(--word-offset, 0)) / 8), 1);
+  color: color-mix(in srgb, #4A3F35 calc(var(--reveal-amount) * 100%), #c4b5a2);
+  opacity: calc(0.1 + var(--reveal-amount) * 0.9);
 }
 
 /* Lazy rendering for off-screen sections */
@@ -64,6 +71,23 @@
   .content-auto {
     content-visibility: auto;
     contain-intrinsic-size: auto 800px;
+  }
+}
+
+/* LiquidBlob — pure CSS animation (no JS animation loop) */
+@keyframes blob-float {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  25%  { transform: translate3d(50px, -40px, 0) scale(1.2); }
+  50%  { transform: translate3d(-20px, 30px, 0) scale(0.9); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
