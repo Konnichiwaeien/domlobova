@@ -33,8 +33,6 @@ export default async function Home() {
   const landingSlug = process.env.NEXT_PUBLIC_SITE_SLUG || "domlobova";
   const landing = await getLandingData(landingSlug);
 
-  
-
   return (
     <SmoothScroll>
       <Preloader />
@@ -46,6 +44,7 @@ export default async function Home() {
             titleTop={landing?.hero?.titleTop} 
             titleBottom={landing?.hero?.titleBottom} 
             heroDescription={landing?.hero?.descr} 
+            videoUrl={landing?.hero?.video?.url}
             welcomeTitle={landing?.welcome?.title}
             welcomeDescription={landing?.welcome?.descr}
           />

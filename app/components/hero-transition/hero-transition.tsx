@@ -9,11 +9,12 @@ interface HeroTransitionProps {
   titleTop?: string;
   titleBottom?: string;
   heroDescription?: string;
+  videoUrl?: string;
   welcomeTitle?: string;
   welcomeDescription?: string;
 }
 
-export const HeroTransition = ({ titleTop, titleBottom, heroDescription, welcomeTitle, welcomeDescription }: HeroTransitionProps) => {
+export const HeroTransition = ({ titleTop, titleBottom, heroDescription, videoUrl, welcomeTitle, welcomeDescription }: HeroTransitionProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const lenis = useLenis();
 
@@ -57,8 +58,17 @@ export const HeroTransition = ({ titleTop, titleBottom, heroDescription, welcome
             poster="/posters/hero-poster.jpg"
             className="w-full h-full object-cover opacity-60"
           >
-            <source src="/videos/hero-1.webm" type="video/webm" />
-            <source src="/videos/hero-1.mp4" type="video/mp4" />
+                <source src={`${videoUrl}`} type="video/webm" />
+                <source src={`${videoUrl}`} type="video/mp4" />
+            {/* {videoUrl ? (
+              <source src={`${videoUrl}`} type="video/mp4" />
+
+            ) : (
+              <>
+                <source src="/videos/hero-1.webm" type="video/webm" />
+                <source src="/videos/hero-1.mp4" type="video/mp4" />
+              </>
+            )} */}
           </video>
 
           <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none">

@@ -17,6 +17,10 @@ export interface LandingData {
     titleTop?: string;
     titleBottom?: string;
     descr?: string;
+    video?: {
+      url: string;
+      mime?: string;
+    };
   };
   welcome?: {
     id: number;
@@ -110,6 +114,7 @@ export async function getLandingData(slug: string): Promise<LandingData | null> 
       populate: [
         'marqueePhotos',
         'hero',
+        'hero.video',
         'welcome.photos',
         'about.photos',
         'about.stats',
