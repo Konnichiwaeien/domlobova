@@ -18,6 +18,7 @@ interface ElegantProgressProps {
     goal?: number;
     active?: boolean;
     primary?: boolean;
+    documentId?: string;
   }[];
 }
 
@@ -241,10 +242,22 @@ const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
                     {primaryCampaign?.descr || "Собранная сумма позволит нам непрерывно оказывать помощь."}
                   </div>
                   <MagneticButton
-                    onClick={() => document.getElementById("donate")?.scrollIntoView({ behavior: "smooth" })}
+                    onClick={() => {
+                      document.getElementById("donate")?.scrollIntoView({ behavior: "smooth" });
+                      if (primaryCampaign) {
+                        window.dispatchEvent(
+                          new CustomEvent('open-donation', {
+                            detail: {
+                              campaignId: primaryCampaign.documentId || String(primaryCampaign.id),
+                              campaignTitle: primaryCampaign.name
+                            }
+                          })
+                        );
+                      }
+                    }}
                     className="w-full sm:w-auto bg-brand-orange hover:bg-white hover:text-brand-orange text-white transition-colors duration-500 rounded-full px-10 py-5 mx-auto md:mx-0 text-sm md:text-base font-bold uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 group shrink-0"
                   >
-                    Сделать перевод <Heart className="w-5 h-5 group-hover:scale-110 transition-transform fill-current" />
+                    Помочь <Heart className="w-5 h-5 group-hover:scale-110 transition-transform fill-current" />
                   </MagneticButton>
                 </div>
               </div>

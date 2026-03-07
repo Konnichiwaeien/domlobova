@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { IMaskInput } from 'react-imask';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useForm } from 'react-hook-form';
+import { useForm, useController } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -83,12 +84,14 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
   const [showPersonalData, setShowPersonalData] = useState(false);
   const [showFormModal, setShowFormModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'success'>('idle');
+  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const lenis = useLenis();
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
     reset,
   } = useForm<VolunteerFormValues>({
@@ -96,6 +99,8 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
     defaultValues: { name: '', phone: '', email: '' },
     mode: 'onBlur',
   });
+
+  const { field: phoneField } = useController({ name: 'phone', control });
 
   // Lock scroll when form modal is open
   useEffect(() => {
@@ -112,16 +117,30 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
     };
   }, [showFormModal, lenis]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (values: VolunteerFormValues) => {
     setIsLoading(true);
-    setTimeout(() => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1337/api';
+      const res = await fetch(`${apiUrl}/volunteer-applications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: values }),
+      });
+      if (!res.ok) throw new Error(`Сервер вернул ошибку: ${res.status}`);
       setStatus('success');
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error ? err.message : 'Не удалось отправить заявку. Попробуйте ещё раз.'
+      );
+      setStatus('error');
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const openFormModal = () => {
     setStatus('idle');
+    setErrorMessage('');
     setConsent(false);
     reset();
     setShowFormModal(true);
@@ -153,7 +172,7 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
 
   return (
     <section id="volunteer" className="relative pt-16 md:pt-20 lg:pt-24 pb-24 md:pb-32 w-full overflow-hidden bg-[#F9F8F6]">
-      <div className="mx-auto w-full max-w-[1200px] px-4 md:px-8">
+      <div className="mx-auto w-full max-w-[1300px] px-4 md:px-8">
         {/* Header */}
         <div className="text-center mb-10 md:mb-14">
           <div className="mb-4 md:mb-6 inline-flex rounded-full bg-brand-orange-light/30 px-6 py-2">
@@ -267,7 +286,7 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
               className="relative z-10 bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[85vh] flex flex-col overflow-hidden"
             >
               {/* Modal Header */}
-              <div className="flex items-center justify-between px-8 py-6 border-b border-brand-brown/10 shrink-0">
+              <div className="flex items-center justify-between px-8 py-6 shrink-0">
                 <h3 className="font-heading text-xl md:text-2xl font-black text-brand-brown pr-8 leading-tight">
                   Заявка волонтёра
                 </h3>
@@ -281,7 +300,7 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
 
               {/* Modal Content */}
               <div
-                className="overflow-y-auto px-8 py-6 overscroll-contain"
+                className="overflow-y-auto px-8 pb-8 overscroll-contain"
                 data-lenis-prevent
               >
                 {status === 'success' ? (
@@ -295,6 +314,24 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
                     <p className="text-base md:text-lg font-medium text-brand-brown-light max-w-sm mx-auto">
                       Мы свяжемся с вами в ближайшее время, чтобы обсудить детали участия.
                     </p>
+                  </div>
+                ) : status === 'error' ? (
+                  <div className="text-center py-6">
+                    <div className="mb-6 flex h-24 w-24 items-center mx-auto justify-center rounded-full bg-red-100 text-red-500">
+                      <AlertCircle className="h-12 w-12" strokeWidth={1.5} />
+                    </div>
+                    <h3 className="font-heading text-2xl md:text-3xl font-bold text-brand-brown mb-3">
+                      Что-то пошло не так
+                    </h3>
+                    <p className="text-base font-medium text-brand-brown-light max-w-sm mx-auto mb-8">
+                      {errorMessage || 'Не удалось отправить заявку. Пожалуйста, попробуйте ещё раз.'}
+                    </p>
+                    <button
+                      onClick={() => { setStatus('idle'); setErrorMessage(''); }}
+                      className="inline-flex items-center gap-2 bg-brand-brown hover:bg-brand-orange text-white font-bold text-sm uppercase tracking-widest px-8 py-4 rounded-full transition-all duration-300 cursor-pointer"
+                    >
+                      Попробовать снова
+                    </button>
                   </div>
                 ) : (
                   <>
@@ -338,9 +375,14 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
                               size={22}
                               className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-brown-light transition-colors duration-300 group-focus-within:text-brand-orange"
                             />
-                            <input
-                              {...register('phone')}
-                              placeholder="Телефон"
+                            <IMaskInput
+                              mask="+{7} (000) 000-00-00"
+                              unmask={false}
+                              value={phoneField.value}
+                              onAccept={(value) => phoneField.onChange(value)}
+                              onBlur={phoneField.onBlur}
+                              inputRef={phoneField.ref}
+                              placeholder="+7 (___) ___-__-__"
                               className={inputClassName(!!errors.phone)}
                             />
                           </div>
@@ -448,17 +490,7 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
                 )}
               </div>
 
-              {/* Modal Footer — close button like LegalModal */}
-              {status === 'success' && (
-                <div className="px-8 py-4 border-t border-brand-brown/10 shrink-0">
-                  <button
-                    onClick={() => setShowFormModal(false)}
-                    className="w-full rounded-2xl bg-brand-brown text-white py-4 font-bold uppercase tracking-wider text-sm hover:bg-brand-orange transition-colors cursor-pointer"
-                  >
-                    Закрыть
-                  </button>
-                </div>
-              )}
+
             </motion.div>
           </div>
         )}

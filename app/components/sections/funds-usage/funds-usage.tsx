@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+
 import React from "react";
 import { renderHighlightedTitle } from "../../../utils/text-parser";
 
@@ -127,16 +127,9 @@ const FundsUsage = ({ data }: FundsUsageProps) => {
                     {item.title}
                   </h3>
 
-                  <p className="relative z-10 text-base md:text-lg font-medium text-white/85 leading-relaxed max-w-[90%] mb-6 md:mb-10">
+                  <p className="relative z-10 text-base md:text-lg font-medium text-white/85 leading-relaxed max-w-[90%]">
                     {item.desc}
                   </p>
-
-                  <a href="#" className="relative z-10 mt-auto flex w-fit items-center gap-4 text-white font-bold uppercase tracking-widest text-xs md:text-sm group-hover:gap-6 transition-[gap,opacity] duration-500 cursor-pointer opacity-80 group-hover:opacity-100">
-                    <span>Подробнее</span>
-                    <div className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center group-hover:bg-white group-hover:text-brand-orange transition-colors duration-500">
-                      <ArrowRight className="w-5 h-5" />
-                    </div>
-                  </a>
                 </div>
 
                 {/* Иллюстрация */}

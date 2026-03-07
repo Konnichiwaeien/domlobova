@@ -64,6 +64,7 @@ interface OtherDonationsProps {
     active?: boolean;
     primary?: boolean;
     closed?: boolean;
+    documentId?: string;
   }[];
 }
 
@@ -95,6 +96,7 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
           }
 
           return {
+            id: c.documentId || String(c.id),
             title: c.name || "Сбор",
             description: c.descr || "",
             goal: c.goal || 0,
@@ -105,7 +107,7 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
             icon
           };
         })
-      : otherDonationsData.map(d => ({ ...d, closed: false, imageUrl: null }));
+      : otherDonationsData.map((d, i) => ({ ...d, id: `fallback-${i}`, closed: false, imageUrl: null }));
   }, [secondaryCampaigns]);
   return (
     <section className="relative z-30 bg-white pt-4 md:pt-6 pb-8 md:pb-10 overflow-hidden">
@@ -231,7 +233,19 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
                       {/* Action Button */}
                       <button 
                         disabled={isCompleted}
-                        onClick={() => !isCompleted && document.getElementById("donate")?.scrollIntoView({ behavior: "smooth" })}
+                        onClick={() => {
+                          if (!isCompleted) {
+                            document.getElementById("donate")?.scrollIntoView({ behavior: "smooth" });
+                            window.dispatchEvent(
+                              new CustomEvent('open-donation', {
+                                detail: {
+                                  campaignId: donation.id,
+                                  campaignTitle: donation.title
+                                }
+                              })
+                            );
+                          }
+                        }}
                         className={`mt-6 w-full py-4 rounded-xl flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest transition-all duration-300 ${isCompleted ? 'bg-brand-cream/50 text-brand-brown/40 cursor-not-allowed border border-brand-brown/5' : 'bg-brand-cream text-brand-brown hover:bg-brand-orange hover:text-white border border-brand-brown/10 hover:border-brand-orange'}`}
                       >
                         {isCompleted ? 'Завершено' : 'Поддержать сбор'}

@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { LegalModal } from '../ui/legal-modal/legal-modal';
-import { useForm } from 'react-hook-form';
+import { useForm, useController } from 'react-hook-form';
+import { IMaskInput } from 'react-imask';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
+import { useEffect } from 'react';
 import {
   Heart,
   AtSign,
@@ -141,13 +143,29 @@ export const FormDonation = () => {
   const [showOffer, setShowOffer] = useState(false);
   const [showPersonalData, setShowPersonalData] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [campaignId, setCampaignId] = useState<string | null>(null);
+  const [campaignTitle, setCampaignTitle] = useState<string | null>(null);
   const { width, height } = useWindowSize();
+
+  // Listen for global donation event to pre-select campaign
+  useEffect(() => {
+    const handleOpenDonation = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.campaignId) {
+        setCampaignId(detail.campaignId);
+        setCampaignTitle(detail.campaignTitle || 'Выбранный сбор');
+      }
+    };
+    window.addEventListener('open-donation', handleOpenDonation);
+    return () => window.removeEventListener('open-donation', handleOpenDonation);
+  }, []);
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    control,
     clearErrors,
     formState: { errors },
   } = useForm<DonationFormValues>({
@@ -162,6 +180,8 @@ export const FormDonation = () => {
     },
     mode: 'onChange',
   });
+
+  const { field: phoneField } = useController({ name: 'phone', control });
 
   const currentAmount = watch('amount');
   const isRecurring = watch('isRecurring');
@@ -225,6 +245,7 @@ export const FormDonation = () => {
           donorPhone: data.isAnonymous ? '' : data.phone,
           isAnonymous: data.isAnonymous,
           isRecurring: data.isRecurring,
+          ...(campaignId ? { campaignId } : {}),
         },
       };
 
@@ -355,6 +376,28 @@ export const FormDonation = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {campaignId && campaignTitle && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col items-center justify-center mb-6"
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-orange-light/20 border border-brand-orange/30">
+            <Heart className="w-4 h-4 text-brand-orange" fill="currentColor" />
+            <span className="text-sm font-bold text-brand-brown">
+              Помощь сбору: <span className="text-brand-orange">{campaignTitle}</span>
+            </span>
+            <button
+              onClick={() => { setCampaignId(null); setCampaignTitle(null); }}
+              className="ml-2 w-5 h-5 rounded-full hover:bg-white text-brand-brown/50 hover:text-red-500 flex items-center justify-center transition-colors"
+              title="Отменить выбор сбора"
+            >
+              ✕
+            </button>
+          </div>
+        </motion.div>
+      )}
 
       <h3 className="text-xl md:text-3xl lg:text-5xl font-heading font-black text-brand-brown mb-4 text-center leading-tight">
         Выберите сумму пожертвования
@@ -559,10 +602,15 @@ export const FormDonation = () => {
                           size={22}
                           className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-brown-light transition-colors duration-300 group-focus-within:text-brand-orange"
                       />
-                      <input
-                          {...register('phone')}
+                      <IMaskInput
+                          mask="+{7} (000) 000-00-00"
+                          unmask={false}
+                          value={phoneField.value ?? ''}
+                          onAccept={(value) => phoneField.onChange(value)}
+                          onBlur={phoneField.onBlur}
+                          inputRef={phoneField.ref}
                           disabled={isAnonymous}
-                          placeholder="Телефон (по желанию)"
+                          placeholder="+7 (___) ___-__-__"
                           className={inputClassName(false)}
                       />
                       </div>

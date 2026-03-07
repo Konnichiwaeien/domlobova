@@ -6,6 +6,8 @@ import {
   Check,
   ArrowDownRight,
   FileText,
+  MapPin,
+  Clock,
 } from "lucide-react";
 import { ShdkTerminal } from "../../icons/shdk-terminal";
 import { LegalModal } from "../../ui/legal-modal/legal-modal";
@@ -53,6 +55,7 @@ const Footer = () => {
   ];
 
   const [copiedLabel, setCopiedLabel] = useState<string | null>(null);
+  const [addressCopied, setAddressCopied] = useState(false);
   const [showRequisites, setShowRequisites] = useState(false);
   const [showOffer, setShowOffer] = useState(false);
   const [showPersonalData, setShowPersonalData] = useState(false);
@@ -61,6 +64,12 @@ const Footer = () => {
     navigator.clipboard.writeText(text);
     setCopiedLabel(label);
     setTimeout(() => setCopiedLabel(null), 2000);
+  };
+
+  const copyAddress = () => {
+    navigator.clipboard.writeText('152128, Ярославская обл., Ростовский МО., рп. Поречье-Рыбное, ул. Кирова 53В');
+    setAddressCopied(true);
+    setTimeout(() => setAddressCopied(false), 2000);
   };
 
   const documents = [
@@ -77,25 +86,56 @@ const Footer = () => {
       className="relative bg-brand-cream pt-12 md:pt-16 pb-8 md:pb-10 overflow-hidden text-brand-brown rounded-t-3xl md:rounded-[3rem] lg:rounded-t-[4rem] -mt-6 md:-mt-10 z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.03)]"
     >
       <div className="relative z-10 mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12">
-        <div className="mb-12 md:mb-16">
-          <div className="mb-4 inline-flex rounded-full bg-brand-orange px-5 py-1.5 shadow-sm">
-             <span className="text-xs font-bold uppercase tracking-widest text-white">Приходите в гости</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8 xl:gap-12 mb-12 md:mb-16">
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 mb-2 md:mb-0">
+            <div className="mb-4 inline-flex rounded-full bg-brand-orange px-5 py-1.5 shadow-sm">
+               <span className="text-xs font-bold uppercase tracking-widest text-white">Приходите в гости</span>
+            </div>
+            <h2 className="font-heading text-5xl md:text-6xl lg:text-7xl font-black leading-[0.9] tracking-tighter text-brand-brown">
+              КОНТАКТЫ
+            </h2>
           </div>
-          <h2 className="font-heading text-3xl md:text-5xl lg:text-6xl font-black mb-10 lg:mb-16 leading-[0.9] tracking-tighter text-brand-brown">
-            КОНТАКТЫ
-          </h2>
+          
+          <div className="col-span-1 flex flex-col justify-end">
+             <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-3 opacity-90 hidden lg:block">Наши соцсети</span>
+             <div className="flex items-center gap-3">
+               {socialLinks.map((social, sIdx) => (
+                 <a
+                   key={sIdx}
+                   href={social.link}
+                   target='_blank'
+                   rel="noopener noreferrer"
+                   aria-label={social.label}
+                   title={social.label}
+                   className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-brand-brown/5 text-brand-brown/80 flex items-center justify-center hover:bg-brand-orange hover:text-white hover:border-brand-orange transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50"
+                 >
+                   <div className="w-5 h-5 flex items-center justify-center">
+                     {social.icon}
+                   </div>
+                 </a>
+               ))}
+             </div>
+          </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8 xl:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8 xl:gap-12 pb-8 md:pb-10">
             
             {/* Box 1: Address */}
-            <div className="space-y-3">
+            <div className="space-y-4">
                <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange block opacity-90">Наш адрес</span>
-               <p className="text-base md:text-lg font-bold leading-relaxed text-brand-brown">
-                  152128, Ярославская обл., Ростовский МО., рп. Поречье-Рыбное, ул. Кирова 53В
-               </p>
-               <p className="text-xs md:text-sm font-medium text-brand-brown-light leading-relaxed pt-1">
-                 Хоспис доступен для посещений каждый день, круглосуточно
-               </p>
+               <div className="group/addr flex items-start gap-2.5">
+                 <MapPin className="w-[18px] h-[18px] md:w-5 md:h-5 text-brand-orange shrink-0 mt-1 md:mt-1.5" strokeWidth={2.5} />
+                 <p className="text-base md:text-lg font-bold leading-relaxed text-brand-brown">
+                    152128, Ярославская обл., Ростовский МО., рп. Поречье-Рыбное, ул. Кирова 53В
+                 </p>
+                 <button
+                   onClick={copyAddress}
+                   aria-label="Скопировать адрес"
+                   className={`p-1.5 rounded-lg cursor-pointer shrink-0 mt-0.5 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${addressCopied ? 'bg-green-600 text-white opacity-100' : 'text-brand-brown/30 hover:text-brand-orange opacity-0 group-hover/addr:opacity-100'}`}
+                 >
+                   {addressCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                 </button>
+               </div>
             </div>
 
             {/* Box 2: Phones */}
@@ -130,7 +170,7 @@ const Footer = () => {
                </div>
             </div>
 
-            {/* Box 4: Documents, Requisites & Socials */}
+            {/* Box 4: Documents, Requisites */}
             <div className="space-y-8 flex flex-col justify-start">
                <div>
                  <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-3 block opacity-90">Документы</span>
@@ -164,30 +204,9 @@ const Footer = () => {
                    <span>Полные реквизиты →</span>
                  </button>
                </div>
-               <div>
-                 <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-2.5 block opacity-90">Мы в соцсетях</span>
-                 <div className="flex gap-3">
-                  {socialLinks.map((social, sIdx) => (
-                    <a 
-                      key={sIdx}
-                      href={social.link}
-                      target='_blank'
-                      rel="noopener noreferrer"
-                      aria-label={social.label}
-                      title={social.label}
-                      className="w-10 h-10 md:w-12 md:h-12 rounded-xl border-2 border-brand-brown/10 text-brand-brown/80 flex items-center justify-center hover:bg-brand-orange hover:border-brand-orange hover:text-white transition-colors duration-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50"
-                    >
-                      <div className="w-5 h-5 md:w-6 md:h-6 flex items-center justify-center">
-                        {social.icon}
-                      </div>
-                    </a>
-                  ))}
-                 </div>
-               </div>
             </div>
 
           </div>
-        </div>
 
         {/* Bottom bar */}
         <div className="flex flex-col md:flex-row justify-between items-center border-t border-brand-brown/10 pt-8 text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-brand-brown/40">
@@ -206,25 +225,27 @@ const Footer = () => {
              </a>
           </div>
 
-          <a
-            href='https://www.shdk.tech/ru'
-            className='flex items-center justify-center whitespace-nowrap gap-2 text-sm text-[#1a7a0a] transition-all duration-500 ease-in-out hover:text-[#39ff14] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#39ff14] rounded-md'
-            target='_blank'
-            rel="noopener noreferrer"
-            aria-label="Разработано SHDK"
-          >
-            <span>Разработано с❤️и☕</span>
-            <ShdkTerminal />
-          </a>
+          <div className="flex items-center justify-end w-full md:w-auto">
+            <a
+              href='https://www.shdk.tech/ru'
+              className='flex items-center justify-center whitespace-nowrap gap-2 text-sm text-[#1a7a0a] transition-all duration-500 ease-in-out hover:text-[#39ff14] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#39ff14] rounded-md'
+              target='_blank'
+              rel="noopener noreferrer"
+              aria-label="Разработано SHDK"
+            >
+              <span>Разработано с❤️и☕</span>
+              <ShdkTerminal />
+            </a>
+          </div>
         </div>
       </div>
     </footer>
 
     {/* Requisites Modal */}
-    <LegalModal isOpen={showRequisites} onClose={() => setShowRequisites(false)} title="Карточка организации">
+    <LegalModal isOpen={showRequisites} onClose={() => setShowRequisites(false)} title="КАРТОЧКА ОРГАНИЗАЦИИ">
       <div className="text-brand-brown space-y-8 pb-6 px-1">
-        <div className="p-5 md:p-6 rounded-2xl bg-brand-cream/50 border border-brand-brown/5 shadow-sm">
-          <span className="text-[10px] uppercase tracking-[0.2em] font-black text-brand-brown/40 mb-2 block">Полное наименование</span>
+        <div className="p-5 md:p-6 rounded-2xl bg-gradient-to-br from-brand-orange/5 to-brand-cream/80 border-l-4 border-brand-orange shadow-sm">
+          <span className="text-[10px] uppercase tracking-[0.2em] font-black text-brand-orange mb-2 block">Полное наименование</span>
           <p className="text-sm md:text-base font-bold leading-tight uppercase">
             АВТОНОМНАЯ БЛАГОТВОРИТЕЛЬНАЯ СОЦИАЛЬНО-МЕДИЦИНСКАЯ НЕКОММЕРЧЕСКАЯ ОРГАНИЗАЦИЯ «ДОМ МИЛОСЕРДИЯ КУЗНЕЦА ЛОБОВА»
           </p>

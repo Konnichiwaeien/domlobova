@@ -62,7 +62,7 @@ export const LegalModal = ({ isOpen, onClose, title, children }: LegalModalProps
             className="relative z-10 bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-8 py-6 border-b border-brand-brown/10 shrink-0">
+            <div className="flex items-center justify-between px-8 py-6 shrink-0">
               <h3 className="font-heading text-xl md:text-2xl font-black text-brand-brown pr-8 leading-tight">
                 {title}
               </h3>
@@ -78,19 +78,9 @@ export const LegalModal = ({ isOpen, onClose, title, children }: LegalModalProps
             <div
               ref={contentRef}
               data-lenis-prevent
-              className="overflow-y-auto px-8 py-6 text-sm md:text-base text-brand-brown leading-relaxed legal-content overscroll-contain"
+              className="overflow-y-auto px-8 pb-8 text-sm md:text-base text-brand-brown leading-relaxed legal-content overscroll-contain"
             >
               {children}
-            </div>
-
-            {/* Footer */}
-            <div className="px-8 py-4 border-t border-brand-brown/10 shrink-0">
-              <button
-                onClick={onClose}
-                className="w-full rounded-2xl bg-brand-brown text-white py-4 font-bold uppercase tracking-wider text-sm hover:bg-brand-orange transition-colors cursor-pointer"
-              >
-                Закрыть
-              </button>
             </div>
           </motion.div>
         </div>
