@@ -6,20 +6,16 @@ interface HeroProps {
   titleTop?: string;
   titleBottom?: string;
   heroDescription?: string;
-  videoUrl?: string;
-  welcomeTitle?: string;
-  welcomeDescription?: string;
+  heroPhotos?: any[];
 }
 
-const Hero = ({ titleTop, titleBottom, heroDescription, videoUrl, welcomeTitle, welcomeDescription }: HeroProps) => {
+const Hero = ({ titleTop, titleBottom, heroDescription, heroPhotos }: HeroProps) => {
   return (
     <HeroTransition 
       titleTop={titleTop} 
       titleBottom={titleBottom} 
       heroDescription={heroDescription} 
-      videoUrl={videoUrl}
-      welcomeTitle={welcomeTitle}
-      welcomeDescription={welcomeDescription}
+      heroPhotos={heroPhotos}
     />
   );
 };

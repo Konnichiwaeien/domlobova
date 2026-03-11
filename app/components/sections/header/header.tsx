@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { Heart, Menu, X, ArrowRight } from "lucide-react";
 import { MagneticButton } from "../../ui/magnetic-button";
+import { DonationModal } from "../../ui/donation-modal";
 import { useLenis } from "lenis/react";
 
 const Header = () => {
@@ -11,12 +12,13 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [heroHeight, setHeroHeight] = useState(0);
+  const [isDonationOpen, setIsDonationOpen] = useState(false);
 
   const { scrollY } = useScroll();
 
   // Dynamically measure the hero section height
   const measureHero = useCallback(() => {
-    const heroEl = document.querySelector('.relative.h-\\[300vh\\]') as HTMLElement | null;
+    const heroEl = document.getElementById('hero') as HTMLElement | null;
     if (heroEl) {
       setHeroHeight(heroEl.offsetTop + heroEl.offsetHeight);
     }
@@ -30,18 +32,15 @@ const Header = () => {
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() ?? 0;
-    // Activate when the second block inside hero is revealed (~30% of hero scroll)
-    const heroEnd = heroHeight || window.innerHeight * 3;
+    const heroEnd = heroHeight || window.innerHeight;
     const threshold = heroEnd * 0.3;
 
-    // Background + shrink only after scrolling past the hero section
     if (latest > threshold) {
       if (!isScrolled) setIsScrolled(true);
     } else {
       if (isScrolled) setIsScrolled(false);
     }
 
-    // Hide on scroll-down / show on scroll-up — only after the hero
     if (latest > threshold) {
       if (latest > previous) {
         if (!hidden) setHidden(true);
@@ -49,7 +48,6 @@ const Header = () => {
         if (hidden) setHidden(false);
       }
     } else {
-      // In hero zone — always visible, never hidden
       if (hidden) setHidden(false);
     }
   });
@@ -76,6 +74,13 @@ const Header = () => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Listen for global donation modal event
+  useEffect(() => {
+    const handleOpenDonation = () => setIsDonationOpen(true);
+    window.addEventListener("open-donation-modal", handleOpenDonation);
+    return () => window.removeEventListener("open-donation-modal", handleOpenDonation);
+  }, []);
+
   return (
     <>
       <motion.header
@@ -90,9 +95,11 @@ const Header = () => {
         }`}
       >
         <div className={`flex w-full items-center justify-between`}>
-          <button
-            onClick={() => scrollTo("hero")}
-            aria-label="Наверх"
+          <a
+            href="https://domlobova.ru/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="На главную"
             className="group flex cursor-pointer items-center gap-3 relative w-auto focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 rounded-lg"
           >
             <img
@@ -109,11 +116,14 @@ const Header = () => {
                 isScrolled && !isOpen ? "opacity-0 h-12 sm:h-14 lg:h-16" : "opacity-100 h-16 sm:h-20 lg:h-24"
               }`}
             />
-          </button>
+          </a>
 
           <div className="flex items-center gap-3 md:gap-4">
             <MagneticButton
-              onClick={() => scrollTo("donate")}
+              onClick={() => {
+                document.documentElement.classList.add("scroll-locked");
+                setIsDonationOpen(true);
+              }}
               className={`group hidden md:flex cursor-pointer items-center gap-2 rounded-full font-bold uppercase tracking-widest transition-[background,color,box-shadow,padding] duration-500 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 ${
                 isScrolled && !isOpen
                   ? "bg-brand-orange text-white shadow-md hover:shadow-brand-orange/40 px-6 md:px-7 py-3 md:py-3.5 text-xs md:text-sm"
@@ -127,7 +137,7 @@ const Header = () => {
                     : "text-brand-orange group-hover:text-white w-5 h-5"
                 }`}
               />
-              Поддержать
+              Помочь нам
             </MagneticButton>
 
             <MagneticButton
@@ -157,36 +167,53 @@ const Header = () => {
           >
             <div className="flex flex-col items-start gap-6 sm:gap-8 text-3xl sm:text-5xl md:text-6xl font-heading font-medium w-full max-w-2xl mx-auto pl-4">
               {[
-                { label: "О нас", id: "about" },
+                { label: "О нас", id: "about", href: "https://domlobova.ru/" },
                 { label: "Истории подопечных", id: "stories" },
                 { label: "Наши потребности", id: "funds" },
                 { label: "Сборы", id: "campaigns" },
                 { label: "Волонтерство", id: "volunteer" },
                 { label: "Контакты", id: "contacts" },
-              ].map((item, i) => (
-                <motion.button
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 + i * 0.1 }}
-                  key={item.id}
-                  onClick={() => scrollTo(item.id)}
-                  className="group flex items-center justify-between w-full text-left transition-all duration-300 hover:text-[#FFEAB0]"
-                >
-                  <span className="relative inline-block overflow-hidden pb-2">
-                    <span className="relative z-10 transition-transform duration-500 ease-out inline-block group-hover:-translate-y-full">
-                      {item.label}
+              ].map((item, i) => {
+                const isExternal = !!item.href;
+                return (
+                  <motion.a
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 + i * 0.1 }}
+                    key={item.id}
+                    href={isExternal ? item.href : `#${item.id}`}
+                    target={isExternal ? "_blank" : undefined}
+                    rel={isExternal ? "noopener noreferrer" : undefined}
+                    onClick={(e) => {
+                      if (!isExternal) {
+                        e.preventDefault();
+                        scrollTo(item.id);
+                      }
+                    }}
+                    className="group flex items-center justify-between w-full text-left transition-all duration-300 hover:text-[#FFEAB0]"
+                  >
+                    <span className="relative inline-block overflow-hidden pb-2">
+                      <span className="relative z-10 transition-transform duration-500 ease-out inline-block group-hover:-translate-y-full">
+                        {item.label}
+                      </span>
+                      <span className="absolute left-0 top-full z-10 text-[#FFEAB0] transition-transform duration-500 ease-out inline-block group-hover:-translate-y-full">
+                        {item.label}
+                      </span>
                     </span>
-                    <span className="absolute left-0 top-full z-10 text-[#FFEAB0] transition-transform duration-500 ease-out inline-block group-hover:-translate-y-full">
-                      {item.label}
-                    </span>
-                  </span>
-                  <ArrowRight className="w-8 h-8 sm:w-12 sm:h-12 opacity-0 -translate-x-8 transition-all duration-500 ease-out group-hover:opacity-100 group-hover:translate-x-0" />
-                </motion.button>
-              ))}
+                    <ArrowRight className="w-8 h-8 sm:w-12 sm:h-12 opacity-0 -translate-x-8 transition-all duration-500 ease-out group-hover:opacity-100 group-hover:translate-x-0" />
+                  </motion.a>
+                );
+              })}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Donation Modal */}
+      <DonationModal
+        isOpen={isDonationOpen}
+        onClose={() => setIsDonationOpen(false)}
+      />
     </>
   );
 };

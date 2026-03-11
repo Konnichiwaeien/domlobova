@@ -74,7 +74,7 @@ const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
   ];
 
   return (
-    <section id="campaigns" className="relative z-30 bg-white pt-16 md:pt-20 pb-8 md:pb-10">
+    <section id="campaigns" className="relative z-30 bg-white pt-16 md:pt-24 lg:pt-28 pb-8 md:pb-12">
       <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12">
         
         {/* Section Heading */}
@@ -165,7 +165,7 @@ const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
                   <div className="flex items-center gap-2.5 bg-brand-orange/10 border border-brand-orange/20 rounded-full px-5 py-2.5 shadow-sm shadow-brand-orange/5 w-fit">
                     <Sparkles className="w-4 h-4 text-brand-orange" />
                     <span className="text-xs font-black uppercase tracking-[0.2em] text-brand-orange">
-                      Активный сбор
+                      Основной сбор
                     </span>
                   </div>
                   <h3 className="font-heading text-xl md:text-3xl font-black uppercase tracking-wide text-brand-brown">

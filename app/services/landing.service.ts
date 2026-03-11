@@ -21,6 +21,7 @@ export interface LandingData {
       url: string;
       mime?: string;
     };
+    photos?: MarqueePhoto[];
   };
   welcome?: {
     id: number;
@@ -115,6 +116,7 @@ export async function getLandingData(slug: string): Promise<LandingData | null> 
         'marqueePhotos',
         'hero',
         'hero.video',
+        'hero.photos',
         'welcome.photos',
         'about.photos',
         'about.stats',

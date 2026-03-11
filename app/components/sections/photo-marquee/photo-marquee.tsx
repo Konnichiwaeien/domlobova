@@ -21,7 +21,7 @@ const PhotoMarquee = ({ photos }: PhotoMarqueeProps) => {
   const loopPhotos = [...displayPhotos, ...displayPhotos];
 
   return (
-    <section className="relative z-40 bg-brand-cream py-2 md:py-16 overflow-hidden pointer-events-none">
+    <section className="relative z-30 bg-brand-cream py-2 md:py-16 overflow-hidden pointer-events-none">
       <div className="w-full flex">
         <motion.div
           animate={{ x: ["0%", "-50%"] }}

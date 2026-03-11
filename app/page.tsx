@@ -3,7 +3,7 @@ import { SmoothScroll } from "./components/ui/smooth-scroll";
 import { ScrollToTop } from "./components/ui/scroll-to-top";
 import { Header } from "./components/sections/header";
 import { Hero } from "./components/sections/hero";
-import { PhotoMarquee } from "./components/sections/photo-marquee";
+import { FeaturesMarquee } from "./components/sections/features-marquee/features-marquee";
 import { ElegantProgress } from "./components/sections/elegant-progress";
 import dynamic from "next/dynamic";
 
@@ -12,9 +12,9 @@ const About = dynamic(() => import("./components/sections/about").then(mod => mo
 const Stories = dynamic(() => import("./components/sections/stories").then(mod => mod.Stories));
 const FundsUsage = dynamic(() => import("./components/sections/funds-usage").then(mod => mod.FundsUsage));
 const DonationBlock = dynamic(() => import("./components/sections/donation-block").then(mod => mod.DonationBlock));
-const VolunteerSection = dynamic(() => import("./components/sections/volunteer").then(mod => mod.VolunteerSection));
+// const VolunteerSection = dynamic(() => import("./components/sections/volunteer").then(mod => mod.VolunteerSection));
 const Footer = dynamic(() => import("./components/sections/footer").then(mod => mod.Footer));
-const Preloader = dynamic(() => import("./components/ui/preloader/preloader").then(mod => mod.Preloader));
+// const Preloader = dynamic(() => import("./components/ui/preloader/preloader").then(mod => mod.Preloader));
 
 import { getLandingData } from "./services/landing.service";
 
@@ -35,7 +35,7 @@ export default async function Home() {
 
   return (
     <SmoothScroll>
-      <Preloader />
+      {/* <Preloader /> */}
       <div className="min-h-screen bg-brand-cream font-sans selection:bg-brand-yellow selection:text-brand-brown">
         <Header />
 
@@ -44,12 +44,10 @@ export default async function Home() {
             titleTop={landing?.hero?.titleTop} 
             titleBottom={landing?.hero?.titleBottom} 
             heroDescription={landing?.hero?.descr} 
-            videoUrl={landing?.hero?.video?.url}
-            welcomeTitle={landing?.welcome?.title}
-            welcomeDescription={landing?.welcome?.descr}
+            heroPhotos={landing?.hero?.photos}
           />
 
-          <PhotoMarquee photos={landing?.welcome?.photos?.map((p: any) => p.url)} />
+          <FeaturesMarquee features={landing?.about?.features} />
 
           <ElegantProgress 
             title={landing?.campaigns?.title} 
@@ -59,6 +57,14 @@ export default async function Home() {
 
           <OtherDonations campaigns={landing?.campaigns?.campaigns} />
 
+          <Stories stories={landing?.stories} />
+
+          <FundsUsage data={landing?.needs} />
+
+          <DonationBlock />
+
+          {/* <VolunteerSection data={landing?.volunteers_needs} /> */}
+
           <About 
             title={landing?.about?.title}
             descr={landing?.about?.descr}
@@ -67,14 +73,6 @@ export default async function Home() {
             features={landing?.about?.features}
             promo={landing?.about?.promo}
           />
-
-          <Stories stories={landing?.stories} />
-
-          <FundsUsage data={landing?.needs} />
-
-          <DonationBlock />
-
-          <VolunteerSection data={landing?.volunteers_needs} />
         </main>
 
         <Footer />

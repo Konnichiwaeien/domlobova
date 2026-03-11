@@ -76,29 +76,29 @@ const Stories = ({ stories: customStories }: StoriesProps) => {
       id="stories"
       className="relative h-[250vh] bg-[#F9F8F6]"
     >
-      <div className="sticky top-0 flex h-screen flex-col overflow-hidden bg-[#F9F8F6]">
+      <div className="sticky top-0 flex min-h-[850px] lg:min-h-[900px] h-screen flex-col overflow-hidden bg-[#F9F8F6] py-16 md:py-24 lg:py-28">
         {/* Title area: Fixed at the top, taking up standard space, no absolute positioning */}
-        <div className="w-full flex-none px-5 pt-14 pb-4 md:px-12 md:pt-20 md:pb-8">
+        <div className="w-full flex-none px-5 md:px-12 mb-8 md:mb-10">
           <h2 className="font-heading text-4xl md:text-5xl lg:text-7xl font-black text-brand-brown uppercase">
             Истории <br/><span className="text-brand-orange italic">подопечных</span>
           </h2>
         </div>
 
         {/* Cards area */}
-        <div className="flex-1 w-full relative -mt-4 flex items-center">
+        <div className="flex-1 w-full relative flex items-stretch min-h-0 min-w-0">
           {/* We've applied an offset width so it translates exactly the width of the track minus the viewport. */}
           <motion.div
             style={{ x }}
-            className="flex gap-5 md:gap-8 px-5 md:px-12 items-center w-max will-change-transform"
+            className="flex gap-5 md:gap-8 px-5 md:px-12 items-stretch h-full w-max will-change-transform"
           >
           {stories.map((story, idx) => (
             <div
               key={idx}
-              className="relative flex h-[70vh] w-[85vw] shrink-0 flex-col overflow-hidden rounded-2xl md:rounded-[3rem] bg-white border border-brand-brown/10 shadow-xl shadow-brand-orange/5 md:h-[65vh] md:w-[75vw] lg:w-[60vw] md:flex-row"
+              className="relative flex h-full w-[85vw] shrink-0 flex-col overflow-hidden rounded-2xl md:rounded-[3rem] bg-white border border-brand-brown/10 shadow-xl shadow-brand-orange/5 md:w-[75vw] lg:w-[60vw] md:flex-row"
             >
               {/* Image half */}
-              <div className="relative h-[38%] md:h-full w-full md:w-1/2 p-3 md:p-6 shrink-0">
-                <div className="h-full w-full overflow-hidden rounded-[2rem]">
+              <div className="relative h-[40%] md:h-auto w-full md:w-[40%] p-3 md:p-5 shrink-0">
+                <div className="h-full w-full overflow-hidden rounded-[2rem] md:rounded-[2.5rem] shadow-sm">
                   <Image
                     src={story.img}
                     alt={``}
@@ -112,25 +112,39 @@ const Stories = ({ stories: customStories }: StoriesProps) => {
               </div>
 
               {/* Text half */}
-              <div className="flex h-[62%] md:h-full w-full flex-col p-5 md:p-8 lg:p-10">
+              <div className="flex flex-1 w-full md:w-[60%] flex-col p-5 md:p-6 lg:p-8 min-h-0 min-w-0 overflow-hidden">
                 <div
-                  className={`mb-2 md:mb-3 shrink-0 self-start rounded-full ${story.color} px-3 py-1 md:px-4 md:py-1.5 text-[10px] md:text-xs font-bold uppercase tracking-widest text-brand-brown`}
+                  className={`mb-2 md:mb-3 shrink-0 self-start rounded-full ${story.color} px-4 py-1.5 md:px-5 md:py-2 text-xs md:text-sm font-bold uppercase tracking-widest text-brand-brown shadow-sm`}
                 >
                   {story.age}
                 </div>
 
-                <h3 className="mb-2 md:mb-4 shrink-0 font-heading text-xl md:text-2xl lg:text-4xl font-bold text-brand-brown">
+                <h3 className="mb-2 md:mb-3 shrink-0 font-heading text-xl md:text-2xl lg:text-3xl font-bold text-brand-brown">
                   {story.name}
                 </h3>
 
-                <p className="text-base md:text-lg shrink-0 font-medium leading-relaxed text-brand-brown-light italic line-clamp-3 md:line-clamp-none">
+                <p className="text-sm md:text-base shrink-0 font-medium leading-relaxed text-brand-brown-light italic line-clamp-3 md:line-clamp-none">
                   «{story.quote}»
                 </p>
 
-                <div className="mt-2 pt-2 md:mt-4 md:pt-4 border-t border-brand-brown/10 flex-1 overflow-y-auto pr-2 custom-scrollbar min-h-0 pb-4">
-                  <p className="text-sm md:text-base leading-relaxed text-brand-brown-light/70">
-                    {story.story}
-                  </p>
+                <div className="flex-1 mt-3 md:mt-4 relative overflow-hidden flex flex-col min-h-0 min-w-0 pb-2 md:pb-3">
+                  {/* Elegant separator */}
+                  <div className="flex items-center gap-3 mb-3 shrink-0 opacity-60">
+                    <div className="w-8 md:w-12 h-[2px] bg-brand-orange/40 rounded-full" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-brand-orange/40" />
+                    <div className="w-8 md:w-12 h-[2px] bg-brand-orange/40 rounded-full" />
+                  </div>
+                  
+                  <div className="flex-1 relative min-h-0 min-w-0">
+                    <div className="absolute inset-0 overflow-y-auto pr-2 custom-scrollbar z-10">
+                      <p className="text-sm md:text-base leading-relaxed text-brand-brown-light/70 wrap-break-word whitespace-pre-wrap">
+                        {story.story}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Bottom fade out to indicate scrolling */}
+                  <div className="absolute bottom-0 left-0 right-2 h-8 md:h-12 bg-linear-to-t from-white to-transparent pointer-events-none z-20" />
                 </div>
               </div>
             </div>

@@ -96,8 +96,8 @@ const Footer = () => {
             </h2>
           </div>
           
-          <div className="col-span-1 flex flex-col justify-end">
-             <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-3 opacity-90 hidden lg:block">Наши соцсети</span>
+          <div className="col-span-1 md:col-span-2 lg:col-span-1 hidden md:flex flex-col items-center lg:items-end justify-end mt-6 md:mt-0">
+             <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-3 opacity-90">Наши соцсети</span>
              <div className="flex items-center gap-3">
                {socialLinks.map((social, sIdx) => (
                  <a
@@ -118,7 +118,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8 xl:gap-12 pb-8 md:pb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-8 xl:gap-12 pb-8 lg:pb-0">
             
             {/* Box 1: Address */}
             <div className="space-y-4">
@@ -138,15 +138,8 @@ const Footer = () => {
                </div>
             </div>
 
-            {/* Box 2: Phones */}
+            {/* Box 2 & 3 Combined: Phones & Email */}
             <div className="space-y-6">
-               <div>
-                  <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-1.5 block opacity-90">Отделение милосердия</span>
-                  <a href="tel:84853620120" className="text-lg md:text-xl font-black tracking-tight text-brand-brown hover:text-brand-orange transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded-md inline-block">
-                    8 (48536) 2-01-20
-                  </a>
-                  <p className="text-[10px] md:text-xs font-bold text-brand-brown/40 mt-1 uppercase tracking-widest">с 9:00 до 21:00</p>
-               </div>
                <div>
                   <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-1.5 block opacity-90">Консультации</span>
                   <a href="tel:89201229737" className="text-lg md:text-xl font-black tracking-tight text-brand-brown hover:text-brand-orange transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded-md inline-block">
@@ -154,27 +147,20 @@ const Footer = () => {
                   </a>
                   <p className="text-[10px] md:text-xs font-bold text-brand-brown/40 mt-1 uppercase tracking-widest">с 8:00 до 17:00</p>
                </div>
-            </div>
 
-            {/* Box 3: Email & Director */}
-            <div className="space-y-6">
                <div>
                   <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-1.5 block opacity-90">Пишите нам</span>
                   <a href="mailto:mail@domlobova.ru" className="text-base sm:text-lg md:text-xl font-bold flex items-center gap-2 text-brand-brown hover:text-brand-orange transition-colors underline decoration-brand-orange/30 hover:decoration-brand-orange underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded-md w-max">
-                    mail@domlobova.ru <ArrowDownRight className="w-4 h-4 rotate-[-45deg]" />
+                    mail@domlobova.ru <ArrowDownRight className="w-4 h-4 -rotate-45" />
                   </a>
-               </div>
-               <div>
-                  <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-1.5 block opacity-90">Директор</span>
-                  <span className="text-base md:text-lg font-black italic text-brand-brown">Васиков Алексей Александрович</span>
                </div>
             </div>
 
-            {/* Box 4: Documents, Requisites */}
-            <div className="space-y-8 flex flex-col justify-start">
+             {/* Box 4: Documents, Requisites */}
+             <div className="col-span-1 md:col-span-2 lg:col-span-1 space-y-8 flex flex-col justify-start">
                <div>
                  <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-3 block opacity-90">Документы</span>
-                 <ul className="space-y-2.5">
+                 <ul className="flex flex-col md:flex-row lg:flex-col gap-2.5 md:gap-6 lg:gap-2.5 flex-wrap">
                    {documents.map((doc, idx) => (
                      <li key={idx}>
                        {doc.external ? (
@@ -204,13 +190,35 @@ const Footer = () => {
                    <span>Полные реквизиты →</span>
                  </button>
                </div>
+
+               {/* Mobile Social Links placed after documents */}
+               <div className="flex md:hidden flex-col justify-start mt-4">
+                 <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-3 opacity-90">Наши соцсети</span>
+                 <div className="flex items-center gap-3">
+                   {socialLinks.map((social, sIdx) => (
+                     <a
+                       key={`mob-${sIdx}`}
+                       href={social.link}
+                       target='_blank'
+                       rel="noopener noreferrer"
+                       aria-label={social.label}
+                       title={social.label}
+                       className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-brand-brown/5 text-brand-brown/80 flex items-center justify-center hover:bg-brand-orange hover:text-white hover:border-brand-orange transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50"
+                     >
+                       <div className="w-5 h-5 flex items-center justify-center">
+                         {social.icon}
+                       </div>
+                     </a>
+                   ))}
+                 </div>
+               </div>
             </div>
 
           </div>
 
         {/* Bottom bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center border-t border-brand-brown/10 pt-8 text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-brand-brown/40">
-          <div className="flex flex-col items-center md:items-start gap-3 text-center md:text-left mb-6 md:mb-0">
+        <div className="flex flex-col lg:flex-row justify-between items-center border-t border-brand-brown/10 pt-8 text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-brand-brown/40">
+          <div className="flex flex-col items-center lg:items-start gap-3 text-center lg:text-left mb-6 lg:mb-0">
              <div className="flex flex-col md:flex-row items-center gap-4 md:gap-10">
                <p>© {new Date().getFullYear()} АБСМНО Дом Милосердия Кузнеца Лобова.</p>
                <p>Все права защищены.</p>
@@ -225,7 +233,7 @@ const Footer = () => {
              </a>
           </div>
 
-          <div className="flex items-center justify-end w-full md:w-auto">
+          <div className="flex items-center justify-center lg:justify-end w-full lg:w-auto mt-2 lg:mt-0">
             <a
               href='https://www.shdk.tech/ru'
               className='flex items-center justify-center whitespace-nowrap gap-2 text-sm text-[#1a7a0a] transition-all duration-500 ease-in-out hover:text-[#39ff14] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#39ff14] rounded-md'

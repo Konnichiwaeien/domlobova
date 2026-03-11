@@ -4,7 +4,7 @@ import { FormDonation } from "../../form-donation";
 
 const DonationBlock = () => {
   return (
-    <section id="donate" className="relative py-16 md:py-20 overflow-hidden bg-[#F9F8F6]">
+    <section id="donate" className="relative py-16 md:py-24 lg:py-28 overflow-hidden bg-[#F9F8F6]">
       <div className="mx-auto max-w-[1300px] px-5 md:px-8">
         <div className="text-center mb-8 md:mb-10">
           <div className="mb-4 md:mb-6 inline-flex rounded-full bg-brand-orange-light/30 px-6 py-2">

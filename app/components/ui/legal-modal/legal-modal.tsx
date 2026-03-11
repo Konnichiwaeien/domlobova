@@ -42,7 +42,7 @@ export const LegalModal = ({ isOpen, onClose, title, children }: LegalModalProps
     <AnimatePresence>
       {isOpen && (
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-8"
+          className="fixed inset-0 z-99999 flex items-center justify-center p-4 md:p-8"
           data-lenis-prevent
           onWheel={(e) => e.stopPropagation()}
           onTouchMove={(e) => e.stopPropagation()}

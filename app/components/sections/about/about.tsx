@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { MagneticButton } from "../../ui/magnetic-button";
 import { renderHighlightedTitle } from "../../../utils/text-parser";
+// import { FeaturesBlock } from "./features-block";
 
 // --- Typing Text Parser ---
 
@@ -209,6 +210,8 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
   }, []);
 
   // Parallax Collage Hooks — reduced ranges on mobile
+  // Currently disabled along with the Promo Block to prevent 'Target ref is defined but not hydrated' error
+  /*
   const collageRef = useRef(null);
   const { scrollYProgress: collageProgress } = useScroll({
     target: collageRef,
@@ -221,6 +224,7 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
   const y4 = useTransform(collageProgress, [0, 1], isMobile ? [50, -50] : [400, -600]);
   const collageScale = useTransform(collageProgress, [0.2, 0.8], isMobile ? [0.95, 1.05] : [0.85, 1.1]);
   const collageOpacity = useTransform(collageProgress, [0.2, 0.5, 0.8], [0.5, 1, 0.8]);
+  */
 
   // Text Reveal Scroll — optimized: single progress value for CSS gradient
   const textRef = useRef(null);
@@ -247,11 +251,11 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
   }, [photos]);
 
   return (
-    <section id="about" className="relative bg-white pt-8 md:pt-16 lg:pt-24 pb-0 overflow-hidden z-10 text-brand-brown">
+    <section id="about" className="relative bg-white pt-16 md:pt-24 lg:pt-28 pb-16 md:pb-24 lg:pb-28 overflow-hidden z-10 text-brand-brown">
       <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12 relative z-20">
-        <div className="flex flex-col gap-10 md:gap-14">
-          <div className="text-center">
-            <h2 className="mb-6 inline-flex rounded-full bg-brand-orange-light/30 px-4 py-1.5 md:px-6 md:py-2 shadow-sm border border-brand-orange/10"><span className="text-[10px] md:text-sm font-bold uppercase tracking-widest text-brand-orange">Дом милосердия кузнеца Лобова</span></h2>
+        <div className="flex flex-col">
+          <div className="text-center mb-8 md:mb-10">
+
             <h3 className="font-heading text-5xl md:text-5xl lg:text-7xl xl:text-8xl font-black text-brand-brown tracking-tighter mx-auto max-w-4xl uppercase">
               {renderHighlightedTitle(title)}
             </h3>
@@ -263,7 +267,7 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 1 }}
-              className="grid grid-cols-2 md:grid-cols-4 w-full max-w-5xl mx-auto gap-4 md:gap-8 lg:gap-12 mb-2 mt-2 md:mt-4"
+              className="grid grid-cols-2 md:grid-cols-4 w-full max-w-5xl mx-auto gap-4 md:gap-8 lg:gap-12 mb-5 md:mb-8 lg:mb-12"
             >
               {stats.map((stat, idx) => (
                 <div key={idx} className="w-full flex flex-col items-center justify-center group">
@@ -286,8 +290,8 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
           )}
 
           {/* Text inline image reveal — optimized: single useTransform + CSS color-mix */}
-          <div ref={textRef} className="max-w-[1200px] mx-auto pb-4 md:pb-6 pt-0 flex flex-col justify-center min-h-[40vh] transform-gpu">
-            <div className="font-heading text-2xl sm:text-3xl md:text-4xl lg:text-[56px] leading-[1.5] lg:leading-[1.4] font-medium text-brand-brown text-center md:text-left">
+          <div ref={textRef} className="max-w-[1200px] mx-auto pb-4 md:pb-6 pt-4 md:pt-8 flex flex-col justify-center min-h-[40vh] transform-gpu">
+            <div className="font-heading text-xl sm:text-2xl md:text-3xl lg:text-[40px] leading-[1.4] lg:leading-[1.35] font-medium text-brand-brown text-center md:text-left">
               <ScrollRevealText
                 text={descr || ""}
                 progress={smoothProgress}
@@ -296,69 +300,11 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
             </div>
           </div>
 
-          {/* Refined Interactive Bento Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6 pb-6 md:pb-10 relative z-30 px-0 md:px-0">
-            {features && features.length > 0 ? (
-              features.map((feature, idx) => {
-                // Determine icon and colors based on index to maintain the existing design feel
-                const defaultStyling = [
-                  { icon: HeartHandshake, color: "text-brand-orange", bgColor: "bg-[#FDFBF7]" },
-                  { icon: ShieldCheck,    color: "text-brand-yellow", bgColor: "bg-[#FDFBF7]" },
-                  { icon: Users,          color: "text-[#E07A5F]",    bgColor: "bg-[#FDFBF7]" },
-                  { icon: Star,           color: "text-[#81B29A]",    bgColor: "bg-[#FDFBF7]" }
-                ];
-                const style = defaultStyling[idx % defaultStyling.length];
-                const Icon = style.icon;
-                const imgSrc = feature.image?.url || `/images/${(idx % 4) + 1}.webp`;
-                const isLastAndOdd = features.length % 2 !== 0 && idx === features.length - 1;
+          {/* Refined Interactive Bento Cards - Currently disabled, preserved in FeaturesBlock */}
+          {/* <FeaturesBlock features={features} /> */}
 
-                return (
-                  <motion.div 
-                    key={idx}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-50px" }}
-                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: idx * 0.1 }}
-                    className={`group relative overflow-hidden rounded-2xl md:rounded-[2.5rem] ${style.bgColor} border border-brand-brown/5 h-[420px] md:h-[400px] cursor-pointer transform-gpu ${isLastAndOdd ? 'md:col-span-2' : ''}`}
-                  >
-                {/* Hover shadow layer — separated from Framer Motion to avoid flicker */}
-                <div className="absolute inset-0 rounded-2xl md:rounded-[2.5rem] shadow-lg group-hover:shadow-xl transition-shadow duration-700 pointer-events-none z-20" />
-
-                {/* Background Image Always Visible */}
-                <div className="absolute inset-0 z-0 overflow-hidden rounded-2xl md:rounded-[2.5rem] pointer-events-none transform-gpu">
-                  <img src={imgSrc} className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] select-none" alt={feature.title}/>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10 pointer-events-none" />
-                </div>
-                
-                {/* Card Content */}
-                <div className="relative z-10 w-full h-full p-5 md:p-8 flex flex-col justify-between">
-                  {/* Top: Icons */}
-                  <div className="flex justify-between items-start">
-                    <div className={`inline-flex rounded-full p-4 bg-black/20 shadow-sm border border-white/10 text-white group-hover:bg-black/30 transition-colors duration-700`}>
-                      <Icon className="h-6 w-6 md:h-8 md:w-8" strokeWidth={1.5} />
-                    </div>
-                    <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white/50 group-hover:bg-white/20 group-hover:text-white group-hover:-rotate-45 transition-[background,color,transform] duration-500 delay-100">
-                      <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
-                    </div>
-                  </div>
-
-                  {/* Bottom: Text */}
-                  <div className="transform translate-y-3 group-hover:translate-y-0 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
-                    <h4 className="font-heading text-[1.7rem] md:text-2xl lg:text-3xl font-black mb-2 md:mb-3 text-white">
-                      {feature.title}
-                    </h4>
-                    <p className="text-base md:text-base lg:text-lg text-white/90 leading-relaxed md:leading-relaxed font-medium transition-colors duration-500 line-clamp-4 md:line-clamp-none">
-                      {feature.descr}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-              );
-            })
-          ) : null}
-          </div>
-
-          {/* Morphing Parallax Collage: Dynamic Promo Block */}
+          {/* Morphing Parallax Collage: Dynamic Promo Block - Currently disabled */}
+          {/* 
           <div ref={collageRef} className="relative w-full h-[85vh] md:h-[85vh] -mb-[5vh]">
             <div className="sticky top-[10vh] md:top-[12vh] h-[70vh] md:h-[75vh] w-full flex items-center justify-center overflow-hidden rounded-[3rem] bg-brand-orange text-brand-cream border border-brand-brown/10 shadow-2xl">
               
@@ -397,7 +343,6 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
                 </MagneticButton>
               </motion.div>
 
-              {/* Parallax Floating Images — will-change + lazy loading */}
               <motion.div style={{ y: y1, willChange: "transform" }} className="absolute z-10 w-[40vw] max-w-[280px] aspect-[3/4] rounded-[2rem] overflow-hidden shadow-2xl rotate-[-4deg] left-[2%] md:left-[8%] top-[8%] border-[6px] border-white/30 transform-gpu">
                 <img src={promo?.images?.[0]?.url || "/images/3.webp"} className="w-full h-full object-cover grayscale-[15%] hover:grayscale-0 transition-[filter] duration-500" alt="Жизнь" loading="lazy"/>
               </motion.div>
@@ -416,6 +361,7 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
 
             </div>
           </div>
+          */}
 
         </div>
       </div>

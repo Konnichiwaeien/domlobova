@@ -1,74 +1,48 @@
 "use client";
 
-
 import React from "react";
 import { renderHighlightedTitle } from "../../../utils/text-parser";
+import { motion } from "framer-motion";
+import { Pill, Activity, Users, Home, Music, Sparkles } from "lucide-react";
 
 interface FundsUsageProps {
   data?: any;
 }
 
 const FundsUsage = ({ data }: FundsUsageProps) => {
-  const items = [
+  const rawItems = [
     {
       title: "Медикаменты и питание",
       num: "01",
       desc: "Специализированное питание, пеленки, противопролежневые средства и жизненно важные препараты.",
-      color: "bg-[#EB6C39]",
-      img: "/images/4.webp",
-      top: "top-24",
     },
     {
       title: "Оборудование",
       num: "02",
       desc: "Инвалидные коляски, многофункциональные кровати, кислородные концентраторы для облегчения жизни.",
-      color: "bg-[#E5793F]",
-      img: "/images/5.webp",
-      top: "top-32",
     },
     {
       title: "Работа специалистов",
       num: "03",
-      desc: "Оплата сложного труда профессиональных сиделок, врачей паллиативной помощи и психологов.",
-      color: "bg-[#D96332]",
-      img: "/images/6.webp",
-      top: "top-40",
+      desc: "Оплата труда профессиональных сиделок, врачей паллиативной помощи и психологов.",
     },
     {
       title: "Бытовые нужды",
       num: "04",
-      desc: "Закупка чистящих средств, предметов гигиены, а также частичная оплата коммунальных услуг.",
-      color: "bg-[#EB6C39]",
-      img: "/images/1.webp",
-      top: "top-48",
+      desc: "Закупка чистящих средств, предметов гигиены, оплата коммунальных услуг.",
     },
     {
       title: "Реабилитация и досуг",
       num: "05",
       desc: "Арт-терапия, восстановительные массажи, организация праздников и концертов.",
-      color: "bg-[#E5793F]",
-      img: "/images/2.webp",
-      top: "top-56",
     },
     {
       title: "Развитие и комфорт",
       num: "06",
-      desc: "Постоянное улучшение условий проживания: ремонт палат, обновление мебели и создание безопасной среды.",
-      color: "bg-[#D96332]",
-      img: "/images/3.webp",
-      top: "top-64",
+      desc: "Улучшение условий: ремонт палат, обновление мебели и создание безопасной среды.",
     },
   ];
 
-  const colors = [
-    "bg-[#EB6C39]", // Brand orange
-    "bg-[#E5793F]", // Slightly warmer
-    "bg-[#D96332]", // Slightly deeper
-  ];
-  const topsMobile = ["top-[64px]", "top-[72px]", "top-[80px]", "top-[88px]", "top-[96px]", "top-[104px]"];
-  const topsDesktop = ["md:top-24", "md:top-32", "md:top-40", "md:top-48", "md:top-56", "md:top-64"];
-
-  // Extract wrapper from array if it comes as an array of 1 item
   const blockData = Array.isArray(data) ? data[0] : (data || {});
   
   const titleString = blockData?.title || "НА ЧТО *НУЖНЫ* СРЕДСТВА";
@@ -79,76 +53,86 @@ const FundsUsage = ({ data }: FundsUsageProps) => {
         title: need.title || "",
         num: String(idx + 1).padStart(2, '0'),
         desc: need.descr || "",
-        color: colors[idx % colors.length],
-        img: Array.isArray(need.image) ? need.image[0]?.url : (need.image?.url || `/images/${(idx % 6) + 1}.webp`),
-        top: topsMobile[idx % topsMobile.length] + " " + topsDesktop[idx % topsDesktop.length],
       }))
-    : items;
+    : rawItems;
+
+  const icons = [Pill, Activity, Users, Home, Music, Sparkles];
 
   return (
     <section
       id="funds"
-      className="bg-white py-16 md:py-20 rounded-2xl md:rounded-[3rem] lg:rounded-[5rem] mx-3 md:mx-6 my-14 md:my-20 border border-brand-brown/5 shadow-sm relative z-30"
+      className="bg-white py-16 md:py-24 lg:py-28 relative z-30 transition-colors duration-500"
     >
       <div className="mx-auto max-w-[1300px] px-5 md:px-8">
-        <div className="mb-8 md:mb-12 lg:mb-16 text-center">
-          <div className="mb-6 inline-flex rounded-full bg-white px-6 py-2 shadow-sm border border-brand-brown/5">
-            <span className="text-sm font-bold uppercase tracking-widest text-brand-orange">
-              Важная поддержка
-            </span>
+        <div className="mb-10 md:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-10">
+          <div className="max-w-3xl">
+            <h2 className="font-heading text-4xl md:text-5xl lg:text-7xl font-black text-brand-brown uppercase mb-4 leading-tight">
+              {renderHighlightedTitle(titleString, "text-brand-orange italic")}
+            </h2>
+            <p className="text-brand-brown-light font-medium text-lg leading-relaxed max-w-xl">
+              Ваши пожертвования помогают Дому милосердия бесперебойно работать и оказывать качественную помощь подопечным.
+            </p>
           </div>
-          <h2 className="font-heading text-4xl md:text-5xl lg:text-7xl font-black text-brand-brown uppercase">
-            {renderHighlightedTitle(titleString, "text-brand-orange italic")}
-          </h2>
         </div>
 
-        <div className="relative pb-0">
-          {mappedItems.map((item: any, idx: number) => (
-            <div
-              key={idx}
-              className={`group sticky ${item.top} mb-6 md:mb-10 overflow-hidden rounded-2xl md:rounded-[3rem] ${item.color} shadow-[0_15px_40px_rgba(0,0,0,0.06)] h-auto md:h-[480px] transition-transform duration-500 transform-gpu`}
-            >
-              <div className={`flex flex-col ${idx % 2 === 0 ? "md:flex-row-reverse" : "md:flex-row"} h-full`}>
-                {/* Текстовая часть */}
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-10%" }}
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: { staggerChildren: 0.15 }
+            }
+          }}
+        >
+          {mappedItems.map((item: any, idx: number) => {
+            const Icon = icons[idx % icons.length];
+            return (
+              <motion.div
+                key={idx}
+                variants={{
+                  hidden: { opacity: 0, y: 40 },
+                  visible: { 
+                    opacity: 1, 
+                    y: 0, 
+                    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } 
+                  }
+                }}
+                className="group relative bg-white rounded-4xl p-8 md:p-10 flex flex-col justify-between border border-brand-brown/5 shadow-sm hover:shadow-[0_20px_40px_rgba(235,108,57,0.08)] transition-all duration-500 overflow-hidden will-change-transform"
+              >
+                {/* Soft background glow on hover */}
+                <div className="absolute -inset-20 bg-linear-to-br from-brand-orange/0 via-brand-orange/0 to-brand-orange/10 opacity-0 group-hover:opacity-100 blur-2xl transition-opacity duration-700 pointer-events-none" />
 
-                <div className="relative w-full md:w-1/2 p-5 md:p-8 lg:p-14 flex flex-col justify-center overflow-visible">
-                  {/* Huge Watermark Number */}
-                  <div className="absolute right-2 top-2 md:right-auto md:left-0 md:top-0 font-heading text-[80px] md:text-[160px] lg:text-[220px] font-black text-white/10 select-none pointer-events-none leading-none tracking-tighter">
-                    {item.num}
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="w-14 h-14 rounded-2xl bg-brand-cream flex items-center justify-center text-brand-orange group-hover:bg-brand-orange group-hover:text-white group-hover:-rotate-6 transition-all duration-500 shadow-sm border border-brand-brown/5">
+                      <Icon className="w-6 h-6" strokeWidth={1.5} />
+                    </div>
+                    <div className="font-heading text-3xl font-black text-brand-brown/10 group-hover:text-brand-orange/20 transition-colors duration-500">
+                      {item.num}
+                    </div>
                   </div>
 
-                  <div className="relative z-10 mb-4 md:mb-6 inline-flex self-start rounded-full bg-white/50 px-4 py-1.5 md:px-6 md:py-2 shadow-sm border border-white/50">
-                    <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-white/80">
-                      Направление {item.num}
-                    </span>
-                  </div>
-
-                  <h3 className="relative z-10 mb-3 md:mb-6 font-heading text-2xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
+                  <h3 className="font-heading text-2xl font-black text-brand-brown mb-4 group-hover:text-brand-orange transition-colors duration-300">
                     {item.title}
                   </h3>
 
-                  <p className="relative z-10 text-base md:text-lg font-medium text-white/85 leading-relaxed max-w-[90%]">
+                  <p className="text-brand-brown-light leading-relaxed font-medium">
                     {item.desc}
                   </p>
                 </div>
-
-                {/* Иллюстрация */}
-
-                <div className="relative w-full md:w-1/2 h-[200px] md:h-full p-3 md:p-5 lg:p-8">
-                  <div className="w-full h-full rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl relative">
-                    <img
-                      src={item.img}
-                      alt={item.title}
-                      loading="lazy"
-                      className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] scale-105 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 border-[6px] border-white/20 rounded-[2rem] md:rounded-[2.5rem] pointer-events-none mix-blend-overlay z-10"></div>
-                  </div>
+                
+                {/* Decorative bottom line */}
+                <div className="absolute bottom-0 left-8 right-8 h-[3px] bg-brand-brown/5 rounded-t-lg overflow-hidden">
+                   <div className="w-0 h-full bg-brand-orange group-hover:w-full transition-all duration-700 ease-out" />
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              </motion.div>
+            );
+          })}
+        </motion.div>
       </div>
     </section>
   );

@@ -50,6 +50,15 @@
   h1, h2, h3, h4, h5, h6, .font-heading {
     font-family: var(--font-sofia), var(--font-manrope), ui-sans-serif, system-ui, sans-serif !important;
   }
+
+  /* Hard scroll lock — Lenis cannot override !important */
+  html.scroll-locked,
+  html.scroll-locked body {
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: none !important;
+    position: relative !important;
+  }
 }
 
 /* GPU compositing hints for animated elements */
@@ -130,4 +139,21 @@
 .volunteer-bullet-active {
   background: var(--brand-orange) !important;
   width: 32px;
+}
+
+/* Custom Scrollbar for Modal content */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 16px 0; /* Keeps it away from the extreme top/bottom edges */
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--brand-orange-light);
+  border-radius: 999px;
+  border: 1px solid white; /* Adds "padding" look by faking a border that matches the background */
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--brand-orange);
 }

@@ -136,7 +136,7 @@ const getImpactDetails = (amount: number) => {
   };
 };
 
-export const FormDonation = () => {
+export const FormDonation = ({ className }: { className?: string } = {}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success'>('idle');
   const [consent, setConsent] = useState(false);
@@ -225,7 +225,6 @@ export const FormDonation = () => {
       const widget = new window.cp.CloudPayments();
 
       const intentParams: CloudPaymentsIntentParams = {
-        publicTerminalId: process.env.NEXT_PUBLIC_CLOUDPAYMENTS_PUBLIC_ID || 'test_api_00000000000000000000002',
         description: 'Пожертвование в Дом милосердия кузнеца Лобова',
         amount: data.amount,
         currency: 'RUB',
@@ -284,7 +283,8 @@ export const FormDonation = () => {
 
 
   return (
-    <div className="bg-white rounded-2xl md:rounded-[3rem] p-5 md:p-8 lg:p-14 shadow-2xl border border-brand-brown/10 mx-auto w-full relative z-20 overflow-hidden">
+    <div className={cn("bg-white rounded-2xl md:rounded-[3rem] shadow-2xl border border-brand-brown/10 mx-auto w-full relative z-20 overflow-hidden flex flex-col pt-8 md:pt-12 lg:pt-14 pb-8 md:pb-12 lg:pb-14 pl-6 md:pl-10 lg:pl-14", className)}>
+      <div className="flex-1 overflow-y-auto overflow-x-hidden pr-6 md:pr-10 lg:pr-14 custom-scrollbar">
       
       {/* Thank You Modal Overlay */}
       <AnimatePresence>
@@ -399,7 +399,7 @@ export const FormDonation = () => {
         </motion.div>
       )}
 
-      <h3 className="text-xl md:text-3xl lg:text-5xl font-heading font-black text-brand-brown mb-4 text-center leading-tight">
+      <h3 className="text-2xl md:text-4xl lg:text-[3.5rem] font-heading font-black text-brand-brown mb-4 text-center leading-tight">
         Выберите сумму пожертвования
       </h3>
 
@@ -871,6 +871,7 @@ export const FormDonation = () => {
           </div>
         </LegalModal>
       </form>
+      </div>
     </div>
   );
 };
