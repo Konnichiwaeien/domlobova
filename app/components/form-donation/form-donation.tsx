@@ -225,6 +225,7 @@ export const FormDonation = ({ className }: { className?: string } = {}) => {
       const widget = new window.cp.CloudPayments();
 
       const intentParams: CloudPaymentsIntentParams = {
+        publicTerminalId: process.env.NEXT_PUBLIC_CLOUDPAYMENTS_PUBLIC_ID || '',
         description: 'Пожертвование в Дом милосердия кузнеца Лобова',
         amount: data.amount,
         currency: 'RUB',
