@@ -17,6 +17,7 @@ const Footer = dynamic(() => import("./components/sections/footer").then(mod => 
 // const Preloader = dynamic(() => import("./components/ui/preloader/preloader").then(mod => mod.Preloader));
 
 import { getLandingData } from "./services/landing.service";
+import { getRecentDonations } from "./services/donation.service";
 
 export async function generateMetadata(): Promise<Metadata> {
   const landingSlug = process.env.NEXT_PUBLIC_SITE_SLUG || "domlobova";
@@ -31,7 +32,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Home() {
   const landingSlug = process.env.NEXT_PUBLIC_SITE_SLUG || "domlobova";
-  const landing = await getLandingData(landingSlug);
+  const [landing, recentDonations] = await Promise.all([
+    getLandingData(landingSlug),
+    getRecentDonations(20)
+  ]);
 
   return (
     <SmoothScroll>
@@ -53,6 +57,7 @@ export default async function Home() {
             title={landing?.campaigns?.title} 
             descr={landing?.campaigns?.descr}
             partners={landing?.campaigns?.campaigns}
+            recentDonations={recentDonations}
           />
 
           <OtherDonations campaigns={landing?.campaigns?.campaigns} />

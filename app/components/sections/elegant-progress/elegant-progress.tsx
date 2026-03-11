@@ -2,10 +2,11 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Heart, HeartHandshake, Target, Users, TrendingUp, Sparkles } from "lucide-react";
+import { Heart, HeartHandshake, Target, Users, TrendingUp, Sparkles, RefreshCw, Hand } from "lucide-react";
 import { MagneticButton } from "../../ui/magnetic-button";
 import { AnimatedCounter } from "../../ui/animated-counter";
 import { renderHighlightedTitle } from "../../../utils/text-parser";
+import { DonationRecord } from "../../../services/donation.service";
 
 interface ElegantProgressProps {
   title?: string;
@@ -20,6 +21,7 @@ interface ElegantProgressProps {
     primary?: boolean;
     documentId?: string;
   }[];
+  recentDonations?: DonationRecord[];
 }
 
 const stats = [
@@ -46,7 +48,26 @@ const stats = [
   },
 ];
 
-const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
+const getTimeAgo = (dateString: string) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return `${diffInSeconds} сек назад`;
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) return `${diffInMinutes} мин назад`;
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours} ч назад`;
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays} дн назад`;
+};
+
+const getDonorIcon = (idx: number) => {
+  const icons = ["☀️", "✨", "🤍", "🕊️", "🌟", "🌷", "🤝", "💡", "🌱"];
+  return icons[idx % icons.length];
+};
+
+const ElegantProgress = ({ title, descr, partners, recentDonations = [] }: ElegantProgressProps) => {
   // Find primary active campaign
   const primaryCampaign = partners?.find((c) => c.active && c.primary) || null;
 
@@ -59,19 +80,6 @@ const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
   
   const progressRef = useRef(null);
   const isProgressInView = useInView(progressRef, { once: true, margin: "-80px" });
-
-  const recentDonations = [
-    { name: "Анна С.", amount: 5000, time: "10 мин назад", icon: "☀️" },
-    { name: "Михаил В.", amount: 1000, time: "25 мин назад", icon: "✨" },
-    { name: "ООО «Ромашка»", amount: 50000, time: "1 час назад", icon: "🏢" },
-    { name: "Елена", amount: 500, time: "2 часа назад", icon: "🤍" },
-    { name: "Аноним", amount: 3000, time: "3 часа назад", icon: "🕊️" },
-    { name: "Алексей И.", amount: 2000, time: "4 часа назад", icon: "🌟" },
-    { name: "Мария", amount: 1500, time: "5 часов назад", icon: "🌷" },
-    { name: "Семья Петровых", amount: 10000, time: "7 часов назад", icon: "🤝" },
-    { name: "Доброжелатель", amount: 800, time: "8 часов назад", icon: "💡" },
-    { name: "Дарья", amount: 1200, time: "10 часов назад", icon: "🌱" },
-  ];
 
   return (
     <section id="campaigns" className="relative z-30 bg-white pt-16 md:pt-24 lg:pt-28 pb-8 md:pb-12">
@@ -285,27 +293,46 @@ const ElegantProgress = ({ title, descr, partners }: ElegantProgressProps) => {
               <div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-white to-transparent pointer-events-none z-10" />
               
               <div className="h-full overflow-y-auto space-y-4 pr-3 scrollbar-thin scrollbar-thumb-brand-cream scrollbar-track-transparent">
-                  {recentDonations.map((donation, idx) => (
+                  {recentDonations.length > 0 ? recentDonations.map((donation, idx) => (
                     <div 
-                      key={idx}
+                      key={donation.id}
                       className="group flex flex-col gap-2 p-4 rounded-2xl hover:bg-brand-cream/80 transition-colors duration-300"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-brand-cream flex items-center justify-center text-xl shadow-sm border border-brand-brown/5 group-hover:-rotate-6 transition-transform">
-                            {donation.icon}
+                            {getDonorIcon(idx)}
                           </div>
                           <div>
-                            <div className="font-bold text-brand-brown text-base">{donation.name}</div>
-                            <div className="text-[10px] text-brand-brown-light font-bold uppercase tracking-widest mt-0.5">{donation.time}</div>
+                            <div className="flex items-center gap-2">
+                              <div className="font-bold text-brand-brown text-base">
+                                {donation.isAnonymous ? "Аноним" : (donation.donorName || "Аноним")}
+                              </div>
+                              {donation.isRecurring ? (
+                                <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase text-brand-orange bg-brand-orange/10 px-1.5 py-0.5 rounded-sm">
+                                  <RefreshCw className="w-2.5 h-2.5" /> Регулярно
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase text-brand-brown/40 bg-brand-brown/5 px-1.5 py-0.5 rounded-sm">
+                                  <Hand className="w-2.5 h-2.5" /> Разово
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[10px] text-brand-brown-light font-bold uppercase tracking-widest mt-0.5">
+                              {getTimeAgo(donation.createdAt)}
+                            </div>
                           </div>
                         </div>
                         <div className="font-heading lining-nums font-black text-xl text-brand-orange tracking-tight">
-                          +{donation.amount.toLocaleString("ru-RU")}
+                          +{Number(donation.amount).toLocaleString("ru-RU")}
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="text-center text-brand-brown/50 text-sm font-medium py-10">
+                      Пока нет пожертвований
+                    </div>
+                  )}
                 {/* Spacer for bottom blur */}
                 <div className="h-12 w-full" />
               </div>
