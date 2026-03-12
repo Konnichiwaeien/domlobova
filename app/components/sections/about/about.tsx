@@ -291,9 +291,9 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
 
           {/* Text inline image reveal — optimized: single useTransform + CSS color-mix */}
           <div ref={textRef} className="max-w-[1200px] mx-auto pb-4 md:pb-6 pt-4 md:pt-8 flex flex-col justify-center min-h-[40vh] transform-gpu">
-            <div className="font-heading text-xl sm:text-2xl md:text-3xl lg:text-[40px] leading-[1.4] lg:leading-[1.35] font-medium text-brand-brown text-center md:text-left">
+            <div className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl leading-[1.4] lg:leading-[1.35] font-medium text-brand-brown text-center md:text-left">
               <ScrollRevealText
-                text={descr || ""}
+                text={descr?.replace(/\[IMAGE\]/g, "") || ""}
                 progress={smoothProgress}
                 imageElements={imageElements}
               />
