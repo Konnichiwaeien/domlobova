@@ -141,7 +141,7 @@ const Footer = () => {
             {/* Box 2 & 3 Combined: Phones & Email */}
             <div className="space-y-6">
                <div>
-                  <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-1.5 block opacity-90">Консультации</span>
+                  <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-1.5 block opacity-90">Горячая линия</span>
                   <a href="tel:89201229737" className="text-lg md:text-xl font-black tracking-tight text-brand-brown hover:text-brand-orange transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded-md inline-block">
                     8 (920) 122-97-37
                   </a>

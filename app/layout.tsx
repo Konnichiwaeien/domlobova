@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Manrope, Sofia_Sans } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import { Metrika } from "./components/metrika";
+import { Suspense } from "react";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -33,6 +35,9 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
         {children}
+        <Suspense fallback={null}>
+          <Metrika />
+        </Suspense>
       </body>
     </html>
   );

@@ -171,7 +171,6 @@ const Header = () => {
                 { label: "Истории подопечных", id: "stories" },
                 { label: "Наши потребности", id: "funds" },
                 { label: "Сборы", id: "campaigns" },
-                { label: "Волонтерство", id: "volunteer" },
                 { label: "Контакты", id: "contacts" },
               ].map((item, i) => {
                 const isExternal = !!item.href;
