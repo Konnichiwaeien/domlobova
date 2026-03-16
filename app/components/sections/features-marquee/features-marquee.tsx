@@ -1,14 +1,24 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { memo } from "react";
 import { HeartHandshake, ShieldCheck, Users, Star, ArrowRight } from "lucide-react";
+
+// Inline keyframes — bypasses Tailwind CSS processing, guaranteed to work
+const MarqueeStyles = memo(() => (
+  <style>{`
+    @keyframes marquee-third {
+      from { transform: translate3d(0, 0, 0); }
+      to { transform: translate3d(-33.333%, 0, 0); }
+    }
+  `}</style>
+));
+MarqueeStyles.displayName = "MarqueeStyles";
 
 interface FeaturesMarqueeProps {
   features?: any[];
 }
 
 const FeaturesMarquee = ({ features }: FeaturesMarqueeProps) => {
-  // If no features provided from CMS, use fallback data to ensure marquee works
   const fallbackFeatures = [
     {
       title: "Комплексный уход",
@@ -38,13 +48,13 @@ const FeaturesMarquee = ({ features }: FeaturesMarqueeProps) => {
   const loopFeatures = [...displayFeatures, ...displayFeatures, ...displayFeatures];
 
   return (
-    <section className="relative z-30 bg-brand-cream py-12 md:py-16 lg:py-20 overflow-hidden pointer-events-none">
+    <section className="relative z-30 py-12 md:py-16 lg:py-20 overflow-hidden pointer-events-none">
+      <MarqueeStyles />
       <div className="w-full flex">
-        {/* We animate x from 0 to -33.33% because we duplicated the array 3 times */}
-        <motion.div
-          animate={{ x: ["0%", "-33.333333%"] }}
-          transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-          className="flex gap-4 md:gap-6 pointer-events-auto w-max px-3 will-change-transform"
+        {/* Pure CSS animation — runs on compositor thread, zero main-thread cost */}
+        <div
+          style={{ animation: "marquee-third 40s linear infinite" }}
+          className="flex gap-4 md:gap-6 pointer-events-auto w-max px-3 will-change-transform transform-gpu"
         >
           {loopFeatures.map((feature, idx) => {
             const defaultStyling = [
@@ -62,7 +72,6 @@ const FeaturesMarquee = ({ features }: FeaturesMarqueeProps) => {
                 key={idx}
                 className={`relative h-[280px] w-[400px] md:h-[300px] md:w-[460px] shrink-0 overflow-hidden rounded-2xl md:rounded-[2rem] shadow-xl shadow-brand-brown/5 border border-brand-brown/5 group cursor-pointer ${style.bgColor} transform-gpu`}
               >
-                {/* Background Image Always Visible */}
                 <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none transform-gpu">
                   <img
                     src={imgSrc}
@@ -74,7 +83,6 @@ const FeaturesMarquee = ({ features }: FeaturesMarqueeProps) => {
                 </div>
 
                 <div className="relative z-10 w-full h-full p-5 md:p-6 flex flex-col justify-between">
-                  {/* Top: Icons */}
                   <div className="flex justify-between items-start">
                     <div className="inline-flex rounded-full p-3 md:p-4 bg-black/20 shadow-sm border border-white/10 text-white group-hover:bg-black/30 transition-colors duration-700">
                       <Icon className="h-5 w-5 md:h-7 md:w-7" strokeWidth={1.5} />
@@ -84,7 +92,6 @@ const FeaturesMarquee = ({ features }: FeaturesMarqueeProps) => {
                     </div>
                   </div>
 
-                  {/* Bottom: Text */}
                   <div className="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
                     <h4 className="font-heading text-xl md:text-2xl font-black mb-2 text-white leading-tight">
                       {feature.title}
@@ -97,7 +104,7 @@ const FeaturesMarquee = ({ features }: FeaturesMarqueeProps) => {
               </div>
             );
           })}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

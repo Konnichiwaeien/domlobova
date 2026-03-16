@@ -83,7 +83,7 @@ const Footer = () => {
     <>
     <footer
       id="contacts"
-      className="relative bg-brand-cream pt-12 md:pt-16 pb-8 md:pb-10 overflow-hidden text-brand-brown rounded-t-3xl md:rounded-[3rem] lg:rounded-t-[4rem] -mt-6 md:-mt-10 z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.03)]"
+      className="relative bg-brand-cream pt-12 md:pt-16 pb-8 md:pb-10 overflow-hidden text-brand-brown rounded-t-3xl md:rounded-[3rem] lg:rounded-t-[4rem] -mt-6 md:-mt-10 z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] content-auto"
     >
       <div className="relative z-10 mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8 xl:gap-12 mb-12 md:mb-16">

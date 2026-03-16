@@ -1,6 +1,16 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { memo } from "react";
+
+const MarqueeStyles = memo(() => (
+  <style>{`
+    @keyframes marquee-half {
+      from { transform: translate3d(0, 0, 0); }
+      to { transform: translate3d(-50%, 0, 0); }
+    }
+  `}</style>
+));
+MarqueeStyles.displayName = "MarqueeStyles";
 
 interface PhotoMarqueeProps {
   photos?: string[];
@@ -22,11 +32,12 @@ const PhotoMarquee = ({ photos }: PhotoMarqueeProps) => {
 
   return (
     <section className="relative z-30 bg-brand-cream py-2 md:py-16 overflow-hidden pointer-events-none">
+      <MarqueeStyles />
       <div className="w-full flex">
-        <motion.div
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
-          className="flex gap-4 md:gap-6 pointer-events-auto w-max px-3 will-change-transform"
+        {/* Pure CSS animation — runs on compositor thread, zero main-thread cost */}
+        <div
+          style={{ animation: "marquee-half 45s linear infinite" }}
+          className="flex gap-4 md:gap-6 pointer-events-auto w-max px-3 will-change-transform transform-gpu"
         >
           {loopPhotos.map((src, i) => (
             <div
@@ -42,7 +53,7 @@ const PhotoMarquee = ({ photos }: PhotoMarqueeProps) => {
               <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -110,7 +110,7 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
       : otherDonationsData.map((d, i) => ({ ...d, id: `fallback-${i}`, closed: false, imageUrl: null }));
   }, [secondaryCampaigns]);
   return (
-    <section className="relative z-30 bg-white pt-6 md:pt-8 pb-16 md:pb-24 lg:pb-28 overflow-hidden">
+    <section className="relative z-30 bg-white pt-6 md:pt-8 pb-16 md:pb-24 lg:pb-28 overflow-hidden content-auto">
       <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12">
         <div className="flex items-center justify-between mb-8 md:mb-12">
           <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-black text-brand-brown tracking-tighter">

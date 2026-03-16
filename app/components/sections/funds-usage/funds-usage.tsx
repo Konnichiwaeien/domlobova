@@ -61,7 +61,7 @@ const FundsUsage = ({ data }: FundsUsageProps) => {
   return (
     <section
       id="funds"
-      className="bg-white py-16 md:py-24 lg:py-28 relative z-30 transition-colors duration-500"
+      className="bg-white py-16 md:py-24 lg:py-28 relative z-30 transition-colors duration-500 content-auto"
     >
       <div className="mx-auto max-w-[1300px] px-5 md:px-8">
         <div className="mb-10 md:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-10">

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Manrope, Sofia_Sans } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -20,19 +20,24 @@ export const metadata: Metadata = {
   description: "Официальный сайт Дома милосердия кузнеца Лобова",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ru">
       <body
         className={`${manrope.variable} ${sofia.variable} antialiased`}
       >
         <Script
           src="https://widget.cloudpayments.ru/bundles/cloudpayments.js"
-          strategy="beforeInteractive"
+          strategy="lazyOnload"
         />
         {children}
         <Suspense fallback={null}>

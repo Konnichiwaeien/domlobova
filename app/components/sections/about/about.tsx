@@ -252,7 +252,7 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
   }, [photos]);
 
   return (
-    <section id="about" className="relative bg-white pt-16 md:pt-24 lg:pt-28 pb-16 md:pb-24 lg:pb-28 overflow-hidden z-10 text-brand-brown">
+    <section id="about" className="relative bg-white pt-16 md:pt-24 lg:pt-28 pb-16 md:pb-24 lg:pb-28 overflow-hidden z-10 text-brand-brown content-auto">
       <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12 relative z-20">
         <div className="flex flex-col">
           <div className="text-center mb-8 md:mb-10">
