@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { Heart, Menu, X, ArrowRight } from "lucide-react";
 import { MagneticButton } from "../../ui/magnetic-button";
@@ -10,7 +10,6 @@ import { useLenis } from "lenis/react";
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [hidden, setHidden] = useState(false);
   const [heroHeight, setHeroHeight] = useState(0);
   const [isDonationOpen, setIsDonationOpen] = useState(false);
 
@@ -31,43 +30,47 @@ const Header = () => {
   }, [measureHero]);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
-    const previous = scrollY.getPrevious() ?? 0;
     const heroEnd = heroHeight || window.innerHeight;
-    const threshold = heroEnd * 0.3;
-
+    const threshold = heroEnd * 0.1;
     if (latest > threshold) {
       if (!isScrolled) setIsScrolled(true);
     } else {
       if (isScrolled) setIsScrolled(false);
     }
-
-    if (latest > threshold) {
-      if (latest > previous) {
-        if (!hidden) setHidden(true);
-      } else {
-        if (hidden) setHidden(false);
-      }
-    } else {
-      if (hidden) setHidden(false);
-    }
   });
 
+  /* ── SCROLL-HIDE BEHAVIOR (commented out, preserved for future use) ──────
+  const [hidden, setHidden] = useState(false);
+  // In useMotionValueEvent:
+  //   if (latest > threshold) {
+  //     if (latest > previous) { if (!hidden) setHidden(true); }
+  //     else { if (hidden) setHidden(false); }
+  //   } else { if (hidden) setHidden(false); }
+  //
+  // In motion.header:
+  //   variants={{ visible: { y: 0 }, hidden: { y: "-100%" } }}
+  //   animate={hidden && !isOpen ? "hidden" : "visible"}
+  //   transition={{ duration: 0.35, ease: "easeInOut" }}
+  ── END SCROLL-HIDE BEHAVIOR ──────────────────────────────────────────── */
+
   const lenis = useLenis();
+  const lenisRef = useRef(lenis);
+  useEffect(() => { lenisRef.current = lenis; });
 
   // Lock body scroll AND stop Lenis when menu is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      lenis?.stop();
+      lenisRef.current?.stop();
     } else {
       document.body.style.overflow = '';
-      lenis?.start();
+      lenisRef.current?.start();
     }
     return () => {
       document.body.style.overflow = '';
-      lenis?.start();
+      lenisRef.current?.start();
     };
-  }, [isOpen, lenis]);
+  }, [isOpen]);
 
   const scrollTo = (id: string) => {
     setIsOpen(false);
@@ -84,73 +87,64 @@ const Header = () => {
   return (
     <>
       <motion.header
-        variants={{
-          visible: { y: 0 },
-          hidden: { y: "-100%" },
-        }}
-        animate={hidden && !isOpen ? "hidden" : "visible"}
-        transition={{ duration: 0.35, ease: "easeInOut" }}
         className={`fixed top-0 left-0 right-0 z-50 transition-[background,padding,box-shadow] duration-500 px-4 md:px-12 ${
           isScrolled && !isOpen ? "bg-[#F9F8F6] shadow-md py-3 md:py-4" : "bg-transparent py-4 md:py-8"
         }`}
       >
-        <div className={`flex w-full items-center justify-between`}>
-          <a
-            href="https://domlobova.ru/"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="На главную"
-            className="group flex cursor-pointer items-center gap-3 relative w-auto focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 rounded-lg"
-          >
-            <img
-              src="/logo-dark.svg"
-              alt="Дом Лобова"
-              className={`w-auto object-contain transition-[opacity,height] duration-500 ${
-                isScrolled && !isOpen ? "opacity-100 h-12 sm:h-14 lg:h-16" : "opacity-0 h-16 sm:h-20 lg:h-24"
-              }`}
-            />
-            <img
-              src="/logo-light.svg"
-              alt="Дом Лобова"
-              className={`absolute left-0 top-0 w-auto object-contain transition-[opacity,height] duration-500 ${
-                isScrolled && !isOpen ? "opacity-0 h-12 sm:h-14 lg:h-16" : "opacity-100 h-16 sm:h-20 lg:h-24"
-              }`}
-            />
-          </a>
-
-          <div className="flex items-center gap-3 md:gap-4">
-            <MagneticButton
-              onClick={() => {
-                document.documentElement.classList.add("scroll-locked");
-                setIsDonationOpen(true);
-              }}
-              className={`group hidden md:flex cursor-pointer items-center gap-2 rounded-full font-bold uppercase tracking-widest transition-[background,color,box-shadow,padding] duration-500 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 ${
-                isScrolled && !isOpen
-                  ? "bg-brand-orange text-white shadow-md hover:shadow-brand-orange/40 px-6 md:px-7 py-3 md:py-3.5 text-xs md:text-sm"
-                  : "bg-brand-cream text-brand-brown hover:bg-brand-orange hover:text-white px-6 md:px-8 py-3 md:py-4 text-sm"
-              }`}
-            >
-              <Heart
-                className={`transition-[color,width,height] duration-500 ${
-                  isScrolled && !isOpen
-                    ? "text-white w-4 h-4 md:w-5 md:h-5"
-                    : "text-brand-orange group-hover:text-white w-5 h-5"
-                }`}
-              />
-              Помочь нам
-            </MagneticButton>
-
+        <div className="flex w-full items-center">
+          {/* Left: Menu button */}
+          <div className="flex-1 flex items-center justify-start">
             <MagneticButton
               onClick={() => setIsOpen(!isOpen)}
               aria-label={isOpen ? "Закрыть меню" : "Открыть меню"}
               aria-expanded={isOpen}
               className={`flex cursor-pointer items-center justify-center rounded-full transition-[background,color,box-shadow] duration-500 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 ${
                 isScrolled && !isOpen
-                  ? "bg-brand-orange text-white shadow-md hover:shadow-brand-orange/40 h-12 w-12 sm:h-14 sm:w-14"
-                  : "bg-brand-cream text-brand-brown hover:bg-brand-orange hover:text-white h-12 w-12 sm:h-14 sm:w-14"
+                  ? "bg-brand-orange text-white shadow-md hover:shadow-brand-orange/40 h-10 w-10 sm:h-12 sm:w-12"
+                  : "bg-brand-cream text-brand-brown hover:bg-brand-orange hover:text-white h-10 w-10 sm:h-12 sm:w-12"
               }`}
             >
-              {isOpen ? <X className={isScrolled ? "w-5 h-5" : "w-6 h-6"} /> : <Menu className={isScrolled ? "w-5 h-5" : "w-6 h-6"} />}
+              {isOpen ? <X className={isScrolled ? "w-5 h-5" : "w-5 h-5"} /> : <Menu className={isScrolled ? "w-5 h-5" : "w-5 h-5"} />}
+            </MagneticButton>
+          </div>
+
+          {/* Center: Logo */}
+          <div className="flex-none">
+            <a
+              href="https://domlobova.ru/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="На главную"
+              className="group flex cursor-pointer items-center gap-3 relative w-auto focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 rounded-lg"
+            >
+              <img
+                src="/logo-dark.svg"
+                alt="Дом Лобова"
+                className={`w-auto object-contain transition-[opacity,height] duration-500 ${
+                  isScrolled && !isOpen ? "h-12 sm:h-12 lg:h-14" : "h-16 sm:h-16 lg:h-20"
+                }`}
+              />
+            </a>
+          </div>
+
+          {/* Right: Помочь button */}
+          <div className="flex-1 flex items-center justify-end">
+            <MagneticButton
+              onClick={() => setIsDonationOpen(true)}
+              className={`group flex cursor-pointer items-center gap-2 rounded-full font-bold uppercase tracking-widest transition-[background,color,box-shadow,padding] duration-500 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 ${
+                isScrolled && !isOpen
+                  ? "bg-brand-orange text-white shadow-md hover:shadow-brand-orange/40 px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm"
+                  : "bg-brand-cream text-brand-brown hover:bg-brand-orange hover:text-white px-5 sm:px-7 py-2.5 sm:py-3.5 text-sm"
+              }`}
+            >
+              <Heart
+                className={`transition-[color,width,height] duration-500 ${
+                  isScrolled && !isOpen
+                    ? "text-white w-4 h-4"
+                    : "text-brand-orange group-hover:text-white w-4 h-4"
+                }`}
+              />
+              Помочь
             </MagneticButton>
           </div>
         </div>

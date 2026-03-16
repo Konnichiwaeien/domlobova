@@ -16,7 +16,10 @@ interface LegalModalProps {
 export const LegalModal = ({ isOpen, onClose, title, children }: LegalModalProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const lenis = useLenis();
+  const lenisRef = useRef(lenis);
   const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { lenisRef.current = lenis; });
 
   useEffect(() => {
     setMounted(true);
@@ -25,16 +28,16 @@ export const LegalModal = ({ isOpen, onClose, title, children }: LegalModalProps
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      lenis?.stop();
+      lenisRef.current?.stop();
     } else {
       document.body.style.overflow = '';
-      lenis?.start();
+      lenisRef.current?.start();
     }
     return () => {
       document.body.style.overflow = '';
-      lenis?.start();
+      lenisRef.current?.start();
     };
-  }, [isOpen, lenis]);
+  }, [isOpen]);
 
   if (!mounted) return null;
 

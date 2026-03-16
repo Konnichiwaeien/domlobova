@@ -3,7 +3,6 @@ import { SmoothScroll } from "./components/ui/smooth-scroll";
 import { ScrollToTop } from "./components/ui/scroll-to-top";
 import { Header } from "./components/sections/header";
 import { Hero } from "./components/sections/hero";
-import { FeaturesMarquee } from "./components/sections/features-marquee/features-marquee";
 import { ElegantProgress } from "./components/sections/elegant-progress";
 import dynamic from "next/dynamic";
 
@@ -50,8 +49,6 @@ export default async function Home() {
             heroDescription={landing?.hero?.descr} 
             heroPhotos={landing?.hero?.photos}
           />
-
-          <FeaturesMarquee features={landing?.about?.features} />
 
           <ElegantProgress 
             title={landing?.campaigns?.title} 

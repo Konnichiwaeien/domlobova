@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { IMaskInput } from 'react-imask';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
@@ -87,6 +87,8 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const lenis = useLenis();
+  const lenisRef = useRef(lenis);
+  useEffect(() => { lenisRef.current = lenis; });
 
   const {
     register,
@@ -106,16 +108,16 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
   useEffect(() => {
     if (showFormModal) {
       document.body.style.overflow = 'hidden';
-      lenis?.stop();
+      lenisRef.current?.stop();
     } else {
       document.body.style.overflow = '';
-      lenis?.start();
+      lenisRef.current?.start();
     }
     return () => {
       document.body.style.overflow = '';
-      lenis?.start();
+      lenisRef.current?.start();
     };
-  }, [showFormModal, lenis]);
+  }, [showFormModal]);
 
   const onSubmit = async (values: VolunteerFormValues) => {
     setIsLoading(true);

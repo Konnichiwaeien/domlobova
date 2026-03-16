@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { MagneticButton } from "../../ui/magnetic-button";
 import { renderHighlightedTitle } from "../../../utils/text-parser";
+import { FeaturesMarquee } from "../features-marquee/features-marquee";
 // import { FeaturesBlock } from "./features-block";
 
 // --- Typing Text Parser ---
@@ -365,6 +366,8 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
 
         </div>
       </div>
+
+      <FeaturesMarquee features={features} />
     </section>
   );
 };

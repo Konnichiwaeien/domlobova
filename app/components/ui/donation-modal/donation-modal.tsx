@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
 import { FormDonation } from "../../form-donation";
 import { useLenis } from "lenis/react";
 
@@ -11,81 +10,62 @@ interface DonationModalProps {
   onClose: () => void;
 }
 
-/**
- * Hard-lock scroll by adding a CSS class with !important rules.
- * Also physically stops Lenis's RAF loop so it can't process wheel events.
- */
-const lockScroll = () => {
-  document.documentElement.classList.add("scroll-locked");
-};
-
-const unlockScroll = () => {
-  document.documentElement.classList.remove("scroll-locked");
-};
-
 export const DonationModal = ({ isOpen, onClose }: DonationModalProps) => {
-  const handleEscape = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    },
-    [onClose]
-  );
-
   const lenis = useLenis();
-  const overlayRef = useRef<HTMLDivElement>(null);
 
+  // Always-current refs — never added to effect deps
+  const lenisRef = useRef(lenis);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { lenisRef.current = lenis; });
+  useEffect(() => { onCloseRef.current = onClose; });
+
+  // Keyboard — depends only on isOpen
   useEffect(() => {
-    if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
-      lenis?.stop();
-      lockScroll();
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCloseRef.current();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [isOpen]);
 
-      // Block wheel events from reaching Lenis at the window level
-      const blockWheel = (e: WheelEvent) => {
-        // Allow wheel events ONLY inside elements with data-lenis-prevent
-        const target = e.target as HTMLElement;
-        if (target.closest("[data-lenis-prevent]")) {
-          // Let the modal's internal scroll handle it
-          return;
-        }
-        e.preventDefault();
-        e.stopPropagation();
-      };
+  // Scroll lock — depends ONLY on isOpen
+  // Must stop Lenis because it registers its wheel listener before the modal
+  // and processes events in capture-phase order (first-registered = first-run)
+  useEffect(() => {
+    if (!isOpen) return;
 
-      window.addEventListener("wheel", blockWheel, { passive: false, capture: true });
+    // Stop Lenis so it doesn't accumulate targetScroll while modal is open
+    lenisRef.current?.stop();
+    document.documentElement.classList.add("scroll-locked");
 
-      return () => {
-        window.removeEventListener("wheel", blockWheel, true);
-        document.removeEventListener("keydown", handleEscape);
-        unlockScroll();
-        lenis?.start();
-      };
-    }
+    // Extra safety: block wheel at capture level for non-Lenis scroll paths
+    const blockWheel = (e: WheelEvent) => {
+      if ((e.target as HTMLElement).closest("[data-lenis-prevent]")) return;
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    window.addEventListener("wheel", blockWheel, { passive: false, capture: true });
 
     return () => {
-      document.removeEventListener("keydown", handleEscape);
+      window.removeEventListener("wheel", blockWheel, true);
+      document.documentElement.classList.remove("scroll-locked");
+      lenisRef.current?.start();
     };
-  }, [isOpen, handleEscape, lenis]);
+  }, [isOpen]); // ← only isOpen, lenis accessed via ref — no spurious cleanups
 
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          ref={overlayRef}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          exit={{ opacity: 0, pointerEvents: "none" }}
           transition={{ duration: 0.3 }}
           className="fixed inset-0 z-100 flex items-center justify-center p-4 md:p-10"
           data-lenis-prevent={true}
         >
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={onClose}
-          />
-
-          {/* Modal content wrapper */}
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
           <motion.div
             initial={{ opacity: 0, y: 40, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -93,16 +73,7 @@ export const DonationModal = ({ isOpen, onClose }: DonationModalProps) => {
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="relative z-10 w-full max-w-[1300px] flex justify-center"
           >
-            {/* Close button */}
-            <button
-              onClick={onClose}
-              className="absolute -top-3 -right-1 md:-top-4 md:-right-4 z-50 flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-full bg-white text-brand-brown hover:bg-brand-orange hover:text-white transition-all duration-300 shadow-[0_10px_30px_rgba(0,0,0,0.1)] cursor-pointer backdrop-blur-sm border border-brand-brown/5"
-              aria-label="Закрыть"
-            >
-              <X className="w-5 h-5 md:w-6 md:h-6" strokeWidth={2.5} />
-            </button>
-
-            <FormDonation className="max-h-[90vh] md:max-h-[85vh]" />
+            <FormDonation className="max-h-[90vh] md:max-h-[85vh]" onClose={onClose} />
           </motion.div>
         </motion.div>
       )}
