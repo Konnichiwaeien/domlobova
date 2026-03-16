@@ -117,13 +117,21 @@ const Header = () => {
               aria-label="На главную"
               className="group flex cursor-pointer items-center gap-3 relative w-auto focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 rounded-lg"
             >
-              <img
-                src="/logo-dark.svg"
-                alt="Дом Лобова"
-                className={`w-auto object-contain transition-[opacity,height] duration-500 ${
-                  isScrolled && !isOpen ? "h-12 sm:h-12 lg:h-14" : "h-16 sm:h-16 lg:h-20"
-                }`}
-              />
+              <div className={`relative transition-[height] duration-500 ${
+                isScrolled && !isOpen ? "h-12 sm:h-12 lg:h-14" : "h-16 sm:h-16 lg:h-20"
+              }`}>
+                <img
+                  src="/logo-dark.svg"
+                  alt="Дом Лобова"
+                  className={`h-full w-auto object-contain transition-opacity duration-500 ${isOpen ? "opacity-0" : "opacity-100"}`}
+                />
+                <img
+                  src="/logo-light.svg"
+                  alt=""
+                  aria-hidden="true"
+                  className={`absolute inset-0 h-full w-auto object-contain transition-opacity duration-500 ${isOpen ? "opacity-100" : "opacity-0"}`}
+                />
+              </div>
             </a>
           </div>
 
