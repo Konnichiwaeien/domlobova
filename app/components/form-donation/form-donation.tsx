@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect } from 'react';
 import { LegalModal } from '../ui/legal-modal/legal-modal';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,15 +13,10 @@ import {
   AtSign,
   Check,
   Coins,
-  HandHeart,
-  Sun,
   User,
   X,
   AlertCircle,
   Loader2,
-  ChevronRight,
-  ShieldCheck,
-  Users
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -65,97 +60,27 @@ const donationSchema = z
 type DonationFormValues = z.infer<typeof donationSchema>;
 
 // --- Data ---
-const TIERS = [
-  {
-    amount: 200,
-    amountLabel: '200 ₽',
-    name: 'Внимание',
-    colorClass: 'text-brand-orange bg-brand-orange-light/20',
-    iconClass: 'text-brand-orange',
-    icon: <Heart size={24} />,
-  },
-  {
-    amount: 500,
-    amountLabel: '500 ₽',
-    name: 'Забота',
-    colorClass: 'text-[#E07A5F] bg-[#E07A5F]/10',
-    iconClass: 'text-[#E07A5F]',
-    icon: <HandHeart size={24} />,
-  },
-  {
-    amount: 1000,
-    amountLabel: '1 000 ₽',
-    name: 'Поддержка',
-    colorClass: 'text-brand-yellow bg-brand-yellow/20',
-    iconClass: 'text-brand-yellow',
-    icon: <Sun size={24} />,
-  },
-  {
-    amount: 2000,
-    amountLabel: '2 000 ₽',
-    name: 'Опора',
-    colorClass: 'text-brand-brown bg-brand-brown/10',
-    iconClass: 'text-brand-brown',
-    icon: <ShieldCheck size={24} />,
-  },
-];
+const AMOUNTS = [200, 500, 1000, 2000];
 
-const getImpactDetails = (amount: number) => {
-  if (amount >= 2000)
-    return {
-      title: 'Опора',
-      text: 'Пожертвования направляются на обеспечение профессионального ухода, который осуществляет многопрофильная команда специалистов: врач, медицинские сестры и помощники по уходу. Собранные средства позволяют поддерживать ежедневную работу персонала, гарантируя подопечным качественное медицинское и социальное сопровождение.',
-      icon: <Users className="text-brand-yellow" size={28} strokeWidth={1.5} />,
-      style: 'bg-brand-cream border-brand-brown/10 text-brand-brown',
-    };
-
-  if (amount >= 1000)
-    return {
-      title: 'Поддержка',
-      text: 'Пожертвования позволяют обеспечивать подопечным жизнь без боли, помогая им сохранять максимально возможную самостоятельность и достойное качество жизни. Это те ресурсы, которые дают человеку силы на ежедневную рутину и помогают сохранять достоинство.',
-      icon: <Sun className="text-[#81B29A]" size={28} strokeWidth={1.5} />,
-      style: 'bg-[#FDFBF7] border-brand-brown/10 text-brand-brown',
-    };
-
-  if (amount >= 500)
-    return {
-      title: 'Забота',
-      text: 'Пожертвования позволяют поддерживать атмосферу тепла, бытового комфорта и безопасности. Из этих составляющих рождается чувство дома и сохраняется человеческое достоинство, которое так важно для каждого подопечного Дома милосердия.',
-      icon: <HandHeart className="text-[#E07A5F]" size={28} strokeWidth={1.5} />,
-      style: 'bg-[#FDFBF7] border-brand-brown/10 text-brand-brown',
-    };
-
-  return {
-    title: 'Внимание',
-    text: 'Даже небольшая сумма превращается в реальную помощь: теплый плед, чашка горячего чая и искреннее внимание, которого так часто не хватает людям с тяжелым диагнозом.',
-    icon: <Heart className="text-brand-orange" size={28} strokeWidth={1.5} />,
-    style: 'bg-brand-cream border-brand-brown/10 text-brand-brown',
-  };
+const formatAmount = (amount: number) => {
+  return amount.toLocaleString('ru-RU') + ' ₽';
 };
 
-export const FormDonation = ({ className, onClose }: { className?: string; onClose?: () => void } = {}) => {
+export const FormDonation = ({ className, onClose, initialCampaignId, initialCampaignTitle }: { className?: string; onClose?: () => void; initialCampaignId?: string; initialCampaignTitle?: string } = {}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success'>('idle');
   const [consent, setConsent] = useState(false);
   const [showOffer, setShowOffer] = useState(false);
   const [showPersonalData, setShowPersonalData] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [campaignId, setCampaignId] = useState<string | null>(null);
-  const [campaignTitle, setCampaignTitle] = useState<string | null>(null);
+  const [campaignId, setCampaignId] = useState<string | null>(initialCampaignId || null);
+  const [campaignTitle, setCampaignTitle] = useState<string | null>(initialCampaignTitle || null);
   const { width, height } = useWindowSize();
 
-  // Listen for global donation event to pre-select campaign
   useEffect(() => {
-    const handleOpenDonation = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      if (detail?.campaignId) {
-        setCampaignId(detail.campaignId);
-        setCampaignTitle(detail.campaignTitle || 'Выбранный сбор');
-      }
-    };
-    window.addEventListener('open-donation', handleOpenDonation);
-    return () => window.removeEventListener('open-donation', handleOpenDonation);
-  }, []);
+    setCampaignId(initialCampaignId || null);
+    setCampaignTitle(initialCampaignTitle || null);
+  }, [initialCampaignId, initialCampaignTitle]);
 
   const {
     register,
@@ -182,13 +107,8 @@ export const FormDonation = ({ className, onClose }: { className?: string; onClo
   const isAnonymous = watch('isAnonymous');
 
   const safeAmount = Number(currentAmount) || 0;
-  const impact = getImpactDetails(safeAmount);
 
-  const activeTier = [...TIERS]
-    .reverse()
-    .find((tier) => safeAmount >= tier.amount);
-
-  const handleTierSelect = (amount: number) => {
+  const handleAmountSelect = (amount: number) => {
     setValue('amount', amount, { shouldDirty: true });
   };
 
@@ -210,7 +130,6 @@ export const FormDonation = ({ className, onClose }: { className?: string; onClo
     setErrorMessage(null);
 
     try {
-      // Ensure CloudPayments script is loaded
       if (typeof window === 'undefined' || !window.cp) {
         throw new Error('CloudPayments widget не загружен. Обновите страницу.');
       }
@@ -242,7 +161,6 @@ export const FormDonation = ({ className, onClose }: { className?: string; onClo
         },
       };
 
-      // Add recurrent params if monthly donation selected
       if (data.isRecurring) {
         intentParams.recurrent = {
           interval: 'Month',
@@ -255,7 +173,6 @@ export const FormDonation = ({ className, onClose }: { className?: string; onClo
       if (result?.success) {
         setStatus('success');
       } else {
-        // Widget was closed without payment
         setIsLoading(false);
       }
     } catch (err: unknown) {
@@ -274,12 +191,10 @@ export const FormDonation = ({ className, onClose }: { className?: string; onClo
         : 'border-transparent bg-brand-cream text-brand-brown placeholder:text-brand-brown-light/60 hover:border-brand-orange/30 focus:outline-none focus:bg-white focus:border-brand-yellow focus-visible:ring-4 focus-visible:ring-brand-orange/50 disabled:opacity-60 disabled:cursor-not-allowed'
     );
 
-
-
   return (
-    <div className={cn("bg-white rounded-2xl md:rounded-[3rem] shadow-2xl border border-brand-brown/10 mx-auto w-full relative z-20 overflow-hidden flex flex-col pt-8 md:pt-12 lg:pt-14 pb-8 md:pb-12 lg:pb-14 pl-6 md:pl-10 lg:pl-14", className)}>
-      <div className="flex-1 overflow-y-auto overflow-x-hidden pr-6 md:pr-10 lg:pr-14 custom-scrollbar">
-      
+    <div className={cn("bg-white rounded-2xl md:rounded-[3rem] shadow-2xl border border-brand-brown/10 mx-auto w-full relative z-20 flex flex-col pt-8 md:pt-12 lg:pt-14 pb-8 md:pb-12 lg:pb-14", className)}>
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
+
       {/* Thank You Modal Overlay */}
       <AnimatePresence>
         {status === 'success' && (
@@ -298,7 +213,7 @@ export const FormDonation = ({ className, onClose }: { className?: string; onClo
               colors={['#FF7A00', '#E07A5F', '#F4A261', '#E9C46A']}
               className="!fixed !z-[60]"
             />
-            
+
             <motion.div
               initial={{ scale: 0.8, y: 50, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
@@ -317,8 +232,7 @@ export const FormDonation = ({ className, onClose }: { className?: string; onClo
                 >
                   <Heart className="h-14 w-14" strokeWidth={2} fill="currentColor" />
                 </motion.div>
-                
-                {/* Floating mini hearts */}
+
                 {[...Array(3)].map((_, i) => (
                   <motion.div
                     key={i}
@@ -331,15 +245,15 @@ export const FormDonation = ({ className, onClose }: { className?: string; onClo
                   </motion.div>
                 ))}
               </motion.div>
-              
+
               <h3 className="font-heading text-4xl md:text-5xl font-black text-brand-brown mb-4">
                 Спасибо!
               </h3>
-              
+
               <p className="mt-4 text-lg font-medium text-brand-brown-light leading-relaxed">
                 Ваше пожертвование успешно отправлено. <br className="hidden sm:block" />Вы сделали этот мир чуточку светлее!
               </p>
-              
+
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -375,7 +289,7 @@ export const FormDonation = ({ className, onClose }: { className?: string; onClo
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center justify-center mb-6"
+          className="flex flex-col items-center justify-center mb-6 px-6 md:px-10 lg:px-14"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-orange-light/20 border border-brand-orange/30">
             <Heart className="w-4 h-4 text-brand-orange" fill="currentColor" />
@@ -404,402 +318,185 @@ export const FormDonation = ({ className, onClose }: { className?: string; onClo
         </button>
       )}
 
-      <h3 className="text-2xl md:text-3xl lg:text-[2.5rem] font-heading font-black text-brand-brown mb-8 text-center leading-tight">
-        Выберите сумму пожертвования
-      </h3>
+      <div className="px-6 md:px-10 lg:px-14">
+        <h3 className="text-2xl md:text-3xl lg:text-[2.5rem] font-heading font-black text-brand-brown mb-8 text-center leading-tight">
+          Выберите сумму пожертвования
+        </h3>
 
-      {/* Переключатель */}
-      <div className="flex justify-center mb-10">
-        <div className="bg-brand-cream p-1.5 rounded-full flex relative w-max">
-          <motion.div
-            className="absolute top-1.5 bottom-1.5 left-1.5 bg-white rounded-full shadow-md"
-            style={{ width: 'calc(50% - 6px)' }}
-            animate={{ x: isRecurring ? '100%' : '0%' }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          />
-          <button
-            type="button"
-            onClick={() => setValue('isRecurring', false)}
-            className={cn(
-              'relative z-10 w-32 md:w-40 py-3 text-sm md:text-base font-bold rounded-full transition-colors duration-300 cursor-pointer',
-              !isRecurring
-                ? 'text-brand-orange'
-                : 'text-brand-brown-light hover:text-brand-brown'
-            )}
-          >
-            Разово
-          </button>
-          <button
-            type="button"
-            onClick={() => setValue('isRecurring', true)}
-            className={cn(
-              'relative z-10 w-32 md:w-40 py-3 text-sm md:text-base font-bold rounded-full transition-colors duration-300 cursor-pointer',
-              isRecurring
-                ? 'text-brand-orange'
-                : 'text-brand-brown-light hover:text-brand-brown'
-            )}
-          >
-            Ежемесячно
-          </button>
+        {/* Переключатель разово/ежемесячно */}
+        <div className="flex justify-center mb-10">
+          <div className="bg-brand-cream p-1.5 rounded-full flex relative w-max">
+            <motion.div
+              className="absolute top-1.5 bottom-1.5 left-1.5 bg-white rounded-full shadow-md"
+              style={{ width: 'calc(50% - 6px)' }}
+              animate={{ x: isRecurring ? '100%' : '0%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            />
+            <button
+              type="button"
+              onClick={() => setValue('isRecurring', false)}
+              className={cn(
+                'relative z-10 w-32 md:w-40 py-3 text-sm md:text-base font-bold rounded-full transition-colors duration-300 cursor-pointer',
+                !isRecurring
+                  ? 'text-brand-orange'
+                  : 'text-brand-brown-light hover:text-brand-brown'
+              )}
+            >
+              Разово
+            </button>
+            <button
+              type="button"
+              onClick={() => setValue('isRecurring', true)}
+              className={cn(
+                'relative z-10 w-32 md:w-40 py-3 text-sm md:text-base font-bold rounded-full transition-colors duration-300 cursor-pointer',
+                isRecurring
+                  ? 'text-brand-orange'
+                  : 'text-brand-brown-light hover:text-brand-brown'
+              )}
+            >
+              Ежемесячно
+            </button>
+          </div>
         </div>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* ══════════════════════════════════════════════════════════════
-            MOBILE (<sm): тиры в 1 колонку, описание внутри карточки
-            ══════════════════════════════════════════════════════════════ */}
-        <div className="sm:hidden grid grid-cols-1 gap-3 mb-6">
-          {TIERS.map((tier) => {
-            const isSelected = activeTier?.amount === tier.amount;
+        {/* Суммы: grid на всех разрешениях */}
+        <div className="grid grid-cols-4 gap-2 sm:gap-4 mb-8 px-6 md:px-10 lg:px-14">
+          {AMOUNTS.map((amount) => {
+            const isSelected = safeAmount === amount;
             return (
-              <motion.button
-                key={tier.amount}
+              <button
+                key={amount}
                 type="button"
-                onClick={() => handleTierSelect(tier.amount)}
-                whileTap={{ scale: 0.99 }}
+                onClick={() => handleAmountSelect(amount)}
                 className={cn(
-                  'relative flex flex-col rounded-xl border-2 outline-none transition-all duration-300 cursor-pointer overflow-hidden text-left',
+                  'flex items-center justify-center rounded-xl sm:rounded-2xl border-2 outline-none transition-all duration-300 cursor-pointer',
+                  'py-4 sm:py-6 md:py-8 lg:py-10',
                   isSelected
-                    ? 'border-brand-orange bg-brand-orange-light/10 ring-4 ring-brand-orange/10'
-                    : 'border-brand-brown/5 bg-brand-cream hover:border-brand-orange/30'
+                    ? 'border-brand-orange bg-brand-orange text-white shadow-lg shadow-brand-orange/30'
+                    : 'border-brand-brown/10 bg-brand-cream text-brand-brown hover:border-brand-orange/40 hover:bg-white'
                 )}
               >
-                <div className="flex items-center gap-4 p-4">
-                  <div className={cn('w-12 h-12 rounded-full flex items-center justify-center bg-white shadow-sm shrink-0 border border-brand-brown/5', tier.iconClass)}>
-                    {tier.icon}
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-heading font-black text-2xl text-brand-brown">{tier.amountLabel}</div>
-                    <div className={cn('text-sm font-bold px-2.5 py-0.5 rounded-full inline-block mt-0.5', tier.colorClass)}>{tier.name}</div>
-                  </div>
-                  {isSelected && (
-                    <motion.div layoutId="check-mobile" className="text-brand-orange shrink-0 mr-1">
-                      <Check className="w-5 h-5" strokeWidth={3} />
-                    </motion.div>
-                  )}
-                </div>
-
-                <AnimatePresence>
-                  {isSelected && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25, ease: 'easeInOut' }}
-                      className="overflow-hidden"
-                    >
-                      <div className={cn('mx-3 mb-3 rounded-xl p-3 border', impact.style)}>
-                        <p className="text-sm font-medium leading-relaxed text-brand-brown/90 mb-3">{impact.text}</p>
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            document.getElementById('form-submit')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                          }}
-                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); document.getElementById('form-submit')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }}
-                          className="inline-flex items-center gap-1 text-sm font-bold text-brand-orange hover:text-brand-brown transition-colors cursor-pointer"
-                        >
-                          Помочь <ChevronRight size={15} />
-                        </span>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.button>
+                <span className={cn(
+                  'font-heading font-black text-lg sm:text-2xl md:text-3xl lg:text-4xl whitespace-nowrap',
+                  isSelected ? 'text-white' : 'text-brand-brown'
+                )}>
+                  {formatAmount(amount)}
+                </span>
+              </button>
             );
           })}
         </div>
 
-        {/* ══════════════════════════════════════════════════════════════
-            TABLET (sm → lg): тиры 2×2 + описание под ними
-            ══════════════════════════════════════════════════════════════ */}
-        <div className="hidden sm:grid lg:hidden grid-cols-2 gap-4 mb-4">
-          {TIERS.map((tier) => {
-            const isSelected = activeTier?.amount === tier.amount;
-            return (
-              <motion.button
-                key={tier.amount}
-                type="button"
-                onClick={() => handleTierSelect(tier.amount)}
-                whileTap={{ scale: 0.98 }}
-                className={cn(
-                  'relative flex flex-col items-center justify-center rounded-xl border-2 outline-none transition-all duration-300 cursor-pointer p-5 gap-3',
-                  isSelected
-                    ? 'border-brand-orange bg-brand-orange-light/10 ring-4 ring-brand-orange/10 shadow-sm'
-                    : 'border-brand-brown/5 bg-brand-cream hover:border-brand-orange/30 hover:bg-white'
-                )}
-              >
-                <div className={cn('w-14 h-14 rounded-full flex items-center justify-center bg-white shadow-sm border border-brand-brown/5', tier.iconClass)}>
-                  {tier.icon}
-                </div>
-                <div className="text-center">
-                  <div className="font-heading font-black text-2xl text-brand-brown mb-1">{tier.amountLabel}</div>
-                  <div className={cn('text-sm font-bold px-3 py-1 rounded-full inline-block', tier.colorClass)}>{tier.name}</div>
-                </div>
-                {isSelected && (
-                  <motion.div layoutId="check-tablet" className="absolute top-3 right-3 text-brand-orange">
-                    <Check className="w-5 h-5" strokeWidth={3} />
-                  </motion.div>
-                )}
-              </motion.button>
-            );
-          })}
-        </div>
-        <AnimatePresence mode="wait">
-          {safeAmount > 0 && (
-            <motion.div
-              key={`tablet-${impact.title}`}
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className={cn('hidden sm:flex lg:hidden rounded-2xl p-5 border items-start gap-4 mb-6 mt-2', impact.style)}
-            >
-              <div className="shrink-0 bg-white p-3 rounded-full shadow-sm border border-brand-brown/5">{impact.icon}</div>
-              <div>
-                <h4 className="font-heading font-black text-lg text-brand-brown mb-1.5">{impact.title}</h4>
-                <p className="text-sm md:text-base font-medium leading-relaxed opacity-90 text-brand-brown">{impact.text}</p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ══════════════════════════════════════════════════════════════
-            DESKTOP (lg+): две секции по две колонки
-            ══════════════════════════════════════════════════════════════ */}
-        <div className="hidden lg:block">
-          {/* Секция 1: квадратные тиры 2×2 (лево) + описание (право) */}
-          <div className="grid grid-cols-2 gap-8 mb-8">
-            <div className="grid grid-cols-2 gap-4">
-              {TIERS.map((tier) => {
-                const isSelected = activeTier?.amount === tier.amount;
-                return (
-                  <motion.button
-                    key={tier.amount}
-                    type="button"
-                    onClick={() => handleTierSelect(tier.amount)}
-                    whileTap={{ scale: 0.97 }}
-                    className={cn(
-                      'relative flex flex-col items-center justify-center rounded-2xl border-2 outline-none transition-all duration-300 cursor-pointer p-5 gap-3 aspect-square',
-                      isSelected
-                        ? 'border-brand-orange bg-brand-orange-light/10 ring-4 ring-brand-orange/10 shadow-sm'
-                        : 'border-brand-brown/5 bg-brand-cream hover:border-brand-orange/30 hover:bg-white'
-                    )}
-                  >
-                    <div className={cn('w-14 h-14 rounded-full flex items-center justify-center bg-white shadow-sm border border-brand-brown/5', tier.iconClass)}>
-                      {tier.icon}
-                    </div>
-                    <div className="text-center">
-                      <div className="font-heading font-black text-2xl xl:text-3xl text-brand-brown mb-1">{tier.amountLabel}</div>
-                      <div className={cn('text-sm font-bold px-3 py-1 rounded-full inline-block', tier.colorClass)}>{tier.name}</div>
-                    </div>
-                    {isSelected && (
-                      <motion.div layoutId="check-desktop" className="absolute top-4 right-4 text-brand-orange">
-                        <Check className="w-6 h-6" strokeWidth={3} />
-                      </motion.div>
-                    )}
-                  </motion.button>
-                );
-              })}
+        <div className="px-6 md:px-10 lg:px-14">
+          {/* Поле "Другая сумма" */}
+          <div className="mb-6">
+            <label className="block text-xs font-bold text-brand-brown-light mb-2 ml-1 uppercase tracking-wider">Другая сумма</label>
+            <div className="relative group">
+              <Coins size={22} className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-brown-light transition-colors duration-300 group-focus-within:text-brand-orange" />
+              <input
+                type="number"
+                placeholder="0"
+                value={Number.isNaN(currentAmount) ? '' : (currentAmount ?? '')}
+                onChange={(e) => setValue('amount', e.target.valueAsNumber, { shouldDirty: true })}
+                className={clsx(inputClassName(!!errors.amount), 'pr-12')}
+              />
+              <span className="absolute right-6 top-1/2 -translate-y-1/2 font-bold text-brand-brown-light text-xl pointer-events-none">₽</span>
             </div>
-
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`desktop-impact-${impact.title}`}
-                initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }}
-                transition={{ duration: 0.3 }}
-                className={cn('rounded-2xl p-8 border flex flex-col items-center justify-center text-center gap-5 min-h-[280px]', impact.style)}
-              >
-                <div className="shrink-0 bg-white p-4 rounded-full shadow-md border border-brand-brown/5">{impact.icon}</div>
-                <div>
-                  <h4 className="font-heading font-black text-2xl text-brand-brown mb-3">{impact.title}</h4>
-                  <p className="text-base font-medium leading-relaxed opacity-90 text-brand-brown">{impact.text}</p>
-                </div>
-              </motion.div>
+            <AnimatePresence>
+              {errors.amount && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="text-red-500 text-sm font-bold flex items-center gap-2 mt-2 ml-1">
+                  <AlertCircle size={16} /> {errors.amount.message}
+                </motion.div>
+              )}
             </AnimatePresence>
           </div>
 
-          {/* Секция 2: поля (лево) + согласие+кнопка (право) */}
-          <div className="grid grid-cols-2 gap-8">
-            <div className="space-y-5">
-              <div>
-                <label className="block text-xs font-bold text-brand-brown-light mb-2 ml-1 uppercase tracking-wider">Другая сумма</label>
-                <div className="relative group">
-                  <Coins size={22} className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-brown-light transition-colors duration-300 group-focus-within:text-brand-orange" />
-                  <input type="number" placeholder="0" {...register('amount', { valueAsNumber: true })} className={clsx(inputClassName(!!errors.amount), 'pr-12')} />
-                  <span className="absolute right-6 top-1/2 -translate-y-1/2 font-bold text-brand-brown-light text-xl pointer-events-none">₽</span>
-                </div>
-                <AnimatePresence>
-                  {errors.amount && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="text-red-500 text-sm font-bold flex items-center gap-2 mt-2 ml-1">
-                      <AlertCircle size={16} /> {errors.amount.message}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <div className="relative group">
-                    <User size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-brown-light transition-colors duration-300 group-focus-within:text-brand-orange" />
-                    <input {...register('name')} disabled={isAnonymous} placeholder="Ваше Имя" className={inputClassName(!!errors.name)} />
-                  </div>
-                  <AnimatePresence>
-                    {errors.name && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="text-red-500 text-sm font-bold flex items-center gap-2 mt-2 ml-1">
-                        <AlertCircle size={16} /> {errors.name.message}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-                <div>
-                  <div className="relative group">
-                    <AtSign size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-brown-light transition-colors duration-300 group-focus-within:text-brand-orange" />
-                    <input {...register('email')} disabled={isAnonymous} placeholder="Email (для чека)" className={inputClassName(!!errors.email)} />
-                  </div>
-                  <AnimatePresence>
-                    {errors.email && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="text-red-500 text-sm font-bold flex items-center gap-2 mt-2 ml-1">
-                        <AlertCircle size={16} /> {errors.email.message}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-
-            </div>
-
-            <div className="flex flex-col justify-end gap-5">
-              <div
-                className="flex items-center gap-3 cursor-pointer group select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50 rounded-lg p-1"
-                onClick={toggleAnonymous} role="checkbox" tabIndex={0} aria-checked={isAnonymous}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleAnonymous(); } }}
-              >
-                <div className={cn('w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-300 shrink-0', isAnonymous ? 'bg-brand-orange border-brand-orange' : 'bg-white border-brand-brown/30 group-hover:border-brand-orange')}>
-                  <div className={cn('transition-opacity duration-200 flex items-center justify-center', isAnonymous ? 'opacity-100' : 'opacity-0')}>
-                    <Check size={14} className="text-white" strokeWidth={3} />
-                  </div>
-                </div>
-                <span className="text-sm font-bold text-brand-brown transition-colors duration-300 group-hover:text-brand-orange">Сделать платеж анонимным</span>
-              </div>
-              <div
-                className="flex items-start gap-3 cursor-pointer group select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50 rounded-lg p-1"
-                onClick={() => setConsent(!consent)} role="checkbox" tabIndex={0} aria-checked={consent}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setConsent(!consent); } }}
-              >
-                <div className={cn('w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-300 shrink-0 mt-0.5', consent ? 'bg-brand-orange border-brand-orange' : 'bg-white border-brand-brown/30 group-hover:border-brand-orange')}>
-                  <div className={cn('transition-opacity duration-200 flex items-center justify-center', consent ? 'opacity-100' : 'opacity-0')}>
-                    <Check size={14} className="text-white" strokeWidth={3} />
-                  </div>
-                </div>
-                <span className="text-sm font-medium text-brand-brown-light leading-relaxed">
-                  Нажимая кнопку, я выражаю своё безоговорочное согласие (акцепт) с условиями{' '}
-                  <button type="button" onClick={(e) => { e.stopPropagation(); setShowOffer(true); }} className="text-brand-orange underline hover:text-brand-brown transition-colors cursor-pointer">Публичной оферты</button>{' '}
-                  и даю согласие на{' '}
-                  <button type="button" onClick={(e) => { e.stopPropagation(); setShowPersonalData(true); }} className="text-brand-orange underline hover:text-brand-brown transition-colors cursor-pointer">обработку персональных данных</button>
-                </span>
-              </div>
-              <button
-                type="submit"
-                disabled={isLoading || !consent || ((!isAnonymous) && !!errors.name)}
-                className="w-full rounded-xl lg:rounded-2xl bg-brand-brown py-5 text-center text-xl font-black uppercase tracking-widest text-white transition-all hover:bg-brand-orange disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer shadow-xl shadow-brand-brown/20"
-              >
-                {isLoading ? <Loader2 className="animate-spin h-7 w-7" /> : (isRecurring ? 'Подписаться' : 'Помочь')}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* ══════════════════════════════════════════════════════════════
-            MOBILE + TABLET (<lg): поля в карточке + кнопка
-            ══════════════════════════════════════════════════════════════ */}
-        <div className="lg:hidden">
-          <div className="rounded-2xl bg-brand-cream/60 border border-brand-brown/5 p-5 sm:p-7 mb-5 space-y-4">
+          {/* Поля имени и email */}
+          <div className="grid sm:grid-cols-2 gap-4 mb-6">
             <div>
-              <label className="block text-xs font-bold text-brand-brown-light mb-2 ml-1 uppercase tracking-wider">Другая сумма</label>
               <div className="relative group">
-                <Coins size={22} className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-brown-light transition-colors duration-300 group-focus-within:text-brand-orange" />
-                <input type="number" placeholder="0" value={Number.isNaN(currentAmount) ? '' : (currentAmount ?? '')} onChange={(e) => setValue('amount', e.target.valueAsNumber, { shouldDirty: true })} className={clsx(inputClassName(!!errors.amount), 'pr-12')} />
-                <span className="absolute right-6 top-1/2 -translate-y-1/2 font-bold text-brand-brown-light text-xl pointer-events-none">₽</span>
+                <User size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-brown-light transition-colors duration-300 group-focus-within:text-brand-orange" />
+                <input
+                  value={watch('name') ?? ''}
+                  onChange={(e) => setValue('name', e.target.value, { shouldDirty: true })}
+                  disabled={isAnonymous}
+                  placeholder="Ваше Имя"
+                  className={inputClassName(!!errors.name)}
+                />
               </div>
               <AnimatePresence>
-                {errors.amount && (
+                {errors.name && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="text-red-500 text-sm font-bold flex items-center gap-2 mt-2 ml-1">
-                    <AlertCircle size={16} /> {errors.amount.message}
+                    <AlertCircle size={16} /> {errors.name.message}
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <div className="relative group">
-                  <User size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-brown-light transition-colors duration-300 group-focus-within:text-brand-orange" />
-                  <input value={watch('name') ?? ''} onChange={(e) => setValue('name', e.target.value, { shouldDirty: true })} disabled={isAnonymous} placeholder="Ваше Имя" className={inputClassName(!!errors.name)} />
-                </div>
-                <AnimatePresence>
-                  {errors.name && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="text-red-500 text-sm font-bold flex items-center gap-2 mt-2 ml-1">
-                      <AlertCircle size={16} /> {errors.name.message}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+            <div>
+              <div className="relative group">
+                <AtSign size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-brown-light transition-colors duration-300 group-focus-within:text-brand-orange" />
+                <input
+                  value={watch('email') ?? ''}
+                  onChange={(e) => setValue('email', e.target.value, { shouldDirty: true })}
+                  disabled={isAnonymous}
+                  placeholder="Email (для чека)"
+                  className={inputClassName(!!errors.email)}
+                />
               </div>
-              <div>
-                <div className="relative group">
-                  <AtSign size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-brown-light transition-colors duration-300 group-focus-within:text-brand-orange" />
-                  <input value={watch('email') ?? ''} onChange={(e) => setValue('email', e.target.value, { shouldDirty: true })} disabled={isAnonymous} placeholder="Email (для чека)" className={inputClassName(!!errors.email)} />
-                </div>
-                <AnimatePresence>
-                  {errors.email && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="text-red-500 text-sm font-bold flex items-center gap-2 mt-2 ml-1">
-                      <AlertCircle size={16} /> {errors.email.message}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-
-            <div
-              className="flex items-center gap-3 cursor-pointer group select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50 rounded-lg pt-1"
-              onClick={toggleAnonymous} role="checkbox" tabIndex={0} aria-checked={isAnonymous}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleAnonymous(); } }}
-            >
-              <div className={cn('w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-300 shrink-0', isAnonymous ? 'bg-brand-orange border-brand-orange' : 'bg-white border-brand-brown/30 group-hover:border-brand-orange')}>
-                <div className={cn('transition-opacity duration-200 flex items-center justify-center', isAnonymous ? 'opacity-100' : 'opacity-0')}>
-                  <Check size={14} className="text-white" strokeWidth={3} />
-                </div>
-              </div>
-              <span className="text-sm font-bold text-brand-brown transition-colors duration-300 group-hover:text-brand-orange">Сделать платеж анонимным</span>
+              <AnimatePresence>
+                {errors.email && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="text-red-500 text-sm font-bold flex items-center gap-2 mt-2 ml-1">
+                    <AlertCircle size={16} /> {errors.email.message}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div
-              className="flex items-start gap-3 cursor-pointer group select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50 rounded-lg p-1"
-              onClick={() => setConsent(!consent)} role="checkbox" tabIndex={0} aria-checked={consent}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setConsent(!consent); } }}
-            >
-              <div className={cn('w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-300 shrink-0 mt-0.5', consent ? 'bg-brand-orange border-brand-orange' : 'bg-white border-brand-brown/30 group-hover:border-brand-orange')}>
-                <div className={cn('transition-opacity duration-200 flex items-center justify-center', consent ? 'opacity-100' : 'opacity-0')}>
-                  <Check size={14} className="text-white" strokeWidth={3} />
-                </div>
+          {/* Анонимно */}
+          <div
+            className="flex items-center gap-3 cursor-pointer group select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50 rounded-lg mb-5"
+            onClick={toggleAnonymous} role="checkbox" tabIndex={0} aria-checked={isAnonymous}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleAnonymous(); } }}
+          >
+            <div className={cn('w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-300 shrink-0', isAnonymous ? 'bg-brand-orange border-brand-orange' : 'bg-white border-brand-brown/30 group-hover:border-brand-orange')}>
+              <div className={cn('transition-opacity duration-200 flex items-center justify-center', isAnonymous ? 'opacity-100' : 'opacity-0')}>
+                <Check size={14} className="text-white" strokeWidth={3} />
               </div>
-              <span className="text-sm font-medium text-brand-brown-light leading-relaxed">
-                Нажимая кнопку, я выражаю своё безоговорочное согласие (акцепт) с условиями{' '}
-                <button type="button" onClick={(e) => { e.stopPropagation(); setShowOffer(true); }} className="text-brand-orange underline hover:text-brand-brown transition-colors cursor-pointer">Публичной оферты</button>{' '}
-                и даю согласие на{' '}
-                <button type="button" onClick={(e) => { e.stopPropagation(); setShowPersonalData(true); }} className="text-brand-orange underline hover:text-brand-brown transition-colors cursor-pointer">обработку персональных данных</button>
-              </span>
             </div>
-            <button
-              id="form-submit"
-              type="submit"
-              disabled={isLoading || !consent || ((!isAnonymous) && !!errors.name)}
-              className="w-full rounded-xl md:rounded-2xl bg-brand-brown py-4 md:py-6 text-center text-xl md:text-2xl font-black uppercase tracking-widest text-white transition-all hover:bg-brand-orange disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer shadow-xl shadow-brand-brown/20"
-            >
-              {isLoading ? <Loader2 className="animate-spin h-8 w-8" /> : (isRecurring ? 'Подписаться' : 'Помочь')}
-            </button>
+            <span className="text-sm font-bold text-brand-brown transition-colors duration-300 group-hover:text-brand-orange">Сделать платеж анонимным</span>
           </div>
+
+          {/* Согласие */}
+          <div
+            className="flex items-start gap-3 cursor-pointer group select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50 rounded-lg p-1 mb-6"
+            onClick={() => setConsent(!consent)} role="checkbox" tabIndex={0} aria-checked={consent}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setConsent(!consent); } }}
+          >
+            <div className={cn('w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-300 shrink-0 mt-0.5', consent ? 'bg-brand-orange border-brand-orange' : 'bg-white border-brand-brown/30 group-hover:border-brand-orange')}>
+              <div className={cn('transition-opacity duration-200 flex items-center justify-center', consent ? 'opacity-100' : 'opacity-0')}>
+                <Check size={14} className="text-white" strokeWidth={3} />
+              </div>
+            </div>
+            <span className="text-sm font-medium text-brand-brown-light leading-relaxed">
+              Нажимая кнопку, я выражаю своё безоговорочное согласие (акцепт) с условиями{' '}
+              <button type="button" onClick={(e) => { e.stopPropagation(); setShowOffer(true); }} className="text-brand-orange underline hover:text-brand-brown transition-colors cursor-pointer">Публичной оферты</button>{' '}
+              и даю согласие на{' '}
+              <button type="button" onClick={(e) => { e.stopPropagation(); setShowPersonalData(true); }} className="text-brand-orange underline hover:text-brand-brown transition-colors cursor-pointer">обработку персональных данных</button>
+            </span>
+          </div>
+
+          {/* Кнопка отправки */}
+          <button
+            id="form-submit"
+            type="submit"
+            disabled={isLoading || !consent || ((!isAnonymous) && !!errors.name)}
+            className="w-full rounded-xl md:rounded-2xl bg-brand-brown py-5 md:py-6 text-center text-xl md:text-2xl font-black uppercase tracking-widest text-white transition-all hover:bg-brand-orange disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer shadow-xl shadow-brand-brown/20"
+          >
+            {isLoading ? <Loader2 className="animate-spin h-8 w-8" /> : (isRecurring ? 'Подписаться' : 'Помочь')}
+          </button>
         </div>
 
         {/* Модалка оферты */}

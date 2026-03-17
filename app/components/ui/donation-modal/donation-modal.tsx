@@ -8,9 +8,11 @@ import { useLenis } from "lenis/react";
 interface DonationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  campaignId?: string;
+  campaignTitle?: string;
 }
 
-export const DonationModal = ({ isOpen, onClose }: DonationModalProps) => {
+export const DonationModal = ({ isOpen, onClose, campaignId, campaignTitle }: DonationModalProps) => {
   const lenis = useLenis();
 
   // Always-current refs — never added to effect deps
@@ -73,7 +75,7 @@ export const DonationModal = ({ isOpen, onClose }: DonationModalProps) => {
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="relative z-10 w-full max-w-[1300px] flex justify-center"
           >
-            <FormDonation className="max-h-[90vh] md:max-h-[85vh]" onClose={onClose} />
+            <FormDonation className="max-h-[90vh] md:max-h-[85vh]" onClose={onClose} initialCampaignId={campaignId} initialCampaignTitle={campaignTitle} />
           </motion.div>
         </motion.div>
       )}

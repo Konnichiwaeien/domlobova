@@ -1,22 +1,19 @@
 "use client";
 
-import { useRef, useMemo } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useState, useMemo } from "react";
 import Image from "next/image";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
 
 interface StoriesProps {
   stories?: any[];
 }
 
 const Stories = ({ stories: customStories }: StoriesProps) => {
-  const targetRef = useRef(null);
-
-  const { scrollYProgress } = useScroll({ target: targetRef });
-
-  // Map scroll progress to a numeric value 0-100 to avoid string interpolation errors in Framer Motion
-  const progress = useTransform(scrollYProgress, [0, 1], [0, 100]);
-  // Manually construct the calc string on each frame so Framer Motion doesn't choke on calc()
-  const x = useTransform(progress, (p) => `calc(-${p}% + ${p}vw)`);
+  const [isBeginning, setIsBeginning] = useState(true);
+  const [isEnd, setIsEnd] = useState(false);
 
   const defaultStyling = [
     { color: "bg-brand-yellow/30" },
@@ -34,123 +31,159 @@ const Stories = ({ stories: customStories }: StoriesProps) => {
     return `${age} лет`;
   };
 
-  const stories = customStories && customStories.length > 0
-    ? customStories.map((story, idx) => ({
+  const stories = useMemo(() => {
+    if (customStories && customStories.length > 0) {
+      return customStories.map((story, idx) => ({
         name: story.name || "",
         age: getAgeString(story.age),
-        quote: (story.quote || "").replace(/^«|»$/g, '').trim(),
+        quote: (story.quote || "").replace(/^«|»$/g, "").trim(),
         story: story.description || "",
-        img: Array.isArray(story.image) ? story.image[0]?.url : (story.image?.url || `/images/${(idx % 3) + 1}.webp`),
+        img: Array.isArray(story.image)
+          ? story.image[0]?.url
+          : story.image?.url || `/images/${(idx % 3) + 1}.webp`,
         color: defaultStyling[idx % defaultStyling.length].color,
-      }))
-    : [
-        {
-          name: "Мария Ивановна",
-          age: "78 лет",
-          quote: "Я думала, что осталась совсем одна. Но здесь мне вернули не только здоровье, но и семью.",
-          story: "Мария Ивановна потеряла близких и оказалась без поддержки. Отделение милосердия стало для неё вторым домом — здесь она получила полноценный уход, регулярное питание и, главное, людей, которым не всё равно.",
-          img: "/images/1.webp",
-          color: "bg-brand-yellow/30",
-        },
-        {
-          name: "Алексей Сергеевич",
-          age: "45 лет",
-          quote: "Новая инвалидная коляска подарила мне возможность снова выходить на улицу и видеть небо.",
-          story: "После тяжёлой травмы Алексей оказался прикован к дому. Благодаря средствам фонда удалось приобрести специализированную коляску и организовать курс реабилитации. Сейчас он снова ведёт активную жизнь.",
-          img: "/images/2.webp",
-          color: "bg-brand-orange-light/30",
-        },
-        {
-          name: "Елена",
-          age: "62 года",
-          quote: "Спасибо сиделкам фонда. Без их круглосуточной поддержки мы бы не справились с болезнью мужа.",
-          story: "Муж Елены тяжело заболел, и семья не могла обеспечить круглосуточный уход самостоятельно. Фонд выделил профессиональную сиделку и оплатил необходимые медикаменты. Это позволило Елене сохранить силы и быть рядом.",
-          img: "/images/3.webp",
-          color: "bg-brand-blue-light/30",
-        },
-      ];
+      }));
+    }
+    return [
+      {
+        name: "Мария Ивановна",
+        age: "78 лет",
+        quote:
+          "Я думала, что осталась совсем одна. Но здесь мне вернули не только здоровье, но и семью.",
+        story:
+          "Мария Ивановна потеряла близких и оказалась без поддержки. Отделение милосердия стало для неё вторым домом — здесь она получила полноценный уход, регулярное питание и, главное, людей, которым не всё равно.",
+        img: "/images/1.webp",
+        color: "bg-brand-yellow/30",
+      },
+      {
+        name: "Алексей Сергеевич",
+        age: "45 лет",
+        quote:
+          "Новая инвалидная коляска подарила мне возможность снова выходить на улицу и видеть небо.",
+        story:
+          "После тяжёлой травмы Алексей оказался прикован к дому. Благодаря средствам фонда удалось приобрести специализированную коляску и организовать курс реабилитации. Сейчас он снова ведёт активную жизнь.",
+        img: "/images/2.webp",
+        color: "bg-brand-orange-light/30",
+      },
+      {
+        name: "Елена",
+        age: "62 года",
+        quote:
+          "Спасибо сиделкам фонда. Без их круглосуточной поддержки мы бы не справились с болезнью мужа.",
+        story:
+          "Муж Елены тяжело заболел, и семья не могла обеспечить круглосуточный уход самостоятельно. Фонд выделил профессиональную сиделку и оплатил необходимые медикаменты. Это позволило Елене сохранить силы и быть рядом.",
+        img: "/images/3.webp",
+        color: "bg-brand-blue-light/30",
+      },
+    ];
+  }, [customStories]);
 
   return (
     <section
-      ref={targetRef}
       id="stories"
-      className="relative h-[250vh] bg-[#F9F8F6]"
+      className="relative bg-white py-16 md:py-24 lg:py-28 overflow-hidden content-auto"
     >
-      <div className="sticky top-0 flex min-h-[850px] lg:min-h-[900px] h-screen flex-col overflow-hidden bg-[#F9F8F6] py-16 md:py-24 lg:py-28">
-        {/* Title area: Fixed at the top, taking up standard space, no absolute positioning */}
-        <div className="w-full flex-none px-5 md:px-12 mb-8 md:mb-10">
+      <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8 md:mb-12">
           <h2 className="font-heading text-4xl md:text-5xl lg:text-7xl font-black text-brand-brown uppercase">
-            Истории <br/><span className="text-brand-orange italic">подопечных</span>
+            Истории{" "}
+            <br />
+            <span className="text-brand-orange italic">подопечных</span>
           </h2>
+          <div className="hidden md:flex gap-2">
+            <button
+              className="stories-prev w-12 h-12 rounded-full border border-brand-brown/10 flex items-center justify-center text-brand-brown hover:bg-brand-orange hover:text-white hover:border-brand-orange transition-all duration-300 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-brand-brown disabled:hover:border-brand-brown/10 disabled:cursor-not-allowed"
+              disabled={isBeginning}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              className="stories-next w-12 h-12 rounded-full border border-brand-brown/10 flex items-center justify-center text-brand-brown hover:bg-brand-orange hover:text-white hover:border-brand-orange transition-all duration-300 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-brand-brown disabled:hover:border-brand-brown/10 disabled:cursor-not-allowed"
+              disabled={isEnd}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
         </div>
 
-        {/* Cards area */}
-        <div className="flex-1 w-full relative flex items-stretch min-h-0 min-w-0">
-          {/* We've applied an offset width so it translates exactly the width of the track minus the viewport. */}
-          <motion.div
-            style={{ x }}
-            className="flex gap-5 md:gap-8 px-5 md:px-12 items-stretch h-full w-max will-change-transform"
-          >
+        {/* Swiper */}
+        <Swiper
+          modules={[Navigation]}
+          navigation={{
+            prevEl: ".stories-prev",
+            nextEl: ".stories-next",
+          }}
+          spaceBetween={24}
+          slidesPerView={1.05}
+          breakpoints={{
+            640: { slidesPerView: 1.3 },
+            768: { slidesPerView: 1.8 },
+            1024: { slidesPerView: 2.2 },
+            1280: { slidesPerView: 2.5 },
+          }}
+          grabCursor={true}
+          onSlideChange={(swiper) => {
+            setIsBeginning(swiper.isBeginning);
+            setIsEnd(swiper.isEnd);
+          }}
+          onBeforeInit={(swiper) => {
+            setIsBeginning(swiper.isBeginning);
+            setIsEnd(swiper.isEnd);
+          }}
+          className="w-full [&>.swiper-wrapper]:items-stretch"
+        >
           {stories.map((story, idx) => (
-            <div
-              key={idx}
-              className="relative flex h-full w-[85vw] shrink-0 flex-col overflow-hidden rounded-2xl md:rounded-[3rem] bg-white border border-brand-brown/10 shadow-xl shadow-brand-orange/5 md:w-[75vw] lg:w-[60vw] md:flex-row"
-            >
-              {/* Image half */}
-              <div className="relative h-[40%] md:h-auto w-full md:w-[40%] p-3 md:p-5 shrink-0">
-                <div className="h-full w-full overflow-hidden rounded-[2rem] md:rounded-[2.5rem] shadow-sm">
+            <SwiperSlide key={idx} className="h-auto! flex">
+              <div className="flex flex-col w-full h-full overflow-hidden rounded-2xl md:rounded-[3rem] bg-white border border-brand-brown/10">
+                {/* Image */}
+                <div className="relative h-64 md:h-80 w-full shrink-0">
                   <Image
                     src={story.img}
-                    alt={``}
+                    alt={story.name}
                     fill
-                    sizes="(max-width: 768px) 90vw, (max-width: 1024px) 75vw, 60vw"
+                    sizes="(max-width: 768px) 95vw, (max-width: 1024px) 55vw, 40vw"
                     quality={85}
                     loading="lazy"
-                    className="object-cover transition-transform duration-700 hover:scale-105 will-change-transform"
+                    className="object-cover"
                   />
                 </div>
-              </div>
 
-              {/* Text half */}
-              <div className="flex flex-1 w-full md:w-[60%] flex-col p-5 md:p-6 lg:p-8 min-h-0 min-w-0 overflow-hidden">
-                <div
-                  className={`mb-2 md:mb-3 shrink-0 self-start rounded-full ${story.color} px-4 py-1.5 md:px-5 md:py-2 text-xs md:text-sm font-bold uppercase tracking-widest text-brand-brown shadow-sm`}
-                >
-                  {story.age}
-                </div>
+                {/* Text content */}
+                <div className="flex flex-col flex-1 p-5 md:p-6 lg:p-8">
+                  <div
+                    className={`mb-2 md:mb-3 self-start rounded-full ${story.color} px-4 py-1.5 md:px-5 md:py-2 text-xs md:text-sm font-bold uppercase tracking-widest text-brand-brown shadow-sm`}
+                  >
+                    {story.age}
+                  </div>
 
-                <h3 className="mb-2 md:mb-3 shrink-0 font-heading text-xl md:text-2xl lg:text-3xl font-bold text-brand-brown">
-                  {story.name}
-                </h3>
+                  <h3 className="mb-2 md:mb-3 font-heading text-xl md:text-2xl lg:text-3xl font-bold text-brand-brown">
+                    {story.name}
+                  </h3>
 
-                <p className="text-sm md:text-base shrink-0 font-medium leading-relaxed text-brand-brown-light italic line-clamp-3 md:line-clamp-none">
-                  «{story.quote}»
-                </p>
+                  <p className="text-sm md:text-base font-medium leading-relaxed text-brand-brown-light italic mb-3 md:mb-4">
+                    «{story.quote}»
+                  </p>
 
-                <div className="flex-1 mt-3 md:mt-4 relative overflow-hidden flex flex-col min-h-0 min-w-0 pb-2 md:pb-3">
-                  {/* Elegant separator */}
-                  <div className="flex items-center gap-3 mb-3 shrink-0 opacity-60">
+                  {/* Separator */}
+                  <div className="flex items-center gap-3 mb-3 opacity-60">
                     <div className="w-8 md:w-12 h-[2px] bg-brand-orange/40 rounded-full" />
                     <div className="w-1.5 h-1.5 rounded-full bg-brand-orange/40" />
                     <div className="w-8 md:w-12 h-[2px] bg-brand-orange/40 rounded-full" />
                   </div>
-                  
-                  <div className="flex-1 relative min-h-0 min-w-0">
-                    <div className="absolute inset-0 overflow-y-auto pr-2 custom-scrollbar z-10">
-                      <p className="text-sm md:text-base leading-relaxed text-brand-brown-light/70 wrap-break-word whitespace-pre-wrap">
-                        {story.story}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {/* Bottom fade out to indicate scrolling */}
-                  <div className="absolute bottom-0 left-0 right-2 h-8 md:h-12 bg-linear-to-t from-white to-transparent pointer-events-none z-20" />
+
+                  <p className="text-sm md:text-base leading-relaxed text-brand-brown-light/70">
+                    {story.story}
+                  </p>
                 </div>
               </div>
-            </div>
+            </SwiperSlide>
           ))}
-          </motion.div>
-        </div>
+        </Swiper>
       </div>
     </section>
   );

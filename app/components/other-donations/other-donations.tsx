@@ -235,9 +235,8 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
                         disabled={isCompleted}
                         onClick={() => {
                           if (!isCompleted) {
-                            document.getElementById("donate")?.scrollIntoView({ behavior: "smooth" });
                             window.dispatchEvent(
-                              new CustomEvent('open-donation', {
+                              new CustomEvent('open-donation-modal', {
                                 detail: {
                                   campaignId: donation.id,
                                   campaignTitle: donation.title
@@ -248,7 +247,7 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
                         }}
                         className={`mt-6 w-full py-4 rounded-xl flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest transition-all duration-300 ${isCompleted ? 'bg-brand-cream/50 text-brand-brown/40 cursor-not-allowed border border-brand-brown/5' : 'bg-brand-cream text-brand-brown hover:bg-brand-orange hover:text-white border border-brand-brown/10 hover:border-brand-orange'}`}
                       >
-                        {isCompleted ? 'Завершено' : 'Поддержать сбор'}
+                        {isCompleted ? 'Завершено' : 'Помочь'}
                         {!isCompleted && <Heart className="w-4 h-4" strokeWidth={2.5} />}
                       </button>
                     </div>

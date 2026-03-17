@@ -79,6 +79,9 @@ const Footer = () => {
     { label: "Политика обработки ПД", onClick: () => setShowPersonalData(true) },
   ];
 
+  /* Shared grid classes for both rows so columns always align */
+  /* Flex-based layout for visually equal spacing between content blocks */
+
   return (
     <>
     <footer
@@ -86,8 +89,9 @@ const Footer = () => {
       className="relative bg-brand-cream pt-12 md:pt-16 pb-8 md:pb-10 overflow-hidden text-brand-brown rounded-t-3xl md:rounded-[3rem] lg:rounded-t-[4rem] -mt-6 md:-mt-10 z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] content-auto"
     >
       <div className="relative z-10 mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8 xl:gap-12 mb-12 md:mb-16">
-          <div className="col-span-1 md:col-span-2 lg:col-span-3 mb-2 md:mb-0">
+        {/* Header row: Title + Social links */}
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-6 mb-12 md:mb-16">
+          <div className="mb-2 md:mb-0">
             <div className="mb-4 inline-flex rounded-full bg-brand-orange px-5 py-1.5 shadow-sm">
                <span className="text-xs font-bold uppercase tracking-widest text-white">Приходите в гости</span>
             </div>
@@ -96,7 +100,7 @@ const Footer = () => {
             </h2>
           </div>
           
-          <div className="col-span-1 md:col-span-2 lg:col-span-1 hidden md:flex flex-col items-center lg:items-end justify-end mt-6 md:mt-0">
+          <div className="hidden md:flex flex-col items-start justify-end">
              <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-3 opacity-90">Наши соцсети</span>
              <div className="flex items-center gap-3">
                {socialLinks.map((social, sIdx) => (
@@ -118,10 +122,11 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-8 xl:gap-12 pb-8 lg:pb-0">
-            
+        {/* Content row: Address | Phone+Email | Documents */}
+        <div className="flex flex-col md:flex-wrap md:flex-row lg:flex-nowrap lg:justify-between gap-10 pb-8 lg:pb-0">
+
             {/* Box 1: Address */}
-            <div className="space-y-4">
+            <div className="space-y-4 lg:max-w-[320px] shrink-0">
                <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange block opacity-90">Наш адрес</span>
                <div className="group/addr flex items-start gap-2.5">
                  <MapPin className="w-[18px] h-[18px] md:w-5 md:h-5 text-brand-orange shrink-0 mt-1 md:mt-1.5" strokeWidth={2.5} />
@@ -138,12 +143,12 @@ const Footer = () => {
                </div>
             </div>
 
-            {/* Box 2 & 3 Combined: Phones & Email */}
-            <div className="space-y-6">
+            {/* Box 2: Phones & Email */}
+            <div className="space-y-6 shrink-0">
                <div>
-                  <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-1.5 block opacity-90">Горячая линия</span>
-                  <a href="tel:89201229737" className="text-lg md:text-xl font-black tracking-tight text-brand-brown hover:text-brand-orange transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded-md inline-block">
-                    8 (920) 122-97-37
+                  <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-1.5 block opacity-90">Звоните нам</span>
+                  <a href="tel:+79206592856" className="text-lg md:text-xl font-black tracking-tight text-brand-brown hover:text-brand-orange transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange rounded-md inline-block">
+                    +7 (920) 659-28-56
                   </a>
                   <p className="text-[10px] md:text-xs font-bold text-brand-brown/40 mt-1 uppercase tracking-widest">с 8:00 до 17:00</p>
                </div>
@@ -156,8 +161,8 @@ const Footer = () => {
                </div>
             </div>
 
-             {/* Box 4: Documents, Requisites */}
-             <div className="col-span-1 md:col-span-2 lg:col-span-1 space-y-8 flex flex-col justify-start">
+             {/* Box 3: Documents */}
+             <div className="space-y-8 flex flex-col justify-start items-start shrink-0">
                <div>
                  <span className="text-[10px] md:text-xs uppercase tracking-[0.2em] font-black text-brand-orange mb-3 block opacity-90">Документы</span>
                  <ul className="flex flex-col md:flex-row lg:flex-col gap-2.5 md:gap-6 lg:gap-2.5 flex-wrap">

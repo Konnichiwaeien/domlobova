@@ -48,7 +48,7 @@ const FeaturesMarquee = ({ features }: FeaturesMarqueeProps) => {
   const loopFeatures = [...displayFeatures, ...displayFeatures, ...displayFeatures];
 
   return (
-    <section className="relative z-30 py-12 md:py-16 lg:py-20 overflow-hidden pointer-events-none">
+    <section className="relative z-30 pt-4 md:pt-6 pb-0 overflow-hidden pointer-events-none">
       <MarqueeStyles />
       <div className="w-full flex">
         {/* Pure CSS animation — runs on compositor thread, zero main-thread cost */}

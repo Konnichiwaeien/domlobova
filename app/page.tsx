@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { SmoothScroll } from "./components/ui/smooth-scroll";
 import { ScrollToTop } from "./components/ui/scroll-to-top";
 import { Header } from "./components/sections/header";
-import { Hero } from "./components/sections/hero";
+import { HeroV2 } from "./components/sections/hero-v2";
 import { ElegantProgress } from "./components/sections/elegant-progress";
 import dynamic from "next/dynamic";
 
@@ -17,6 +17,7 @@ const Footer = dynamic(() => import("./components/sections/footer").then(mod => 
 
 import { getLandingData } from "./services/landing.service";
 import { getRecentDonations } from "./services/donation.service";
+import { HeroTransition } from './components/hero-transition';
 
 export async function generateMetadata(): Promise<Metadata> {
   const landingSlug = process.env.NEXT_PUBLIC_SITE_SLUG || "domlobova";
@@ -43,12 +44,16 @@ export default async function Home() {
         <Header />
 
         <main>
-          <Hero 
-            titleTop={landing?.hero?.titleTop} 
-            titleBottom={landing?.hero?.titleBottom} 
-            heroDescription={landing?.hero?.descr} 
+          {/* <HeroV2
+            titleTop={landing?.hero?.titleTop}
+            titleBottom={landing?.hero?.titleBottom}
+            heroDescription={landing?.hero?.descr}
             heroPhotos={landing?.hero?.photos}
-          />
+          /> */}
+          <HeroTransition       titleTop={landing?.hero?.titleTop}
+            titleBottom={landing?.hero?.titleBottom}
+            heroDescription={landing?.hero?.descr}
+            heroPhotos={landing?.hero?.photos}/>
 
           <ElegantProgress 
             title={landing?.campaigns?.title} 
@@ -59,11 +64,11 @@ export default async function Home() {
 
           <OtherDonations campaigns={landing?.campaigns?.campaigns} />
 
+          <DonationBlock />
+
           <Stories stories={landing?.stories} />
 
           <FundsUsage data={landing?.needs} />
-
-          <DonationBlock />
 
           {/* <VolunteerSection data={landing?.volunteers_needs} /> */}
 

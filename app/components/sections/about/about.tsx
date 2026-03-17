@@ -252,7 +252,7 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
   }, [photos]);
 
   return (
-    <section id="about" className="relative bg-white pt-16 md:pt-24 lg:pt-28 pb-16 md:pb-24 lg:pb-28 overflow-hidden z-10 text-brand-brown content-auto">
+    <section id="about" className="relative bg-white pt-16 md:pt-24 lg:pt-28 pb-20 md:pb-28 lg:pb-36 overflow-hidden z-10 text-brand-brown content-auto">
       <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12 relative z-20">
         <div className="flex flex-col">
           <div className="text-center mb-8 md:mb-10">
@@ -291,7 +291,7 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
           )}
 
           {/* Text inline image reveal — optimized: single useTransform + CSS color-mix */}
-          <div ref={textRef} className="max-w-[1200px] mx-auto pb-4 md:pb-6 pt-4 md:pt-8 flex flex-col justify-center min-h-[40vh] transform-gpu">
+          <div ref={textRef} className="max-w-[1200px] mx-auto pb-2 md:pb-4 lg:pb-6 pt-2 md:pt-4 flex flex-col justify-center min-h-[40vh] transform-gpu">
             <div className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl leading-[1.4] lg:leading-[1.35] font-medium text-brand-brown text-center md:text-left">
               <ScrollRevealText
                 text={descr?.replace(/\[IMAGE\]/g, "") || ""}

@@ -3,7 +3,7 @@
 import React from "react";
 import { renderHighlightedTitle } from "../../../utils/text-parser";
 import { motion } from "framer-motion";
-import { Pill, Activity, Users, Home, Music, Sparkles } from "lucide-react";
+import { Pill, Activity, Users, Home, Music, Sparkles, Heart } from "lucide-react";
 
 interface FundsUsageProps {
   data?: any;
@@ -61,7 +61,7 @@ const FundsUsage = ({ data }: FundsUsageProps) => {
   return (
     <section
       id="funds"
-      className="bg-white py-16 md:py-24 lg:py-28 relative z-30 transition-colors duration-500 content-auto"
+      className="bg-[#F9F8F6] py-16 md:py-24 lg:py-28 relative z-30 transition-colors duration-500 content-auto"
     >
       <div className="mx-auto max-w-[1300px] px-5 md:px-8">
         <div className="mb-10 md:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-10">
@@ -133,6 +133,18 @@ const FundsUsage = ({ data }: FundsUsageProps) => {
             );
           })}
         </motion.div>
+
+        {/* Кнопка помочь */}
+        <div className="flex justify-center mt-10 md:mt-14">
+          <button
+            onClick={() => {
+              window.dispatchEvent(new Event('open-donation-modal'));
+            }}
+            className="bg-brand-orange hover:bg-brand-brown text-white transition-colors duration-500 rounded-full px-10 py-5 text-sm md:text-base font-bold uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 cursor-pointer"
+          >
+            Помочь <Heart className="w-5 h-5 fill-current" />
+          </button>
+        </div>
       </div>
     </section>
   );
