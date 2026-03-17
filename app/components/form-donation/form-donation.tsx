@@ -482,7 +482,7 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
             id="form-submit"
             type="submit"
             disabled={isLoading || !isValid}
-            className="w-full rounded-xl md:rounded-2xl bg-brand-brown py-5 md:py-6 text-center text-xl md:text-2xl font-black uppercase tracking-widest text-white transition-all hover:bg-brand-orange disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer shadow-xl shadow-brand-brown/20"
+            className="w-full rounded-xl md:rounded-2xl bg-brand-brown py-4 md:py-6 text-center text-base md:text-2xl font-black uppercase tracking-widest text-white transition-all hover:bg-brand-orange disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer shadow-xl shadow-brand-brown/20"
           >
             {isLoading ? <Loader2 className="animate-spin h-8 w-8" /> : (isRecurring ? 'Подписка на помощь' : 'Помочь')}
           </button>

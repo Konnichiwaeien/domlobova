@@ -97,7 +97,7 @@ export const HeroV2 = ({
                 className="px-10 py-5 bg-brand-orange text-white rounded-full font-semibold text-base flex items-center gap-2.5 shadow-xl hover:bg-[#1A1A1A] transition-all duration-500 cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50"
               >
                 <Heart size={18} className="fill-white" />
-                Помочь
+                ПОМОЧЬ
               </button>
               <a
                 href="#about"
@@ -180,7 +180,7 @@ export const HeroV2 = ({
                 className="w-full max-w-xs px-8 py-4 bg-brand-orange text-white rounded-full font-semibold flex items-center justify-center gap-2.5 shadow-xl hover:bg-[#1A1A1A] transition-all duration-500 cursor-pointer"
               >
                 <Heart size={16} className="fill-white" />
-                Помочь
+                ПОМОЧЬ
               </button>
             </div>
 

@@ -102,7 +102,7 @@ const Header = () => {
       >
         <div className="flex w-full items-center">
           {/* Left: Menu button */}
-          <div className="flex-1 flex items-center justify-start">
+          <div className="flex-none sm:flex-1 flex items-center justify-start">
             <MagneticButton
               onClick={() => setIsOpen(!isOpen)}
               aria-label={isOpen ? "Закрыть меню" : "Открыть меню"}
@@ -118,7 +118,7 @@ const Header = () => {
           </div>
 
           {/* Center: Logo */}
-          <div className="flex-none">
+          <div className="flex-1 sm:flex-none flex sm:block items-center ml-3 sm:ml-0">
             <a
               href="https://domlobova.ru/"
               target="_blank"
@@ -127,7 +127,7 @@ const Header = () => {
               className="group flex cursor-pointer items-center gap-3 relative w-auto focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 rounded-lg"
             >
               <div className={`relative transition-[height] duration-500 ${
-                isScrolled && !isOpen ? "h-12 sm:h-12 lg:h-14" : "h-16 sm:h-16 lg:h-20"
+                isScrolled && !isOpen ? "h-8 sm:h-12 lg:h-14" : "h-10 sm:h-16 lg:h-20"
               }`}>
                 <img
                   src="/logo-dark.svg"
@@ -151,14 +151,14 @@ const Header = () => {
               className={`group flex cursor-pointer items-center gap-2 rounded-full font-bold uppercase tracking-widest transition-[background,color,box-shadow,padding] duration-500 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 ${
                 isScrolled && !isOpen
                   ? "bg-brand-orange text-white shadow-md hover:shadow-brand-orange/40 px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm"
-                  : "bg-brand-cream text-brand-brown hover:bg-brand-orange hover:text-white px-5 sm:px-7 py-2.5 sm:py-3.5 text-sm"
+                  : "bg-brand-orange text-white lg:bg-brand-cream lg:text-brand-brown hover:bg-brand-orange hover:text-white px-5 sm:px-7 py-2.5 sm:py-3.5 text-sm"
               }`}
             >
               <Heart
                 className={`transition-[color,width,height] duration-500 ${
                   isScrolled && !isOpen
                     ? "text-white w-4 h-4"
-                    : "text-brand-orange group-hover:text-white w-4 h-4"
+                    : "text-white lg:text-brand-orange group-hover:text-white w-4 h-4"
                 }`}
               />
               Помочь
