@@ -69,7 +69,6 @@ const formatAmount = (amount: number) => {
 export const FormDonation = ({ className, onClose, initialCampaignId, initialCampaignTitle }: { className?: string; onClose?: () => void; initialCampaignId?: string; initialCampaignTitle?: string } = {}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success'>('idle');
-  const [consent, setConsent] = useState(false);
   const [showOffer, setShowOffer] = useState(false);
   const [showPersonalData, setShowPersonalData] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -88,7 +87,7 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
     setValue,
     watch,
     clearErrors,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<DonationFormValues>({
     resolver: zodResolver(donationSchema),
     defaultValues: {
@@ -114,14 +113,13 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
 
   const toggleAnonymous = () => {
     const newValue = !isAnonymous;
-    setValue('isAnonymous', newValue);
+    setValue('isAnonymous', newValue, { shouldValidate: true });
     if (newValue === true) {
-      setValue('name', 'Анонимный Благотворитель');
-      setValue('email', 'anonymous@domlobova.ru');
-      clearErrors(['name', 'email']);
+      setValue('name', 'Анонимный Благотворитель', { shouldValidate: true });
+      setValue('email', 'anonymous@domlobova.ru', { shouldValidate: true });
     } else {
-      if (watch('name') === 'Анонимный Благотворитель') setValue('name', '');
-      if (watch('email') === 'anonymous@domlobova.ru') setValue('email', '');
+      if (watch('name') === 'Анонимный Благотворитель') setValue('name', '', { shouldValidate: true });
+      if (watch('email') === 'anonymous@domlobova.ru') setValue('email', '', { shouldValidate: true });
     }
   };
 
@@ -185,7 +183,7 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
 
   const inputClassName = (hasError: boolean) =>
     cn(
-      'w-full rounded-xl md:rounded-2xl border-2 py-5 pl-12 pr-6 text-xl font-bold outline-none transition-all duration-300 ease-in-out',
+      'w-full rounded-xl md:rounded-2xl border-2 py-3.5 md:py-4 pl-12 pr-6 text-base md:text-lg font-bold outline-none transition-all duration-300 ease-in-out',
       hasError
         ? 'border-red-300 bg-red-50 text-red-900 placeholder:text-red-300 focus:border-red-500'
         : 'border-transparent bg-brand-cream text-brand-brown placeholder:text-brand-brown-light/60 hover:border-brand-orange/30 focus:outline-none focus:bg-white focus:border-brand-yellow focus-visible:ring-4 focus-visible:ring-brand-orange/50 disabled:opacity-60 disabled:cursor-not-allowed'
@@ -469,22 +467,13 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
             <span className="text-sm font-bold text-brand-brown transition-colors duration-300 group-hover:text-brand-orange">Сделать платеж анонимным</span>
           </div>
 
-          {/* Согласие */}
-          <div
-            className="flex items-start gap-3 cursor-pointer group select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange/50 rounded-lg p-1 mb-6"
-            onClick={() => setConsent(!consent)} role="checkbox" tabIndex={0} aria-checked={consent}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setConsent(!consent); } }}
-          >
-            <div className={cn('w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-300 shrink-0 mt-0.5', consent ? 'bg-brand-orange border-brand-orange' : 'bg-white border-brand-brown/30 group-hover:border-brand-orange')}>
-              <div className={cn('transition-opacity duration-200 flex items-center justify-center', consent ? 'opacity-100' : 'opacity-0')}>
-                <Check size={14} className="text-white" strokeWidth={3} />
-              </div>
-            </div>
+          {/* Согласие (текст без чекбокса) */}
+          <div className="mb-6 pl-1">
             <span className="text-sm font-medium text-brand-brown-light leading-relaxed">
               Нажимая кнопку, я выражаю своё безоговорочное согласие (акцепт) с условиями{' '}
-              <button type="button" onClick={(e) => { e.stopPropagation(); setShowOffer(true); }} className="text-brand-orange underline hover:text-brand-brown transition-colors cursor-pointer">Публичной оферты</button>{' '}
+              <button type="button" onClick={() => setShowOffer(true)} className="text-brand-orange underline hover:text-brand-brown transition-colors cursor-pointer">Публичной оферты</button>{' '}
               и даю согласие на{' '}
-              <button type="button" onClick={(e) => { e.stopPropagation(); setShowPersonalData(true); }} className="text-brand-orange underline hover:text-brand-brown transition-colors cursor-pointer">обработку персональных данных</button>
+              <button type="button" onClick={() => setShowPersonalData(true)} className="text-brand-orange underline hover:text-brand-brown transition-colors cursor-pointer">обработку персональных данных</button>
             </span>
           </div>
 
@@ -492,10 +481,10 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
           <button
             id="form-submit"
             type="submit"
-            disabled={isLoading || !consent || ((!isAnonymous) && !!errors.name)}
+            disabled={isLoading || !isValid}
             className="w-full rounded-xl md:rounded-2xl bg-brand-brown py-5 md:py-6 text-center text-xl md:text-2xl font-black uppercase tracking-widest text-white transition-all hover:bg-brand-orange disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer shadow-xl shadow-brand-brown/20"
           >
-            {isLoading ? <Loader2 className="animate-spin h-8 w-8" /> : (isRecurring ? 'Подписаться' : 'Помочь')}
+            {isLoading ? <Loader2 className="animate-spin h-8 w-8" /> : (isRecurring ? 'Оформить подписку' : 'Помочь')}
           </button>
         </div>
 

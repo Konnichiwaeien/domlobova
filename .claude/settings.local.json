@@ -5,7 +5,11 @@
       "Bash(xargs ls:*)",
       "Bash(xargs cat:*)",
       "Bash(ls -la /c/Development/Crafting/domlobova/domlobova/app/components/sections/*/index.ts*)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npx next:*)",
+      "Bash(ls \"C:\\\\Development\\\\Crafting\\\\domlobova\\\\domlobova\\\\node_modules\\\\.bin\\\\next\"*)",
+      "Bash(where next:*)",
+      "Bash(node node_modules/next/dist/bin/next dev -p 50200)"
     ]
   }
 }

@@ -223,7 +223,7 @@ export const HeroTransition = ({
                 className="px-10 py-5 bg-[#E65C3D] text-white rounded-full font-semibold hover:bg-[#1A1A1A] transition-all duration-500 flex items-center gap-3 group shadow-xl cursor-pointer"
               >
                 <Heart size={18} className="fill-white group-hover:scale-110 transition-transform duration-300" />
-                Помочь нам
+                Помочь
               </button>
             </div>
           </motion.div>
@@ -291,7 +291,7 @@ export const HeroTransition = ({
                 className="w-full sm:w-auto px-8 py-4 bg-[#E65C3D] text-white rounded-full font-semibold hover:bg-[#1A1A1A] transition-all duration-500 flex items-center justify-center gap-2.5 shadow-lg cursor-pointer"
               >
                 <Heart size={16} className="fill-white" />
-                Помочь нам
+                Помочь
               </button>
             </div>
           </motion.div>
