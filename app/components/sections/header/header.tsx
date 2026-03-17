@@ -12,6 +12,7 @@ const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [heroHeight, setHeroHeight] = useState(0);
   const [isDonationOpen, setIsDonationOpen] = useState(false);
+  const [modalCampaign, setModalCampaign] = useState<{ id: string; title: string } | null>(null);
 
   const { scrollY } = useScroll();
 
@@ -77,9 +78,17 @@ const Header = () => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Listen for global donation modal event
+  // Listen for global donation modal event (single source of truth)
   useEffect(() => {
-    const handleOpenDonation = () => setIsDonationOpen(true);
+    const handleOpenDonation = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.campaignId) {
+        setModalCampaign({ id: detail.campaignId, title: detail.campaignTitle || 'Выбранный сбор' });
+      } else {
+        setModalCampaign(null);
+      }
+      setIsDonationOpen(true);
+    };
     window.addEventListener("open-donation-modal", handleOpenDonation);
     return () => window.removeEventListener("open-donation-modal", handleOpenDonation);
   }, []);
@@ -213,7 +222,9 @@ const Header = () => {
       {/* Donation Modal */}
       <DonationModal
         isOpen={isDonationOpen}
-        onClose={() => setIsDonationOpen(false)}
+        onClose={() => { setIsDonationOpen(false); setModalCampaign(null); }}
+        campaignId={modalCampaign?.id}
+        campaignTitle={modalCampaign?.title}
       />
     </>
   );

@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import React, { useRef, useCallback, useMemo } from "react";
 import { useInView } from "framer-motion";
 import { Heart, Users, CalendarHeart, PhoneCall } from "lucide-react";
 import Image from "next/image";
-import { DonationModal } from "../../ui/donation-modal";
 
 interface HeroV2Props {
   titleTop?: string;
@@ -34,26 +33,8 @@ export const HeroV2 = ({
 }: HeroV2Props) => {
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.2 });
-  const [isDonationOpen, setIsDonationOpen] = useState(false);
-  const [modalCampaign, setModalCampaign] = useState<{ id: string; title: string } | null>(null);
-
   const openDonation = useCallback(() => {
-    setModalCampaign(null);
-    setIsDonationOpen(true);
-  }, []);
-
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      if (detail?.campaignId) {
-        setModalCampaign({ id: detail.campaignId, title: detail.campaignTitle || 'Выбранный сбор' });
-      } else {
-        setModalCampaign(null);
-      }
-      setIsDonationOpen(true);
-    };
-    window.addEventListener("open-donation-modal", handler);
-    return () => window.removeEventListener("open-donation-modal", handler);
+    window.dispatchEvent(new CustomEvent('open-donation-modal'));
   }, []);
 
   const photos = useMemo(() => Array.from({ length: 4 }, (_, i) => ({
@@ -250,7 +231,6 @@ export const HeroV2 = ({
         </div>
       </section>
 
-      <DonationModal isOpen={isDonationOpen} onClose={() => setIsDonationOpen(false)} campaignId={modalCampaign?.id} campaignTitle={modalCampaign?.title} />
     </>
   );
 };

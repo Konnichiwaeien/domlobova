@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState, useMemo, useCallback, memo } from "
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { Heart } from "lucide-react";
 import { useLenis } from "lenis/react";
-import { DonationModal } from "../ui/donation-modal";
 
 // Morph keyframes — static CSS, rendered once via memo
 const MorphStyles = memo(() => (
@@ -117,7 +116,6 @@ export const HeroTransition = ({
   heroPhotos,
 }: HeroTransitionProps) => {
   const lenis = useLenis();
-  const [isDonationOpen, setIsDonationOpen] = useState(false);
   const [mobileSlide, setMobileSlide] = useState(0);
 
   // Motion values for mouse — update WITHOUT triggering React re-renders
@@ -145,13 +143,7 @@ export const HeroTransition = ({
   }, [lenis]);
 
   const openDonation = useCallback(() => {
-    setIsDonationOpen(true);
-  }, []);
-
-  useEffect(() => {
-    const handleOpenDonation = () => setIsDonationOpen(true);
-    window.addEventListener("open-donation-modal", handleOpenDonation);
-    return () => window.removeEventListener("open-donation-modal", handleOpenDonation);
+    window.dispatchEvent(new CustomEvent('open-donation-modal'));
   }, []);
 
   // Mobile slider — only runs on mobile via matchMedia
@@ -307,7 +299,6 @@ export const HeroTransition = ({
 
       </div>
 
-      <DonationModal isOpen={isDonationOpen} onClose={() => setIsDonationOpen(false)} />
     </>
   );
 };
