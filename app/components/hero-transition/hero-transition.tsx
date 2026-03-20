@@ -212,7 +212,7 @@ export const HeroTransition = ({
             </h1>
 
             {heroDescription && (
-              <p className="text-lg text-slate-500 font-medium max-w-lg mx-auto mb-10 pointer-events-auto leading-relaxed">
+              <p className="text-lg text-slate-800 font-medium max-w-lg mx-auto mb-10 pointer-events-auto leading-relaxed">
                 {heroDescription}
               </p>
             )}
@@ -280,7 +280,7 @@ export const HeroTransition = ({
             </h1>
 
             {heroDescription && (
-              <p className="text-sm text-slate-500 font-medium max-w-xs mx-auto mb-6 leading-relaxed">
+              <p className="text-sm text-slate-800 font-medium max-w-xs mx-auto mb-6 leading-relaxed">
                 {heroDescription}
               </p>
             )}

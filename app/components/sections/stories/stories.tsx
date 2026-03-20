@@ -176,9 +176,14 @@ const Stories = ({ stories: customStories }: StoriesProps) => {
                     <div className="w-8 md:w-12 h-[2px] bg-brand-orange/40 rounded-full" />
                   </div>
 
-                  <p className="text-sm md:text-base leading-relaxed text-brand-brown-light/70">
-                    {story.story}
-                  </p>
+                  <div className="relative flex-1 min-h-0 overflow-hidden">
+                    <div className="h-40 md:h-48 overflow-y-auto pr-2 custom-scrollbar">
+                      <p className="text-sm md:text-base leading-relaxed text-brand-brown-light/70 pb-4">
+                        {story.story}
+                      </p>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-2 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+                  </div>
                 </div>
               </div>
             </SwiperSlide>

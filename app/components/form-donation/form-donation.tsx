@@ -202,7 +202,7 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
 
   const inputClassName = (hasError: boolean) =>
     cn(
-      'w-full rounded-xl md:rounded-2xl border-2 py-3.5 md:py-4 pl-12 pr-6 text-base md:text-lg font-bold outline-none transition-all duration-300 ease-in-out',
+      'w-full rounded-xl md:rounded-2xl border-2 py-3.5 md:py-3.5 pl-12 pr-6 text-base md:text-base font-bold outline-none transition-all duration-300 ease-in-out',
       hasError
         ? 'border-red-300 bg-red-50 text-red-900 placeholder:text-red-300 focus:border-red-500'
         : 'border-transparent bg-brand-cream text-brand-brown placeholder:text-brand-brown-light/60 hover:border-brand-orange/30 focus:outline-none focus:bg-white focus:border-brand-yellow focus-visible:ring-4 focus-visible:ring-brand-orange/50 disabled:opacity-60 disabled:cursor-not-allowed'
@@ -426,14 +426,14 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
                 onClick={() => handleAmountSelect(amount)}
                 className={cn(
                   'flex items-center justify-center rounded-2xl border-2 outline-none transition-all duration-300 cursor-pointer',
-                  'py-6 md:py-8 lg:py-10',
+                  'py-6 md:py-6 lg:py-8',
                   isSelected
                     ? 'border-brand-orange bg-brand-orange text-white shadow-lg shadow-brand-orange/30'
                     : 'border-brand-brown/10 bg-brand-cream text-brand-brown hover:border-brand-orange/40 hover:bg-white'
                 )}
               >
                 <span className={cn(
-                  'font-heading font-black text-2xl md:text-3xl lg:text-4xl whitespace-nowrap',
+                  'font-heading font-black text-2xl md:text-2xl lg:text-3xl whitespace-nowrap',
                   isSelected ? 'text-white' : 'text-brand-brown'
                 )}>
                   {formatAmount(amount)}
@@ -540,7 +540,7 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
             id="form-submit"
             type="submit"
             disabled={isLoading || !isValid}
-            className="w-full rounded-xl md:rounded-2xl bg-brand-brown py-4 md:py-6 text-center text-base md:text-2xl font-black uppercase tracking-widest text-white transition-all hover:bg-brand-orange disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer shadow-xl shadow-brand-brown/20"
+            className="w-full rounded-xl md:rounded-2xl bg-brand-brown py-4 md:py-5 text-center text-base md:text-xl font-black uppercase tracking-widest text-white transition-all hover:bg-brand-orange disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer shadow-xl shadow-brand-brown/20"
           >
             {isLoading ? <Loader2 className="animate-spin h-8 w-8" /> : (isRecurring ? 'Подписка на помощь' : 'Помочь')}
           </button>
