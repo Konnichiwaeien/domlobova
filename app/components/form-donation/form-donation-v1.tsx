@@ -222,17 +222,19 @@ export const FormDonation = ({ className, onClose }: { className?: string; onClo
         description: 'Пожертвование в Дом милосердия кузнеца Лобова',
         amount: data.amount,
         currency: 'RUB',
+        accountId: data.isAnonymous ? `anon_${Date.now()}` : data.email,
         paymentSchema: 'Single',
         skin: 'modern',
         autoClose: 3,
         email: data.isAnonymous ? undefined : data.email,
-        emailBehavior: data.isAnonymous ? 'Hidden' : 'Optional',
+        emailBehavior: data.isAnonymous ? 'Hidden' : 'Required',
+        requireEmail: data.isAnonymous ? false : true,
         userInfo: {
           firstName: data.isAnonymous ? 'Анонимный' : (data.name || ''),
           phone: data.isAnonymous ? '' : (data.phone || ''),
           email: data.isAnonymous ? '' : (data.email || ''),
         },
-        metadata: {
+        data: {
           donorName: data.isAnonymous ? 'Анонимный благотворитель' : data.name,
           donorEmail: data.isAnonymous ? '' : data.email,
           donorPhone: data.isAnonymous ? '' : data.phone,
