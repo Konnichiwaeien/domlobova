@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { LegalModal } from '../ui/legal-modal/legal-modal';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -72,9 +72,24 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
   const [showOffer, setShowOffer] = useState(false);
   const [showPersonalData, setShowPersonalData] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [blurredFields, setBlurredFields] = useState<Record<string, boolean>>({});
+  const markBlurred = (field: string) => setBlurredFields((prev) => ({ ...prev, [field]: true }));
   const [campaignId, setCampaignId] = useState<string | null>(initialCampaignId || null);
   const [campaignTitle, setCampaignTitle] = useState<string | null>(initialCampaignTitle || null);
   const { width, height } = useWindowSize();
+  const amountsInnerRef = useRef<HTMLDivElement>(null);
+  const [dragBounds, setDragBounds] = useState({ left: 0, right: 0 });
+
+  useEffect(() => {
+    const inner = amountsInnerRef.current;
+    if (!inner) return;
+    
+    // Calculate how far we can drag.
+    // inner.scrollWidth is the total width of all cards + gaps
+    // inner.offsetWidth is the visible width of the container
+    const overflow = inner.scrollWidth - inner.offsetWidth;
+    setDragBounds({ left: -Math.max(overflow, 0), right: 0 });
+  }, [width]);
 
   useEffect(() => {
     setCampaignId(initialCampaignId || null);
@@ -108,7 +123,7 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
   const safeAmount = Number(currentAmount) || 0;
 
   const handleAmountSelect = (amount: number) => {
-    setValue('amount', amount, { shouldDirty: true });
+    setValue('amount', amount, { shouldValidate: true, shouldDirty: true });
   };
 
   const toggleAnonymous = () => {
@@ -291,9 +306,7 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-orange-light/20 border border-brand-orange/30">
             <Heart className="w-4 h-4 text-brand-orange" fill="currentColor" />
-            <span className="text-sm font-bold text-brand-brown">
-              Помощь сбору: <span className="text-brand-orange">{campaignTitle}</span>
-            </span>
+              <span className="text-brand-orange text-sm font-bold">{campaignTitle}</span>
             <button
               onClick={() => { setCampaignId(null); setCampaignTitle(null); }}
               className="ml-2 w-5 h-5 rounded-full hover:bg-white text-brand-brown/50 hover:text-red-500 flex items-center justify-center transition-colors"
@@ -359,8 +372,47 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* Суммы: grid на всех разрешениях */}
-        <div className="grid grid-cols-4 gap-2 sm:gap-4 mb-8 px-6 md:px-10 lg:px-14">
+        {/* Суммы: горизонтальный скролл на мобильных, grid на sm+ */}
+
+        {/* Mobile: draggable horizontal scroll */}
+        <div className="sm:hidden mb-8 px-6 overflow-hidden">
+          <motion.div
+            ref={amountsInnerRef}
+            className="flex gap-3 cursor-grab active:cursor-grabbing touch-pan-x"
+            drag="x"
+            dragConstraints={dragBounds}
+            dragElastic={0.12}
+            dragTransition={{ bounceStiffness: 400, bounceDamping: 35 }}
+          >
+            {AMOUNTS.map((amount) => {
+              const isSelected = safeAmount === amount;
+              return (
+                <motion.button
+                  key={amount}
+                  type="button"
+                  onClick={() => handleAmountSelect(amount)}
+                  whileTap={{ scale: 0.95 }}
+                  className={cn(
+                    'flex items-center justify-center rounded-xl border-2 outline-none transition-colors duration-300 shrink-0 w-[120px] py-5',
+                    isSelected
+                      ? 'border-brand-orange bg-brand-orange text-white shadow-lg shadow-brand-orange/30'
+                      : 'border-brand-brown/10 bg-brand-cream text-brand-brown'
+                  )}
+                >
+                  <span className={cn(
+                    'font-heading font-black text-lg whitespace-nowrap pointer-events-none select-none',
+                    isSelected ? 'text-white' : 'text-brand-brown'
+                  )}>
+                    {formatAmount(amount)}
+                  </span>
+                </motion.button>
+              );
+            })}
+          </motion.div>
+        </div>
+
+        {/* Tablet+Desktop: grid */}
+        <div className="hidden sm:grid grid-cols-4 gap-4 mb-8 px-6 md:px-10 lg:px-14">
           {AMOUNTS.map((amount) => {
             const isSelected = safeAmount === amount;
             return (
@@ -369,15 +421,15 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
                 type="button"
                 onClick={() => handleAmountSelect(amount)}
                 className={cn(
-                  'flex items-center justify-center rounded-xl sm:rounded-2xl border-2 outline-none transition-all duration-300 cursor-pointer',
-                  'py-4 sm:py-6 md:py-8 lg:py-10',
+                  'flex items-center justify-center rounded-2xl border-2 outline-none transition-all duration-300 cursor-pointer',
+                  'py-6 md:py-8 lg:py-10',
                   isSelected
                     ? 'border-brand-orange bg-brand-orange text-white shadow-lg shadow-brand-orange/30'
                     : 'border-brand-brown/10 bg-brand-cream text-brand-brown hover:border-brand-orange/40 hover:bg-white'
                 )}
               >
                 <span className={cn(
-                  'font-heading font-black text-lg sm:text-2xl md:text-3xl lg:text-4xl whitespace-nowrap',
+                  'font-heading font-black text-2xl md:text-3xl lg:text-4xl whitespace-nowrap',
                   isSelected ? 'text-white' : 'text-brand-brown'
                 )}>
                   {formatAmount(amount)}
@@ -397,7 +449,7 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
                 type="number"
                 placeholder="0"
                 value={Number.isNaN(currentAmount) ? '' : (currentAmount ?? '')}
-                onChange={(e) => setValue('amount', e.target.valueAsNumber, { shouldDirty: true })}
+                onChange={(e) => setValue('amount', e.target.valueAsNumber, { shouldValidate: true, shouldDirty: true })}
                 className={clsx(inputClassName(!!errors.amount), 'pr-12')}
               />
               <span className="absolute right-6 top-1/2 -translate-y-1/2 font-bold text-brand-brown-light text-xl pointer-events-none">₽</span>
@@ -418,14 +470,15 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
                 <User size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-brown-light transition-colors duration-300 group-focus-within:text-brand-orange" />
                 <input
                   value={watch('name') ?? ''}
-                  onChange={(e) => setValue('name', e.target.value, { shouldDirty: true })}
+                  onChange={(e) => setValue('name', e.target.value, { shouldValidate: true, shouldDirty: true })}
+                  onBlur={() => markBlurred('name')}
                   disabled={isAnonymous}
                   placeholder="Ваше Имя"
-                  className={inputClassName(!!errors.name)}
+                  className={inputClassName(!!errors.name && !!blurredFields.name)}
                 />
               </div>
               <AnimatePresence>
-                {errors.name && (
+                {errors.name && blurredFields.name && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="text-red-500 text-sm font-bold flex items-center gap-2 mt-2 ml-1">
                     <AlertCircle size={16} /> {errors.name.message}
                   </motion.div>
@@ -437,14 +490,15 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
                 <AtSign size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-brown-light transition-colors duration-300 group-focus-within:text-brand-orange" />
                 <input
                   value={watch('email') ?? ''}
-                  onChange={(e) => setValue('email', e.target.value, { shouldDirty: true })}
+                  onChange={(e) => setValue('email', e.target.value, { shouldValidate: true, shouldDirty: true })}
+                  onBlur={() => markBlurred('email')}
                   disabled={isAnonymous}
                   placeholder="Email (для чека)"
-                  className={inputClassName(!!errors.email)}
+                  className={inputClassName(!!errors.email && !!blurredFields.email)}
                 />
               </div>
               <AnimatePresence>
-                {errors.email && (
+                {errors.email && blurredFields.email && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="text-red-500 text-sm font-bold flex items-center gap-2 mt-2 ml-1">
                     <AlertCircle size={16} /> {errors.email.message}
                   </motion.div>

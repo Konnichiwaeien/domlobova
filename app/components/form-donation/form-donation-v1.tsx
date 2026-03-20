@@ -379,9 +379,7 @@ export const FormDonation = ({ className, onClose }: { className?: string; onClo
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-orange-light/20 border border-brand-orange/30">
             <Heart className="w-4 h-4 text-brand-orange" fill="currentColor" />
-            <span className="text-sm font-bold text-brand-brown">
-              Помощь сбору: <span className="text-brand-orange">{campaignTitle}</span>
-            </span>
+            <span className="text-brand-orange text-sm font-bold">{campaignTitle}</span>
             <button
               onClick={() => { setCampaignId(null); setCampaignTitle(null); }}
               className="ml-2 w-5 h-5 rounded-full hover:bg-white text-brand-brown/50 hover:text-red-500 flex items-center justify-center transition-colors"

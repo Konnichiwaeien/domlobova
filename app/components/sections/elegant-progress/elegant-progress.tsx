@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import { Heart, HeartHandshake, Target, Users, TrendingUp, Sparkles, RefreshCw, Hand } from "lucide-react";
 import { MagneticButton } from "../../ui/magnetic-button";
@@ -80,6 +80,16 @@ const ElegantProgress = ({ title, descr, partners, recentDonations = [] }: Elega
   
   const progressRef = useRef(null);
   const isProgressInView = useInView(progressRef, { once: true, margin: "-80px" });
+
+  // Client-only rendering for relative time to avoid hydration mismatch
+  const [mounted, setMounted] = useState(false);
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    setMounted(true);
+    const interval = setInterval(() => setTick((t) => t + 1), 30_000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <section id="campaigns" className="relative z-30 bg-white pt-16 md:pt-24 lg:pt-28 pb-8 md:pb-12">
@@ -316,7 +326,7 @@ const ElegantProgress = ({ title, descr, partners, recentDonations = [] }: Elega
                               )}
                             </div>
                             <div className="text-[10px] text-brand-brown-light font-bold uppercase tracking-widest mt-0.5">
-                              {getTimeAgo(donation.createdAt)}
+                              {mounted ? getTimeAgo(donation.createdAt) : "Недавно"}
                             </div>
                           </div>
                         </div>
