@@ -166,7 +166,9 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
           phone: data.isAnonymous ? '' : (data.phone || ''),
           email: data.isAnonymous ? '' : (data.email || ''),
         },
-        data: {
+        // Per CloudPayments docs: custom data goes in "metadata" (becomes JsonData).
+        // "data" is reserved for CloudPayments system config (receipts, etc).
+        metadata: {
           donorName: data.isAnonymous ? 'Анонимный благотворитель' : data.name,
           donorEmail: data.isAnonymous ? '' : data.email,
           donorPhone: data.isAnonymous ? '' : data.phone,
@@ -174,14 +176,14 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
           isRecurring: data.isRecurring,
           ...(campaignId ? { campaignId } : {}),
         },
+        // Recurrent config is a separate top-level param per docs
+        ...(data.isRecurring ? {
+          recurrent: {
+            interval: 'Month',
+            period: 1,
+          },
+        } : {}),
       };
-
-      if (data.isRecurring) {
-        intentParams.recurrent = {
-          interval: 'Month',
-          period: 1,
-        };
-      }
 
       const result = await widget.start(intentParams);
 
