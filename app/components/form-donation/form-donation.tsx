@@ -158,7 +158,9 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
         currency: 'RUB',
         paymentSchema: 'Single',
         skin: 'modern',
+        autoClose: 3,
         emailBehavior: data.isAnonymous ? 'Optional' : 'Required',
+        receiptEmail: data.isAnonymous ? '' : data.email,
         userInfo: {
           accountId: data.isAnonymous ? `anon_${Date.now()}` : data.email,
           email: data.isAnonymous ? '' : data.email,
@@ -224,7 +226,7 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-sm"
+            className="absolute inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-md rounded-2xl md:rounded-[3rem]"
           >
             <Confetti
               width={width}
@@ -243,9 +245,12 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
               className="relative rounded-[3rem] bg-white p-8 md:p-12 shadow-2xl shadow-brand-orange/10 border border-brand-orange/20 text-center max-w-lg w-[calc(100%-2rem)] mx-auto z-50 flex flex-col items-center"
             >
               <motion.div
-                initial={{ scale: 0 }}
+                initial={{ scale: 0, rotate: 0 }}
                 animate={{ scale: 1, rotate: [0, 10, -10, 0] }}
-                transition={{ type: 'spring', delay: 0.3, bounce: 0.6 }}
+                transition={{ 
+                  scale: { type: 'spring', delay: 0.3, bounce: 0.6 },
+                  rotate: { type: 'tween', delay: 0.5, duration: 0.5 }
+                }}
                 className="mb-8 flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-brand-orange to-[#E07A5F] text-white shadow-lg shadow-brand-orange/30 relative"
               >
                 <motion.div
@@ -279,30 +284,63 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setStatus('idle')}
+                onClick={() => {
+                  setStatus('idle');
+                  if (onClose) onClose();
+                }}
                 className="mt-10 rounded-full bg-brand-cream px-10 py-5 w-full text-base font-bold uppercase tracking-widest text-brand-orange hover:bg-brand-yellow/30 hover:text-brand-brown transition-colors cursor-pointer border border-brand-orange/10"
               >
-                Вернуться
+                Закрыть
               </motion.button>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Error toast */}
+      {/* Error Modal Overlay */}
       <AnimatePresence>
         {errorMessage && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="absolute top-4 left-4 right-4 z-50 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-4 shadow-lg"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[60] flex items-center justify-center bg-white/70 backdrop-blur-md rounded-2xl md:rounded-[3rem]"
           >
-            <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
-            <p className="text-sm font-bold text-red-700 flex-1">{errorMessage}</p>
-            <button onClick={() => setErrorMessage(null)} className="text-red-400 hover:text-red-600 cursor-pointer shrink-0">
-              ✕
-            </button>
+            <motion.div
+              initial={{ scale: 0.8, y: 50, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              transition={{ type: 'spring', delay: 0.1, duration: 0.8, bounce: 0.4 }}
+              className="relative rounded-[3rem] bg-white p-8 md:p-12 shadow-2xl shadow-red-500/10 border border-red-500/20 text-center max-w-lg w-[calc(100%-2rem)] mx-auto z-50 flex flex-col items-center"
+            >
+              <motion.div
+                initial={{ scale: 0, rotate: 0 }}
+                animate={{ scale: 1, rotate: [0, 5, -5, 0] }}
+                transition={{ 
+                  scale: { type: 'spring', delay: 0.3, bounce: 0.6 },
+                  rotate: { type: 'tween', delay: 0.5, duration: 0.4 }
+                }}
+                className="mb-8 flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-red-400 text-white shadow-lg shadow-red-500/30 relative"
+              >
+                <AlertCircle className="h-14 w-14" strokeWidth={2} />
+              </motion.div>
+
+              <h3 className="font-heading text-3xl md:text-4xl font-black text-brand-brown mb-4">
+                Что-то пошло не так
+              </h3>
+
+              <p className="mt-2 text-base md:text-lg font-medium text-brand-brown-light/80 leading-relaxed max-w-[90%] mx-auto">
+                {errorMessage}
+              </p>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setErrorMessage(null)}
+                className="mt-10 rounded-full bg-red-50 px-10 py-5 w-full text-base font-bold uppercase tracking-widest text-red-500 hover:bg-red-100/70 hover:text-red-700 transition-colors cursor-pointer border border-red-500/10"
+              >
+                Попробовать снова
+              </motion.button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -659,7 +697,7 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
             <p>Настоящее Согласие является бессрочным, и действует все время до момента прекращения обработки персональных данных, указанных в п.7 и п.8 данного Согласия.</p>
 
             <h4 className="font-bold mt-4">10.</h4>
-            <p>Место нахождения организации: 152128, Ярославская область, Ростовский р-н, рп. Поречье-Рыбное, ул. Кирова, д. 53.</p>
+            <p>Место нахождения организации: 152128, Ярославская область, Ростовский район, рабочий поселок Поречье-Рыбное, ул Кирова, д. 53в</p>
           </div>
         </LegalModal>
       </form>
