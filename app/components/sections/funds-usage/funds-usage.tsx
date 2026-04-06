@@ -2,7 +2,7 @@
 
 import React from "react";
 import { renderHighlightedTitle } from "../../../utils/text-parser";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { Pill, Activity, Users, Home, Music, Sparkles, Heart } from "lucide-react";
 
 interface FundsUsageProps {
@@ -75,33 +75,18 @@ const FundsUsage = ({ data }: FundsUsageProps) => {
           </div>
         </div>
 
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-10%" }}
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: { staggerChildren: 0.15 }
-            }
-          }}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {mappedItems.map((item: any, idx: number) => {
             const Icon = icons[idx % icons.length];
             return (
               <motion.div
                 key={idx}
-                variants={{
-                  hidden: { opacity: 0, y: 40 },
-                  visible: { 
-                    opacity: 1, 
-                    y: 0, 
-                    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } 
-                  }
-                }}
-                className="group relative bg-white rounded-4xl p-8 md:p-10 flex flex-col justify-between border border-brand-brown/5 shadow-sm hover:shadow-[0_20px_40px_rgba(235,108,57,0.08)] transition-all duration-500 overflow-hidden will-change-transform"
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.8, delay: idx * 0.12, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={{ boxShadow: "0px 20px 40px rgba(235,108,57,0.08)" }}
+                className="group relative bg-white rounded-4xl p-8 md:p-10 flex flex-col justify-between border border-brand-brown/5 shadow-sm overflow-hidden"
               >
                 {/* Soft background glow on hover */}
                 <div className="absolute -inset-20 bg-linear-to-br from-brand-orange/0 via-brand-orange/0 to-brand-orange/10 opacity-0 group-hover:opacity-100 blur-2xl transition-opacity duration-700 pointer-events-none" />
@@ -132,7 +117,7 @@ const FundsUsage = ({ data }: FundsUsageProps) => {
               </motion.div>
             );
           })}
-        </motion.div>
+        </div>
 
         {/* Кнопка помочь */}
         <div className="flex justify-center mt-10 md:mt-14">

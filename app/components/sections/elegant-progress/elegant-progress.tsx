@@ -299,7 +299,7 @@ const ElegantProgress = ({ title, descr, partners, recentDonations = [] }: Elega
               <div className="absolute top-0 left-0 right-0 h-4 bg-linear-to-b from-white to-transparent pointer-events-none z-10" />
               <div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-white to-transparent pointer-events-none z-10" />
               
-              <div className="h-full overflow-y-auto space-y-4 pr-3 scrollbar-thin scrollbar-thumb-brand-cream scrollbar-track-transparent">
+              <div data-lenis-prevent="true" className="h-full overflow-y-auto space-y-4 pr-3 scrollbar-thin scrollbar-thumb-brand-cream scrollbar-track-transparent">
                   {recentDonations.length > 0 ? recentDonations.map((donation, idx) => (
                     <div 
                       key={donation.id}
@@ -311,27 +311,28 @@ const ElegantProgress = ({ title, descr, partners, recentDonations = [] }: Elega
                             {getDonorIcon(idx)}
                           </div>
                           <div>
-                            <div className="flex items-center gap-2">
-                              <div className="font-bold text-brand-brown text-base">
-                                {donation.isAnonymous ? "Аноним" : (donation.donorName || "Аноним")}
-                              </div>
+                            <div className="flex flex-col items-start gap-1 pb-1">
                               {donation.isRecurring ? (
-                                <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase text-brand-orange bg-brand-orange/10 px-1.5 py-0.5 rounded-sm">
+                                <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase text-brand-orange bg-brand-orange/10 px-1.5 py-0.5 rounded-sm w-fit">
                                   <RefreshCw className="w-2.5 h-2.5" /> Регулярно
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase text-brand-brown/40 bg-brand-brown/5 px-1.5 py-0.5 rounded-sm">
+                                <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase text-brand-brown/40 bg-brand-brown/5 px-1.5 py-0.5 rounded-sm w-fit">
                                   <Hand className="w-2.5 h-2.5" /> Разово
                                 </span>
                               )}
+                              <div className="font-bold text-brand-brown text-base leading-none">
+                                {donation.isAnonymous ? "Аноним" : (donation.donorName || "Аноним")}
+                              </div>
                             </div>
                             <div className="text-[10px] text-brand-brown-light font-bold uppercase tracking-widest mt-0.5">
                               {mounted ? getTimeAgo(donation.createdAt) : "Недавно"}
                             </div>
                           </div>
                         </div>
-                        <div className="font-heading lining-nums font-black text-xl text-brand-orange tracking-tight">
+                        <div className="font-heading lining-nums font-black text-xl text-brand-orange tracking-tight flex items-baseline gap-1">
                           +{Number(donation.amount).toLocaleString("ru-RU")}
+                          <span className="text-[0.8em]">₽</span>
                         </div>
                       </div>
                     </div>

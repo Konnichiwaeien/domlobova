@@ -149,25 +149,21 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
 
       const widget = new window.cp.CloudPayments();
 
-      const intentParams: CloudPaymentsIntentParams = {
+      const intentParams: any = {
         publicTerminalId: process.env.NEXT_PUBLIC_CLOUDPAYMENTS_PUBLIC_ID || '',
-        description: 'Пожертвование в Дом милосердия кузнеца Лобова',
+        description: data.isRecurring 
+          ? 'Ежемесячное пожертвование в Дом милосердия кузнеца Лобова' 
+          : 'Пожертвование в Дом милосердия кузнеца Лобова',
         amount: data.amount,
         currency: 'RUB',
-        accountId: data.isAnonymous ? `anon_${Date.now()}` : data.email,
         paymentSchema: 'Single',
         skin: 'modern',
-        autoClose: 3,
-        email: data.isAnonymous ? undefined : data.email,
-        emailBehavior: data.isAnonymous ? 'Hidden' : 'Required',
-        requireEmail: data.isAnonymous ? false : true,
+        emailBehavior: data.isAnonymous ? 'Optional' : 'Required',
         userInfo: {
-          firstName: data.isAnonymous ? 'Анонимный' : (data.name || ''),
-          phone: data.isAnonymous ? '' : (data.phone || ''),
-          email: data.isAnonymous ? '' : (data.email || ''),
+          accountId: data.isAnonymous ? `anon_${Date.now()}` : data.email,
+          email: data.isAnonymous ? '' : data.email,
+          firstName: data.isAnonymous ? 'Анонимный благотворитель' : data.name,
         },
-        // Per CloudPayments docs: custom data goes in "metadata" (becomes JsonData).
-        // "data" is reserved for CloudPayments system config (receipts, etc).
         metadata: {
           donorName: data.isAnonymous ? 'Анонимный благотворитель' : data.name,
           donorEmail: data.isAnonymous ? '' : data.email,
@@ -176,20 +172,29 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
           isRecurring: data.isRecurring,
           ...(campaignId ? { campaignId } : {}),
         },
-        // Recurrent config is a separate top-level param per docs
         ...(data.isRecurring ? {
           recurrent: {
             interval: 'Month',
             period: 1,
-          },
+            amount: data.amount,
+          }
         } : {}),
       };
 
-      const result = await widget.start(intentParams);
+      const result: any = await widget.start(intentParams).catch((err: any) => {
+        return { type: 'error', message: err.message || 'Ошибка запуска виджета', status: 'fail' };
+      });
 
-      if (result?.success) {
+      if (result?.type === 'payment' && result?.status === 'success') {
         setStatus('success');
+      } else if (result?.type === 'error' || result?.status === 'fail') {
+        setErrorMessage(result?.message || 'Не удалось совершить платеж (отклонено или ошибка)');
+        setIsLoading(false);
+      } else if (result?.type === 'cancel') {
+        // Пользователь просто закрыл виджет без оплаты
+        setIsLoading(false);
       } else {
+        // Fallback если неизвестый тип
         setIsLoading(false);
       }
     } catch (err: unknown) {
@@ -590,7 +595,7 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
             <div className="bg-brand-cream/50 rounded-2xl p-4 space-y-1 text-sm">
               <p>ОГРН: 1187627032548</p>
               <p>ИНН/КПП: 7609038927/760901001</p>
-              <p>Адрес: 152128, Ярославская область, Ростовский р-н, рп. Поречье-Рыбное, ул. Кирова, д. 53</p>
+              <p>Адрес: 152128, Ярославская область, Ростовский район, рабочий поселок Поречье-Рыбное, ул Кирова, д. 53в</p>
               <p className="mt-2 font-bold">Банковские реквизиты:</p>
               <p>Расчётный счёт: 40703810738000012829</p>
               <p>Банк: ПАО «Сбербанк России»</p>

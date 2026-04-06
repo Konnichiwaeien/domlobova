@@ -628,7 +628,7 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
           <h4 className="font-bold mt-4">10.</h4>
           <p>
             Место нахождения организации: 152128, Ярославская область, Ростовский
-            р-н, рп. Поречье-Рыбное, ул. Кирова, д. 53.
+            район, рабочий поселок Поречье-Рыбное, ул Кирова, д. 53в.
           </p>
         </div>
       </LegalModal>

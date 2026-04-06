@@ -67,7 +67,7 @@ const Footer = () => {
   };
 
   const copyAddress = () => {
-    navigator.clipboard.writeText('152128, Ярославская обл., Ростовский МО., рп. Поречье-Рыбное, ул. Кирова 53В');
+    navigator.clipboard.writeText('152128, Ярославская область, Ростовский район, рабочий поселок Поречье-Рыбное, ул Кирова, д. 53в');
     setAddressCopied(true);
     setTimeout(() => setAddressCopied(false), 2000);
   };
@@ -131,7 +131,7 @@ const Footer = () => {
                <div className="group/addr flex items-start gap-2.5">
                  <MapPin className="w-[18px] h-[18px] md:w-5 md:h-5 text-brand-orange shrink-0 mt-1 md:mt-1.5" strokeWidth={2.5} />
                  <p className="text-base md:text-lg font-bold leading-relaxed text-brand-brown">
-                    152128, Ярославская обл., Ростовский МО., рп. Поречье-Рыбное, ул. Кирова 53В
+                    152128, Ярославская область, Ростовский район, рабочий поселок Поречье-Рыбное, ул Кирова, д. 53в
                  </p>
                  <button
                    onClick={copyAddress}
@@ -284,10 +284,10 @@ const Footer = () => {
               <span className="text-[10px] uppercase tracking-[0.2em] font-black text-brand-brown/40 mb-1">Фактический и юр. адрес</span>
               <div className="flex items-start justify-between gap-2">
                 <span className="text-sm md:text-base font-black leading-snug uppercase">
-                  152128, Ярославская область, Ростовский МО, рп Поречье-Рыбное, ул. Кирова, д. 53В
+                  152128, Ярославская область, Ростовский район, рабочий поселок Поречье-Рыбное, ул Кирова, д. 53в
                 </span>
                 <button 
-                  onClick={() => copyToClipboard('152128, Ярославская область, Ростовский МО, рп Поречье-Рыбное, ул. Кирова, д. 53В', 'Адрес')}
+                  onClick={() => copyToClipboard('152128, Ярославская область, Ростовский район, рабочий поселок Поречье-Рыбное, ул Кирова, д. 53в', 'Адрес')}
                   aria-label="Скопировать Адрес"
                   className={`p-2 w-8 h-8 rounded-lg cursor-pointer shrink-0 mt-0.5 transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-orange ${copiedLabel === 'Адрес' ? 'bg-green-600 text-white opacity-100' : 'hover:bg-brand-brown hover:text-white opacity-0 group-hover/item:opacity-100'}`}
                 >
@@ -333,7 +333,7 @@ const Footer = () => {
         <div className="bg-brand-cream/50 rounded-2xl p-4 space-y-1 text-sm">
           <p>ОГРН: 1187627032548</p>
           <p>ИНН/КПП: 7609038927/760901001</p>
-          <p>Адрес: 152128, Ярославская область, Ростовский р-н, рп. Поречье-Рыбное, ул. Кирова, д. 53</p>
+          <p>Адрес: 152128, Ярославская область, Ростовский район, рабочий поселок Поречье-Рыбное, ул Кирова, д. 53в</p>
           <p className="mt-2 font-bold">Банковские реквизиты:</p>
           <p>Расчётный счёт: 40703810738000012829</p>
           <p>Банк: ПАО «Сбербанк России»</p>
@@ -384,7 +384,7 @@ const Footer = () => {
         <h4 className="font-bold mt-4">9.</h4>
         <p>Настоящее Согласие является бессрочным, и действует все время до момента прекращения обработки персональных данных, указанных в п.7 и п.8 данного Согласия.</p>
         <h4 className="font-bold mt-4">10.</h4>
-        <p>Место нахождения организации: 152128, Ярославская область, Ростовский р-н, рп. Поречье-Рыбное, ул. Кирова, д. 53.</p>
+        <p>Место нахождения организации: 152128, Ярославская область, Ростовский район, рабочий поселок Поречье-Рыбное, ул Кирова, д. 53в.</p>
       </div>
     </LegalModal>
 
