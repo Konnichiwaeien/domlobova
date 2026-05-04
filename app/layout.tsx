@@ -37,7 +37,7 @@ export default function RootLayout({
       >
         <Script
           src="https://widget.cloudpayments.ru/bundles/cloudpayments.js"
-          strategy="lazyOnload"
+          strategy="afterInteractive"
         />
         {children}
         <Suspense fallback={null}>
