@@ -23,10 +23,31 @@ export async function generateMetadata(): Promise<Metadata> {
   const landingSlug = process.env.NEXT_PUBLIC_SITE_SLUG || "domlobova";
   const landing = await getLandingData(landingSlug);
 
+  const title = landing?.seoTitle || "Благотворительный фонд Дом Лобова";
+  const description = landing?.seoDescription || "Сайт благотворительного фонда Дом Лобова.";
+  const keywords = landing?.seoKeywords || "благотворительность, фонд Дом Лобова, помощь";
+  const baseUrl = "https://domlobova.ru";
+
   return {
-    title: landing?.seoTitle || "Благотворительный фонд Дом Лобова",
-    description: landing?.seoDescription || "Сайт благотворительного фонда Дом Лобова.",
-    keywords: landing?.seoKeywords || "благотворительность, фонд Дом Лобова, помощь",
+    title,
+    description,
+    keywords,
+    alternates: {
+      canonical: baseUrl,
+    },
+    openGraph: {
+      title,
+      description,
+      url: baseUrl,
+      siteName: title,
+      locale: 'ru_RU',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
   };
 }
 
