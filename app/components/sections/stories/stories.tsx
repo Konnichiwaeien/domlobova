@@ -93,6 +93,7 @@ const Stories = ({ stories: customStories }: StoriesProps) => {
           </h2>
           <div className="hidden md:flex gap-2">
             <button
+              aria-label="Предыдущая история"
               className="stories-prev w-12 h-12 rounded-full border border-brand-brown/10 flex items-center justify-center text-brand-brown hover:bg-brand-orange hover:text-white hover:border-brand-orange transition-all duration-300 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-brand-brown disabled:hover:border-brand-brown/10 disabled:cursor-not-allowed"
               disabled={isBeginning}
             >
@@ -101,6 +102,7 @@ const Stories = ({ stories: customStories }: StoriesProps) => {
               </svg>
             </button>
             <button
+              aria-label="Следующая история"
               className="stories-next w-12 h-12 rounded-full border border-brand-brown/10 flex items-center justify-center text-brand-brown hover:bg-brand-orange hover:text-white hover:border-brand-orange transition-all duration-300 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-brand-brown disabled:hover:border-brand-brown/10 disabled:cursor-not-allowed"
               disabled={isEnd}
             >

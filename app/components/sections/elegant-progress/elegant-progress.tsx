@@ -236,9 +236,8 @@ const ElegantProgress = ({ title, descr, partners, recentDonations = [] }: Elega
                     transition={{ duration: 2, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
                     className="relative h-full rounded-full bg-gradient-to-r from-brand-orange via-brand-orange to-brand-yellow flex items-center justify-end px-4 overflow-hidden shadow-lg shadow-brand-orange/20"
                   >
-                    {/* Shimmer sweep — CSS keyframes for reliability */}
                     <div
-                      className="progress-shimmer absolute inset-y-0 w-full blur-[2px] pointer-events-none"
+                      className="progress-shimmer absolute inset-y-0 w-full pointer-events-none transform-gpu"
                       style={{
                         background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 15%, rgba(255,255,255,0.3) 40%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0.3) 60%, rgba(255,255,255,0.05) 85%, transparent 100%)",
                       }}

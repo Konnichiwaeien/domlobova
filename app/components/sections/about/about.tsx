@@ -21,6 +21,7 @@ import {
   Clock,
   Home,
 } from "lucide-react";
+import Image from "next/image";
 import { MagneticButton } from "../../ui/magnetic-button";
 import { renderHighlightedTitle } from "../../../utils/text-parser";
 import { FeaturesMarquee } from "../features-marquee/features-marquee";
@@ -130,12 +131,12 @@ const ScrollRevealText = ({ text, progress, imageElements }: { text: string; pro
           return (
             <span 
               key={`img-${idx}`}
-              className="inline-block w-[120px] sm:w-[160px] md:w-[200px] lg:w-[240px] h-[48px] sm:h-[64px] md:h-[80px] lg:h-[88px] rounded-full overflow-hidden align-middle shadow-md shadow-brand-brown/10 border-[3px] border-white mx-1 my-0.5 shrink-0"
+              className="relative inline-block w-[120px] sm:w-[160px] md:w-[200px] lg:w-[240px] h-[48px] sm:h-[64px] md:h-[80px] lg:h-[88px] rounded-full overflow-hidden align-middle shadow-md shadow-brand-brown/10 border-[3px] border-white mx-1 my-0.5 shrink-0 transform-gpu"
               style={{
                 opacity: `clamp(0, (var(--reveal-pos) - ${progressPct}) * 0.05, 1)`,
               } as React.CSSProperties}
             >
-              <img src={part.imageData.src} className="h-full w-full object-cover" alt={part.imageData.alt} loading="lazy" />
+              <Image src={part.imageData.src} alt={part.imageData.alt || ""} fill sizes="(max-width: 768px) 160px, 240px" className="object-cover" />
             </span>
           );
         }

@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import Image from "next/image";
 
 const MarqueeStyles = memo(() => (
   <style>{`
@@ -44,11 +45,12 @@ const PhotoMarquee = ({ photos }: PhotoMarqueeProps) => {
               key={i}
               className="relative h-[320px] w-[440px] md:h-[280px] md:w-[400px] shrink-0 overflow-hidden rounded-2xl md:rounded-[2rem] shadow-xl shadow-brand-brown/5 border border-brand-brown/5 group cursor-pointer transform-gpu"
             >
-              <img
+              <Image
                 src={src}
                 alt=""
-                loading="lazy"
-                className="h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
+                fill
+                sizes="(max-width: 768px) 440px, 400px"
+                className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110 transform-gpu"
               />
               <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
             </div>

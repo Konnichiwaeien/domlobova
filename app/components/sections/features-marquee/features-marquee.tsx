@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import Image from "next/image";
 import { HeartHandshake, ShieldCheck, Users, Star, ArrowRight } from "lucide-react";
 
 // Inline keyframes — bypasses Tailwind CSS processing, guaranteed to work
@@ -73,13 +74,14 @@ const FeaturesMarquee = ({ features }: FeaturesMarqueeProps) => {
                 className={`relative h-[280px] w-[400px] md:h-[300px] md:w-[460px] shrink-0 overflow-hidden rounded-2xl md:rounded-[2rem] shadow-xl shadow-brand-brown/5 border border-brand-brown/5 group cursor-pointer ${style.bgColor} transform-gpu`}
               >
                 <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none transform-gpu">
-                  <img
+                  <Image
                     src={imgSrc}
-                    className="w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] select-none opacity-90"
+                    fill
+                    sizes="(max-width: 768px) 400px, 460px"
+                    className="object-cover scale-105 group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] select-none opacity-90 transform-gpu"
                     alt={feature.title}
-                    loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 pointer-events-none transform-gpu" />
                 </div>
 
                 <div className="relative z-10 w-full h-full p-5 md:p-6 flex flex-col justify-between">

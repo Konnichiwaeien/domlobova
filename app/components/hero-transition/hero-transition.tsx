@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState, useMemo, useCallback, memo } from "
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { Heart } from "lucide-react";
 import { useLenis } from "lenis/react";
+import Image from "next/image";
 
 // Morph keyframes — static CSS, rendered once via memo
 const MorphStyles = memo(() => (
@@ -84,10 +85,10 @@ const Blob = memo(({ blob, mouseX, mouseY }: {
         initial={{ opacity: 0, scale: 0.82 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.6, delay: blob.delay, ease: [0.22, 1, 0.36, 1] }}
-        style={{ x, y, width: "100%", height: "100%" }}
-        className={`shadow-2xl overflow-hidden will-change-transform transform-gpu ${blob.blobClass}`}
+        style={{ x, y, width: "100%", height: "100%", willChange: "border-radius, transform" }}
+        className={`relative shadow-2xl overflow-hidden transform-gpu ${blob.blobClass}`}
       >
-        <img src={blob.img} alt="" aria-hidden="true" className="w-full h-full object-cover scale-110" />
+        <Image src={blob.img} alt="" aria-hidden="true" fill sizes="33vw" priority={blob.id <= 3} className="object-cover scale-110" />
       </motion.div>
     </div>
   );
@@ -241,21 +242,28 @@ export const HeroTransition = ({
             initial={{ opacity: 0, scale: 0.85, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            className="blob-1 overflow-hidden shadow-2xl shrink-0 relative will-change-transform transform-gpu"
-            style={{ width: "74vw", height: "74vw" }}
+            className="blob-1 overflow-hidden shadow-2xl shrink-0 relative transform-gpu"
+            style={{ width: "74vw", height: "74vw", willChange: "border-radius, transform" }}
           >
             <AnimatePresence mode="sync">
-              <motion.img
+              <motion.div
                 key={mobileSlide}
-                src={images[mobileSlide]}
-                alt=""
-                aria-hidden="true"
                 initial={{ opacity: 0, scale: 1.08 }}
                 animate={{ opacity: 1, scale: 1.1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 1, ease: "easeInOut" }}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
+                className="absolute inset-0 w-full h-full"
+              >
+                <Image
+                  src={images[mobileSlide]}
+                  alt=""
+                  aria-hidden="true"
+                  fill
+                  priority={mobileSlide === 0}
+                  sizes="80vw"
+                  className="object-cover"
+                />
+              </motion.div>
             </AnimatePresence>
           </motion.div>
 
