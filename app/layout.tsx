@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { Metrika } from "./components/metrika";
 import { Suspense } from "react";
+import { SuccessModal } from "./components/ui/success-modal/success-modal";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -43,6 +44,7 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <Metrika />
         </Suspense>
+        <SuccessModal />
       </body>
     </html>
   );

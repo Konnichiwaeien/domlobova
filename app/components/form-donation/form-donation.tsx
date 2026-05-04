@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
-import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import {
   Heart,
@@ -95,6 +94,17 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
     setCampaignId(initialCampaignId || null);
     setCampaignTitle(initialCampaignTitle || null);
   }, [initialCampaignId, initialCampaignTitle]);
+
+  // Автоматическое закрытие модалки при успехе
+  useEffect(() => {
+    if (status === 'success') {
+      const timer = setTimeout(() => {
+        setStatus('idle');
+        if (onClose) onClose();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [status, onClose]);
 
   const {
     register,
@@ -187,9 +197,10 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
         return { type: 'error', message: err.message || 'Ошибка запуска виджета', status: 'fail' };
       });
 
-      if (result?.type === 'payment' && result?.status === 'success') {
-        setStatus('success');
-      } else if (result?.type === 'error' || result?.status === 'fail') {
+      if (result?.success || result?.status === 'success' || result?.status === 'Completed') {
+        if (onClose) onClose();
+        window.dispatchEvent(new CustomEvent('open-success-modal'));
+      } else if (result?.type === 'error' || result?.status === 'fail' || result?.status === 'Declined' || result?.success === false) {
         setErrorMessage(result?.message || 'Не удалось совершить платеж (отклонено или ошибка)');
         setIsLoading(false);
       } else if (result?.type === 'cancel') {
@@ -218,84 +229,6 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
   return (
     <div className={cn("bg-white rounded-2xl md:rounded-[3rem] shadow-2xl border border-brand-brown/10 mx-auto w-full relative z-20 flex flex-col pt-8 md:pt-12 lg:pt-14 pb-8 md:pb-12 lg:pb-14", className)}>
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-
-      {/* Thank You Modal Overlay */}
-      <AnimatePresence>
-        {status === 'success' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-md rounded-2xl md:rounded-[3rem]"
-          >
-            <Confetti
-              width={width}
-              height={height}
-              recycle={false}
-              numberOfPieces={400}
-              gravity={0.15}
-              colors={['#FF7A00', '#E07A5F', '#F4A261', '#E9C46A']}
-              className="!fixed !z-[60]"
-            />
-
-            <motion.div
-              initial={{ scale: 0.8, y: 50, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              transition={{ type: 'spring', delay: 0.1, duration: 0.8, bounce: 0.4 }}
-              className="relative rounded-[3rem] bg-white p-8 md:p-12 shadow-2xl shadow-brand-orange/10 border border-brand-orange/20 text-center max-w-lg w-[calc(100%-2rem)] mx-auto z-50 flex flex-col items-center"
-            >
-              <motion.div
-                initial={{ scale: 0, rotate: 0 }}
-                animate={{ scale: 1, rotate: [0, 10, -10, 0] }}
-                transition={{ 
-                  scale: { type: 'spring', delay: 0.3, bounce: 0.6 },
-                  rotate: { type: 'tween', delay: 0.5, duration: 0.5 }
-                }}
-                className="mb-8 flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-brand-orange to-[#E07A5F] text-white shadow-lg shadow-brand-orange/30 relative"
-              >
-                <motion.div
-                   animate={{ scale: [1, 1.2, 1] }}
-                   transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                >
-                  <Heart className="h-14 w-14" strokeWidth={2} fill="currentColor" />
-                </motion.div>
-
-                {[...Array(3)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 0, scale: 0 }}
-                    animate={{ opacity: [0, 1, 0], y: -50 - (i * 20), x: (i % 2 === 0 ? 20 : -20) * (i + 1), scale: [0.5, 1, 0.5] }}
-                    transition={{ repeat: Infinity, duration: 2.5, delay: i * 0.4, ease: "easeOut" }}
-                    className="absolute text-brand-orange"
-                  >
-                    <Heart className="h-6 w-6" fill="currentColor" />
-                  </motion.div>
-                ))}
-              </motion.div>
-
-              <h3 className="font-heading text-4xl md:text-5xl font-black text-brand-brown mb-4">
-                Спасибо!
-              </h3>
-
-              <p className="mt-4 text-lg font-medium text-brand-brown-light leading-relaxed">
-                Ваше пожертвование успешно отправлено. <br className="hidden sm:block" />Вы сделали этот мир чуточку светлее!
-              </p>
-
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  setStatus('idle');
-                  if (onClose) onClose();
-                }}
-                className="mt-10 rounded-full bg-brand-cream px-10 py-5 w-full text-base font-bold uppercase tracking-widest text-brand-orange hover:bg-brand-yellow/30 hover:text-brand-brown transition-colors cursor-pointer border border-brand-orange/10"
-              >
-                Закрыть
-              </motion.button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Error Modal Overlay */}
       <AnimatePresence>
