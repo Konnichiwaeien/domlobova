@@ -17,24 +17,43 @@ export const LegalModal = ({ isOpen, onClose, title, children }: LegalModalProps
   const contentRef = useRef<HTMLDivElement>(null);
   const lenis = useLenis();
   const lenisRef = useRef(lenis);
+  const onCloseRef = useRef(onClose);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { lenisRef.current = lenis; });
+  useEffect(() => { onCloseRef.current = onClose; });
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Keyboard — Escape to close
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      lenisRef.current?.stop();
-    } else {
-      document.body.style.overflow = '';
-      lenisRef.current?.start();
-    }
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCloseRef.current();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [isOpen]);
+
+  // Scroll lock — same mechanism as DonationModal to avoid conflicts
+  useEffect(() => {
+    if (!isOpen) return;
+
+    lenisRef.current?.stop();
+    document.documentElement.classList.add("scroll-locked");
+
+    const blockWheel = (e: WheelEvent) => {
+      if ((e.target as HTMLElement).closest("[data-lenis-prevent]")) return;
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    window.addEventListener("wheel", blockWheel, { passive: false, capture: true });
+
     return () => {
-      document.body.style.overflow = '';
+      window.removeEventListener("wheel", blockWheel, true);
+      document.documentElement.classList.remove("scroll-locked");
       lenisRef.current?.start();
     };
   }, [isOpen]);
@@ -44,16 +63,17 @@ export const LegalModal = ({ isOpen, onClose, title, children }: LegalModalProps
   return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25 }}
           className="fixed inset-0 z-99999 flex items-center justify-center p-4 md:p-8"
           data-lenis-prevent
           onWheel={(e) => e.stopPropagation()}
           onTouchMove={(e) => e.stopPropagation()}
         >
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
           />
@@ -86,7 +106,7 @@ export const LegalModal = ({ isOpen, onClose, title, children }: LegalModalProps
               {children}
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>,
     document.body

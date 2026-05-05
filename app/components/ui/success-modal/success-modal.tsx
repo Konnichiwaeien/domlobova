@@ -1,14 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import { Heart } from 'lucide-react';
+import { useLenis } from 'lenis/react';
 
 export const SuccessModal = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { width, height } = useWindowSize();
+
+  const lenis = useLenis();
+  const lenisRef = useRef(lenis);
+  useEffect(() => { lenisRef.current = lenis; });
 
   useEffect(() => {
     const handleOpen = () => setIsOpen(true);
@@ -16,17 +21,52 @@ export const SuccessModal = () => {
     return () => window.removeEventListener('open-success-modal', handleOpen);
   }, []);
 
+  // Keyboard — depends only on isOpen
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [isOpen]);
+
+  // Scroll lock — depends ONLY on isOpen
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Stop Lenis so it doesn't accumulate targetScroll while modal is open
+    lenisRef.current?.stop();
+    document.documentElement.classList.add("scroll-locked");
+
+    // Extra safety: block wheel at capture level for non-Lenis scroll paths
+    const blockWheel = (e: WheelEvent) => {
+      if ((e.target as HTMLElement).closest("[data-lenis-prevent]")) return;
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    window.addEventListener("wheel", blockWheel, { passive: false, capture: true });
+
+    return () => {
+      window.removeEventListener("wheel", blockWheel, true);
+      document.documentElement.classList.remove("scroll-locked");
+      lenisRef.current?.start();
+    };
+  }, [isOpen]);
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 md:p-10"
+          exit={{ opacity: 0, pointerEvents: "none" }}
+          transition={{ duration: 0.3 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10"
+          data-lenis-prevent={true}
         >
           {/* Backdrop overlay for closing */}
-          <div className="absolute inset-0" onClick={() => setIsOpen(false)} />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
           
           <Confetti
             width={width}
@@ -39,10 +79,10 @@ export const SuccessModal = () => {
           />
 
           <motion.div
-            initial={{ scale: 0.8, y: 50, opacity: 0 }}
-            animate={{ scale: 1, y: 0, opacity: 1 }}
-            exit={{ scale: 0.8, y: 50, opacity: 0 }}
-            transition={{ type: 'spring', delay: 0.1, duration: 0.8, bounce: 0.4 }}
+            initial={{ opacity: 0, y: 40, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 40, scale: 0.97 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="relative rounded-[3rem] bg-white p-8 md:p-12 shadow-2xl shadow-brand-orange/10 border border-brand-orange/20 text-center max-w-lg w-full mx-auto z-[120] flex flex-col items-center"
           >
             <motion.div
