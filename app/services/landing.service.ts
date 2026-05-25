@@ -177,3 +177,55 @@ export async function getLandingData(slug: string): Promise<LandingData | null> 
     return null;
   }
 }
+
+/**
+ * Fetches data for a single campaign by its document ID.
+ *
+ * @param documentId - The unique document identifier for the campaign.
+ * @returns A promise resolving to the campaign data object, or null if it cannot be retrieved.
+ */
+export async function getCampaignData(documentId: string): Promise<any | null> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  if (!apiUrl) {
+    throw new Error('Configuration Error: NEXT_PUBLIC_API_URL environment variable is missing.');
+  }
+
+  try {
+    const query = qs.stringify({
+      populate: ['image']
+    }, {
+      encodeValuesOnly: true
+    });
+
+    const url = `${apiUrl}/campaigns/${documentId}?${query}`;
+
+    const response = await fetch(url, {
+      next: {
+        revalidate: 60,
+        tags: [`campaign-${documentId}`]
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new ApiError(
+        response.status,
+        `Failed to fetch campaign data for ID "${documentId}": ${response.statusText}`
+      );
+    }
+
+    const { data } = await response.json();
+    return data || null;
+  } catch (error) {
+    if (error instanceof ApiError) {
+      console.error(`[API Error] ${error.status}: ${error.message}`);
+    } else {
+      console.error(`[Fetch Error] Failed to retrieve campaign data:`, error);
+    }
+    return null;
+  }
+}
+

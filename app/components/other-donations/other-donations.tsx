@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
 import { Navigation } from "swiper/modules";
@@ -66,9 +67,10 @@ interface OtherDonationsProps {
     closed?: boolean;
     documentId?: string;
   }[];
+  transparent?: boolean;
 }
 
-export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
+export const OtherDonations = ({ campaigns, transparent = false }: OtherDonationsProps) => {
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
 
@@ -110,7 +112,7 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
       : otherDonationsData.map((d, i) => ({ ...d, id: `fallback-${i}`, closed: false, imageUrl: null }));
   }, [secondaryCampaigns]);
   return (
-    <section className="relative z-30 bg-white pt-6 md:pt-8 pb-16 md:pb-24 lg:pb-28 overflow-hidden content-auto">
+    <section className={`relative z-30 pt-6 md:pt-8 pb-16 md:pb-24 lg:pb-28 overflow-hidden content-auto ${transparent ? 'bg-transparent' : 'bg-white'}`}>
       <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12">
         <div className="flex items-center justify-between mb-8 md:mb-12">
           <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-black text-brand-brown tracking-tighter">
@@ -169,23 +171,26 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
               const isCompleted = donation.closed || false;
 
               return (
-                <SwiperSlide key={idx} className="h-auto! flex">
+                <SwiperSlide key={idx} className="h-auto! flex select-none outline-none">
                   <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: idx * 0.1 }}
-                    className="flex flex-col w-full h-full bg-white rounded-2xl md:rounded-[2.5rem] border border-brand-brown/5 overflow-hidden group hover:shadow-[0_20px_50px_rgba(74,63,53,0.06)] transition-shadow duration-500 cursor-grab active:cursor-grabbing"
+                    className="flex flex-col w-full h-full bg-white rounded-2xl md:rounded-[2.5rem] border border-brand-brown/5 overflow-hidden group transition-shadow duration-500 cursor-grab active:cursor-grabbing select-none outline-none focus:outline-none focus-visible:outline-none"
+                    style={{ outline: 'none', WebkitTapHighlightColor: 'transparent', WebkitUserSelect: 'none', userSelect: 'none' }}
                   >
-                    {/* Header Icon Placeholder */}
-                    <div className={`relative h-48 md:h-64 w-full flex items-center justify-center shrink-0 transition-colors duration-700 overflow-hidden rounded-b-4xl md:rounded-b-[2.5rem] shadow-sm ${donation.color}`}>
+                    {/* Header Icon Placeholder wrapped in Link */}
+                    <Link href={`/campaigns/${donation.id}`} draggable="false" className={`relative h-48 md:h-64 w-full flex items-center justify-center shrink-0 transition-colors duration-700 overflow-hidden rounded-b-4xl md:rounded-b-[2.5rem] block select-none outline-none ${donation.color}`} style={{ outline: 'none', WebkitTapHighlightColor: 'transparent', WebkitUserDrag: 'none' } as any}>
                       {donation.imageUrl ? (
                         <Image 
                           src={donation.imageUrl} 
                           alt={donation.title} 
                           fill 
                           sizes="(max-width: 768px) 100vw, 33vw"
-                          className={`object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${isCompleted ? 'saturate-0 opacity-80' : ''}`}
+                          draggable="false"
+                          className={`object-cover transition-transform duration-700 ease-out group-hover:scale-105 select-none ${isCompleted ? 'saturate-0 opacity-80' : ''}`}
+                          style={{ WebkitUserDrag: 'none' } as any}
                         />
                       ) : (
                         <donation.icon className={`w-20 h-20 relative z-10 transition-transform duration-700 ease-out group-hover:scale-110 ${isCompleted ? 'opacity-20' : 'opacity-80'}`} strokeWidth={1.5} />
@@ -203,12 +208,14 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
                           Осталось {Math.max(goal - current, 0).toLocaleString("ru-RU")} ₽
                         </div>
                       )}
-                    </div>
+                    </Link>
 
                     {/* Content */}
                     <div className="p-5 md:p-6 lg:p-8 flex flex-col flex-1">
                       <h3 className="font-heading text-lg md:text-xl lg:text-2xl font-black text-brand-brown mb-2 md:mb-3 group-hover:text-brand-orange transition-colors line-clamp-2">
-                        {donation.title}
+                        <Link href={`/campaigns/${donation.id}`} draggable="false" className="hover:text-brand-orange transition-colors block select-none outline-none" style={{ outline: 'none', WebkitTapHighlightColor: 'transparent', WebkitUserDrag: 'none' } as any}>
+                          {donation.title}
+                        </Link>
                       </h3>
                       <p className="text-brand-brown-light text-sm md:text-base font-medium leading-relaxed line-clamp-3 mb-5 md:mb-6 flex-1">
                         {donation.description}
@@ -232,26 +239,36 @@ export const OtherDonations = ({ campaigns }: OtherDonationsProps) => {
                         </div>
                       </div>
 
-                      {/* Action Button */}
-                      <button 
-                        disabled={isCompleted}
-                        onClick={() => {
-                          if (!isCompleted) {
-                            window.dispatchEvent(
-                              new CustomEvent('open-donation-modal', {
-                                detail: {
-                                  campaignId: donation.id,
-                                  campaignTitle: donation.title
-                                }
-                              })
-                            );
-                          }
-                        }}
-                        className={`mt-6 w-full py-4 rounded-xl flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest transition-all duration-300 ${isCompleted ? 'bg-brand-cream/50 text-brand-brown/40 cursor-not-allowed border border-brand-brown/5' : 'bg-brand-cream text-brand-brown hover:bg-brand-orange hover:text-white border border-brand-brown/10 hover:border-brand-orange'}`}
-                      >
-                        {isCompleted ? 'Завершено' : 'Помочь'}
-                        {!isCompleted && <Heart className="w-4 h-4" strokeWidth={2.5} />}
-                      </button>
+                      {/* Action Buttons split */}
+                      <div className="mt-6 flex gap-3 shrink-0">
+                        <Link 
+                          href={`/campaigns/${donation.id}`}
+                          draggable="false"
+                          className="flex-1 py-3.5 rounded-xl border border-brand-brown/10 hover:border-brand-orange bg-brand-cream hover:bg-brand-orange hover:text-white text-brand-brown transition-all duration-300 text-xs font-bold uppercase tracking-widest flex items-center justify-center select-none"
+                          style={{ outline: 'none', WebkitTapHighlightColor: 'transparent', WebkitUserDrag: 'none' } as any}
+                        >
+                          Детали
+                        </Link>
+                        <button 
+                          disabled={isCompleted}
+                          onClick={() => {
+                            if (!isCompleted) {
+                              window.dispatchEvent(
+                                new CustomEvent('open-donation-modal', {
+                                  detail: {
+                                    campaignId: donation.id,
+                                    campaignTitle: donation.title
+                                  }
+                                })
+                              );
+                            }
+                          }}
+                          className={`flex-1 py-3.5 rounded-xl flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest transition-all duration-300 ${isCompleted ? 'bg-brand-cream/50 text-brand-brown/40 cursor-not-allowed border border-brand-brown/5' : 'bg-brand-orange text-white hover:bg-brand-orange-light shadow-md shadow-brand-orange/10'}`}
+                        >
+                          {isCompleted ? 'Завершен' : 'Помочь'}
+                          {!isCompleted && <Heart className="w-3.5 h-3.5 fill-current" />}
+                        </button>
+                      </div>
                     </div>
                   </motion.div>
                 </SwiperSlide>

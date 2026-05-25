@@ -65,7 +65,21 @@ const formatAmount = (amount: number) => {
   return amount.toLocaleString('ru-RU') + ' ₽';
 };
 
-export const FormDonation = ({ className, onClose, initialCampaignId, initialCampaignTitle }: { className?: string; onClose?: () => void; initialCampaignId?: string; initialCampaignTitle?: string } = {}) => {
+export const FormDonation = ({ 
+  className, 
+  onClose, 
+  initialCampaignId, 
+  initialCampaignTitle,
+  isSidebar = false,
+  title = "Выберите сумму пожертвования"
+}: { 
+  className?: string; 
+  onClose?: () => void; 
+  initialCampaignId?: string; 
+  initialCampaignTitle?: string;
+  isSidebar?: boolean;
+  title?: string;
+} = {}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success'>('idle');
   const [showOffer, setShowOffer] = useState(false);
@@ -278,11 +292,11 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
         )}
       </AnimatePresence>
 
-      {campaignId && campaignTitle && (
+      {onClose && !isSidebar && campaignId && campaignTitle && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center justify-center mb-6 px-6 md:px-10 lg:px-14"
+          className="flex flex-col items-center justify-center mb-6 px-5 sm:px-6 md:px-8"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-orange-light/20 border border-brand-orange/30">
             <Heart className="w-4 h-4 text-brand-orange" fill="currentColor" />
@@ -309,9 +323,9 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
         </button>
       )}
 
-      <div className="px-6 md:px-10 lg:px-14">
-        <h3 className="text-2xl md:text-3xl lg:text-[2.5rem] font-heading font-black text-brand-brown mb-8 text-center leading-tight">
-          Выберите сумму пожертвования
+      <div className="px-5 sm:px-6 md:px-8">
+        <h3 className="text-2xl md:text-3xl lg:text-[2.2rem] font-heading font-black text-brand-brown mb-8 text-center leading-tight">
+          {title}
         </h3>
 
         {/* Переключатель разово/ежемесячно */}
@@ -352,47 +366,44 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* Суммы: горизонтальный скролл на мобильных, grid на sm+ */}
-
-        {/* Mobile: draggable horizontal scroll */}
-        <div className="sm:hidden mb-8 px-6 overflow-hidden">
-          <motion.div
-            ref={amountsInnerRef}
-            className="flex gap-3 cursor-grab active:cursor-grabbing touch-pan-x"
-            drag="x"
-            dragConstraints={dragBounds}
-            dragElastic={0.12}
-            dragTransition={{ bounceStiffness: 400, bounceDamping: 35 }}
+        {/* Mobile/Tablet: Horizontally Scrollable Amounts snapped (hidden on lg+) */}
+        <div className="lg:hidden mb-8 px-5 sm:px-6 md:px-8 relative overflow-hidden group">
+          <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none z-10" />
+          <div 
+            className="flex gap-3 overflow-x-auto pb-2 pr-12 scrollbar-none scroll-smooth snap-x snap-mandatory"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {AMOUNTS.map((amount) => {
               const isSelected = safeAmount === amount;
               return (
-                <motion.button
+                <button
                   key={amount}
                   type="button"
                   onClick={() => handleAmountSelect(amount)}
-                  whileTap={{ scale: 0.95 }}
                   className={cn(
-                    'flex items-center justify-center rounded-xl border-2 outline-none transition-colors duration-300 shrink-0 w-[120px] py-5',
+                    'flex items-center justify-center rounded-xl border-2 outline-none transition-all duration-300 shrink-0 w-[110px] sm:w-[125px] py-4 snap-center cursor-pointer',
                     isSelected
-                      ? 'border-brand-orange bg-brand-orange text-white shadow-lg shadow-brand-orange/30'
-                      : 'border-brand-brown/10 bg-brand-cream text-brand-brown'
+                      ? 'border-brand-orange bg-brand-orange text-white shadow-lg shadow-brand-orange/25'
+                      : 'border-brand-brown/10 bg-brand-cream text-brand-brown hover:border-brand-orange/40 hover:bg-white'
                   )}
                 >
                   <span className={cn(
-                    'font-heading font-black text-lg whitespace-nowrap pointer-events-none select-none',
+                    'font-heading font-black text-lg sm:text-xl whitespace-nowrap',
                     isSelected ? 'text-white' : 'text-brand-brown'
                   )}>
                     {formatAmount(amount)}
                   </span>
-                </motion.button>
+                </button>
               );
             })}
-          </motion.div>
+          </div>
         </div>
 
-        {/* Tablet+Desktop: grid */}
-        <div className="hidden sm:grid grid-cols-4 gap-4 mb-8 px-6 md:px-10 lg:px-14">
+        {/* Desktop: Grid for Amount selection (visible on lg+) */}
+        <div className={cn(
+          "hidden lg:grid gap-3 mb-8 px-5 sm:px-6 md:px-8",
+          isSidebar ? "grid-cols-2" : "grid-cols-4"
+        )}>
           {AMOUNTS.map((amount) => {
             const isSelected = safeAmount === amount;
             return (
@@ -401,15 +412,14 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
                 type="button"
                 onClick={() => handleAmountSelect(amount)}
                 className={cn(
-                  'flex items-center justify-center rounded-2xl border-2 outline-none transition-all duration-300 cursor-pointer',
-                  'py-6 md:py-6 lg:py-8',
+                  'flex items-center justify-center rounded-xl border-2 outline-none transition-all duration-300 py-4 cursor-pointer',
                   isSelected
-                    ? 'border-brand-orange bg-brand-orange text-white shadow-lg shadow-brand-orange/30'
+                    ? 'border-brand-orange bg-brand-orange text-white shadow-md shadow-brand-orange/20'
                     : 'border-brand-brown/10 bg-brand-cream text-brand-brown hover:border-brand-orange/40 hover:bg-white'
                 )}
               >
                 <span className={cn(
-                  'font-heading font-black text-2xl md:text-2xl lg:text-3xl whitespace-nowrap',
+                  'font-heading font-black text-lg xl:text-xl whitespace-nowrap',
                   isSelected ? 'text-white' : 'text-brand-brown'
                 )}>
                   {formatAmount(amount)}
@@ -419,7 +429,7 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
           })}
         </div>
 
-        <div className="px-6 md:px-10 lg:px-14">
+        <div className="px-5 sm:px-6 md:px-8">
           {/* Поле "Другая сумма" */}
           <div className="mb-6">
             <label className="block text-xs font-bold text-brand-brown-light mb-2 ml-1 uppercase tracking-wider">Другая сумма</label>
@@ -444,7 +454,10 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
           </div>
 
           {/* Поля имени и email */}
-          <div className="grid sm:grid-cols-2 gap-4 mb-6">
+          <div className={cn(
+            "mb-6",
+            isSidebar ? "flex flex-col gap-4" : "grid sm:grid-cols-2 gap-4"
+          )}>
             <div>
               <div className="relative group">
                 <User size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-brown-light transition-colors duration-300 group-focus-within:text-brand-orange" />
@@ -465,6 +478,7 @@ export const FormDonation = ({ className, onClose, initialCampaignId, initialCam
                 )}
               </AnimatePresence>
             </div>
+            
             <div>
               <div className="relative group">
                 <AtSign size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-brown-light transition-colors duration-300 group-focus-within:text-brand-orange" />

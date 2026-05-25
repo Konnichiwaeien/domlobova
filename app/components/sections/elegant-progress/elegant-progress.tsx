@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
+import Link from "next/link";
 import { Heart, HeartHandshake, Target, Users, TrendingUp, Sparkles, RefreshCw, Hand } from "lucide-react";
 import { MagneticButton } from "../../ui/magnetic-button";
 import { AnimatedCounter } from "../../ui/animated-counter";
@@ -186,8 +187,14 @@ const ElegantProgress = ({ title, descr, partners, recentDonations = [] }: Elega
                       Основной сбор
                     </span>
                   </div>
-                  <h3 className="font-heading text-xl md:text-3xl font-black uppercase tracking-wide text-brand-brown">
-                    {primaryCampaign?.name || "Спецпитание для подопечных"}
+                  <h3 className="font-heading text-xl md:text-3xl font-black uppercase tracking-wide text-brand-brown hover:text-brand-orange transition-colors">
+                    {primaryCampaign ? (
+                      <Link href={`/campaigns/${primaryCampaign.documentId || primaryCampaign.id}`} className="block">
+                        {primaryCampaign.name}
+                      </Link>
+                    ) : (
+                      "Спецпитание для подопечных"
+                    )}
                   </h3>
                 </motion.div>
                 
@@ -253,26 +260,36 @@ const ElegantProgress = ({ title, descr, partners, recentDonations = [] }: Elega
                   </motion.div>
                 </div>
                 
-                <div className="mt-8 flex flex-col sm:flex-row gap-6 items-center justify-between">
+                <div className="mt-8 flex flex-col md:flex-row gap-6 items-center justify-between">
                   <div className="text-brand-brown/80 text-sm font-bold uppercase tracking-widest leading-relaxed">
                     <HeartHandshake className="inline-block w-4 h-4 mb-1 mr-2 text-brand-orange" />
                     {primaryCampaign?.descr || "Собранная сумма позволит нам непрерывно оказывать помощь."}
                   </div>
-                  <MagneticButton
-                    onClick={() => {
-                      window.dispatchEvent(
-                        new CustomEvent('open-donation-modal', {
-                          detail: primaryCampaign ? {
-                            campaignId: primaryCampaign.documentId || String(primaryCampaign.id),
-                            campaignTitle: primaryCampaign.name
-                          } : undefined
-                        })
-                      );
-                    }}
-                    className="w-full sm:w-auto bg-brand-orange hover:bg-white hover:text-brand-orange text-white transition-colors duration-500 rounded-full px-10 py-5 mx-auto md:mx-0 text-sm md:text-base font-bold uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 group shrink-0"
-                  >
-                    Помочь <Heart className="w-5 h-5 group-hover:scale-110 transition-transform fill-current" />
-                  </MagneticButton>
+                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto shrink-0">
+                    {primaryCampaign && (
+                      <Link
+                        href={`/campaigns/${primaryCampaign.documentId || primaryCampaign.id}`}
+                        className="w-full sm:w-auto bg-white border border-brand-brown/10 hover:border-brand-orange text-brand-brown hover:text-brand-orange transition-all duration-300 rounded-full px-8 py-4.5 text-sm md:text-base font-bold uppercase tracking-widest flex items-center justify-center gap-2 group shrink-0"
+                      >
+                        Подробнее
+                      </Link>
+                    )}
+                    <MagneticButton
+                      onClick={() => {
+                        window.dispatchEvent(
+                          new CustomEvent('open-donation-modal', {
+                            detail: primaryCampaign ? {
+                              campaignId: primaryCampaign.documentId || String(primaryCampaign.id),
+                              campaignTitle: primaryCampaign.name
+                            } : undefined
+                          })
+                        );
+                      }}
+                      className="w-full sm:w-auto bg-brand-orange hover:bg-white hover:text-brand-orange text-white transition-colors duration-500 rounded-full px-8 py-5 text-sm md:text-base font-bold uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 group shrink-0"
+                    >
+                      Помочь <Heart className="w-5 h-5 group-hover:scale-110 transition-transform fill-current" />
+                    </MagneticButton>
+                  </div>
                 </div>
               </div>
             </div>
