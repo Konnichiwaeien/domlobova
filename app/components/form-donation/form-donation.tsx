@@ -241,7 +241,11 @@ export const FormDonation = ({
     );
 
   return (
-    <div className={cn("bg-white rounded-2xl md:rounded-[3rem] shadow-2xl border border-brand-brown/10 mx-auto w-full relative z-20 flex flex-col pt-8 md:pt-12 lg:pt-14 pb-8 md:pb-12 lg:pb-14", className)}>
+    <div className={cn(
+      "bg-white rounded-2xl md:rounded-[3rem] shadow-2xl border border-brand-brown/10 mx-auto w-full relative z-20 flex flex-col",
+      isSidebar ? "pt-8 pb-8 md:pt-10 md:pb-10" : "pt-8 md:pt-12 lg:pt-16 pb-8 md:pb-12 lg:pb-16",
+      className
+    )}>
       <div className="flex-1 overflow-y-auto custom-scrollbar">
 
       {/* Error Modal Overlay */}
@@ -323,8 +327,11 @@ export const FormDonation = ({
         </button>
       )}
 
-      <div className="px-5 sm:px-6 md:px-8">
-        <h3 className="text-2xl md:text-3xl lg:text-[2.2rem] font-heading font-black text-brand-brown mb-8 text-center leading-tight">
+      <div className={isSidebar ? "px-5 sm:px-6 md:px-8" : "px-6 md:px-10 lg:px-14"}>
+        <h3 className={cn(
+          "font-heading font-black text-brand-brown mb-8 text-center leading-tight",
+          isSidebar ? "text-2xl md:text-3xl" : "text-2xl md:text-4xl lg:text-[2.5rem]"
+        )}>
           {title}
         </h3>
 
@@ -401,8 +408,8 @@ export const FormDonation = ({
 
         {/* Desktop: Grid for Amount selection (visible on lg+) */}
         <div className={cn(
-          "hidden lg:grid gap-3 mb-8 px-5 sm:px-6 md:px-8",
-          isSidebar ? "grid-cols-2" : "grid-cols-4"
+          "hidden lg:grid mb-8",
+          isSidebar ? "grid-cols-2 gap-3 px-5 sm:px-6 md:px-8" : "grid-cols-4 gap-4 px-6 md:px-10 lg:px-14"
         )}>
           {AMOUNTS.map((amount) => {
             const isSelected = safeAmount === amount;
@@ -412,15 +419,16 @@ export const FormDonation = ({
                 type="button"
                 onClick={() => handleAmountSelect(amount)}
                 className={cn(
-                  'flex items-center justify-center rounded-xl border-2 outline-none transition-all duration-300 py-4 cursor-pointer',
+                  'flex items-center justify-center border-2 outline-none transition-all duration-300 cursor-pointer',
+                  isSidebar ? 'rounded-xl py-4' : 'rounded-2xl md:rounded-[1.5rem] py-6 md:py-6 lg:py-8',
                   isSelected
-                    ? 'border-brand-orange bg-brand-orange text-white shadow-md shadow-brand-orange/20'
+                    ? 'border-brand-orange bg-brand-orange text-white shadow-lg shadow-brand-orange/25 scale-[1.01]'
                     : 'border-brand-brown/10 bg-brand-cream text-brand-brown hover:border-brand-orange/40 hover:bg-white'
                 )}
               >
                 <span className={cn(
-                  'font-heading font-black text-lg xl:text-xl whitespace-nowrap',
-                  isSelected ? 'text-white' : 'text-brand-brown'
+                  'font-heading font-black whitespace-nowrap',
+                  isSidebar ? 'text-lg xl:text-xl' : 'text-2xl md:text-2xl lg:text-3xl'
                 )}>
                   {formatAmount(amount)}
                 </span>
@@ -429,7 +437,7 @@ export const FormDonation = ({
           })}
         </div>
 
-        <div className="px-5 sm:px-6 md:px-8">
+        <div className={isSidebar ? "px-5 sm:px-6 md:px-8" : "px-6 md:px-10 lg:px-14"}>
           {/* Поле "Другая сумма" */}
           <div className="mb-6">
             <label className="block text-xs font-bold text-brand-brown-light mb-2 ml-1 uppercase tracking-wider">Другая сумма</label>
@@ -530,7 +538,7 @@ export const FormDonation = ({
             id="form-submit"
             type="submit"
             disabled={isLoading || !isValid}
-            className="w-full rounded-xl md:rounded-2xl bg-brand-brown py-4 md:py-5 text-center text-base md:text-xl font-black uppercase tracking-widest text-white transition-all hover:bg-brand-orange disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer shadow-xl shadow-brand-brown/20"
+            className="w-full rounded-xl md:rounded-2xl bg-brand-brown py-4 md:py-5 text-center text-base md:text-xl font-black uppercase tracking-widest text-white cursor-pointer shadow-xl shadow-brand-brown/20 hover:bg-brand-orange hover:scale-[1.01] hover:shadow-2xl hover:shadow-brand-orange/20 active:scale-[0.99] focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none flex items-center justify-center transition-all duration-300"
           >
             {isLoading ? <Loader2 className="animate-spin h-8 w-8" /> : (isRecurring ? 'Подписка на помощь' : 'Помочь')}
           </button>

@@ -244,10 +244,10 @@ export const OtherDonations = ({ campaigns, transparent = false }: OtherDonation
                         <Link 
                           href={`/campaigns/${donation.id}`}
                           draggable="false"
-                          className="flex-1 py-3.5 rounded-xl border border-brand-brown/10 hover:border-brand-orange bg-brand-cream hover:bg-brand-orange hover:text-white text-brand-brown transition-all duration-300 text-xs font-bold uppercase tracking-widest flex items-center justify-center select-none"
+                          className="flex-1 py-3.5 rounded-xl border border-brand-brown/10 hover:border-brand-orange bg-brand-cream hover:bg-brand-orange hover:text-white text-brand-brown transition-all duration-300 text-xs font-bold uppercase tracking-widest flex items-center justify-center select-none cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/20"
                           style={{ outline: 'none', WebkitTapHighlightColor: 'transparent', WebkitUserDrag: 'none' } as any}
                         >
-                          Детали
+                          Подробнее
                         </Link>
                         <button 
                           disabled={isCompleted}
@@ -263,7 +263,7 @@ export const OtherDonations = ({ campaigns, transparent = false }: OtherDonation
                               );
                             }
                           }}
-                          className={`flex-1 py-3.5 rounded-xl flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest transition-all duration-300 ${isCompleted ? 'bg-brand-cream/50 text-brand-brown/40 cursor-not-allowed border border-brand-brown/5' : 'bg-brand-orange text-white hover:bg-brand-orange-light shadow-md shadow-brand-orange/10'}`}
+                          className={`flex-1 py-3.5 rounded-xl flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest transition-all duration-300 ${isCompleted ? 'bg-brand-cream/50 text-brand-brown/40 cursor-not-allowed border border-brand-brown/5' : 'cursor-pointer bg-brand-orange text-white hover:bg-brand-orange-dark hover:scale-[1.02] hover:shadow-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/30 shadow-md shadow-brand-orange/15'}`}
                         >
                           {isCompleted ? 'Завершен' : 'Помочь'}
                           {!isCompleted && <Heart className="w-3.5 h-3.5 fill-current" />}
