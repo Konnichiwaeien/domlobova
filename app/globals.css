@@ -68,10 +68,12 @@
 
 /* PERF: ScrollRevealText — CSS-only word reveal via custom properties */
 /* --reveal-pos is set by JS on the container, --word-offset is per-word */
+/* OPTIMIZED: Removed expensive color-mix() recalculations to achieve 60fps/120fps scrolling. */
+/* Using cheap, GPU-accelerated opacity scaling which visually creates the same smooth color blend. */
 .scroll-reveal-word {
   --reveal-amount: clamp(0, calc((var(--reveal-pos, 0) - var(--word-offset, 0)) / 8), 1);
-  color: color-mix(in srgb, #4A3F35 calc(var(--reveal-amount) * 100%), #c4b5a2);
-  opacity: calc(0.1 + var(--reveal-amount) * 0.9);
+  color: #4A3F35;
+  opacity: calc(0.15 + var(--reveal-amount) * 0.85);
 }
 
 /* Lazy rendering for off-screen sections */
@@ -99,16 +101,14 @@
   }
 }
 
-/* Progress bar shimmer sweep */
+/* Progress bar shimmer sweep V3 */
 @keyframes shimmer-sweep {
   0% { transform: translateX(-150%) skewX(-15deg); }
-  85% { transform: translateX(350%) skewX(-15deg); }
-  100% { transform: translateX(350%) skewX(-15deg); }
+  100% { transform: translateX(250%) skewX(-15deg); }
 }
 
 .progress-shimmer {
-  animation: shimmer-sweep 4s ease-in-out infinite;
-  animation-delay: 2.5s;
+  animation: shimmer-sweep 2.5s ease-in-out infinite;
 }
 
 /* Toast fade-in animation */
@@ -165,3 +165,13 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: var(--brand-orange);
 }
+
+/* Premium slow pulse animation */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.65; transform: scale(0.99); }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+

@@ -175,9 +175,13 @@ export const FormDonation = ({
 
       const intentParams: any = {
         publicTerminalId: process.env.NEXT_PUBLIC_CLOUDPAYMENTS_PUBLIC_ID || '',
-        description: data.isRecurring 
-          ? 'Ежемесячное пожертвование в Дом милосердия кузнеца Лобова' 
-          : 'Пожертвование в Дом милосердия кузнеца Лобова',
+        description: campaignTitle 
+          ? (data.isRecurring 
+              ? `Ежемесячное пожертвование на сбор: ${campaignTitle}` 
+              : `Пожертвование на сбор: ${campaignTitle}`)
+          : (data.isRecurring 
+              ? 'Ежемесячное пожертвование в Дом милосердия кузнеца Лобова' 
+              : 'Пожертвование в Дом милосердия кузнеца Лобова'),
         amount: data.amount,
         currency: 'RUB',
         paymentSchema: 'Single',
@@ -197,6 +201,7 @@ export const FormDonation = ({
           isAnonymous: data.isAnonymous,
           isRecurring: data.isRecurring,
           ...(campaignId ? { campaignId } : {}),
+          ...(campaignTitle ? { campaignTitle } : {}),
         },
         ...(data.isRecurring ? {
           recurrent: {

@@ -8,7 +8,7 @@ import type { Swiper as SwiperType } from "swiper";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
-import { Copy, Heart, Users, Bed, Home, Package, Activity } from "lucide-react";
+import { Copy, Heart, Users, Bed, Home, Package, Activity, ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 const otherDonationsData = [
@@ -66,11 +66,13 @@ interface OtherDonationsProps {
     primary?: boolean;
     closed?: boolean;
     documentId?: string;
+    slug?: string;
   }[];
   transparent?: boolean;
+  className?: string;
 }
 
-export const OtherDonations = ({ campaigns, transparent = false }: OtherDonationsProps) => {
+export const OtherDonations = ({ campaigns, transparent = false, className = "" }: OtherDonationsProps) => {
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
 
@@ -99,6 +101,7 @@ export const OtherDonations = ({ campaigns, transparent = false }: OtherDonation
 
           return {
             id: c.documentId || String(c.id),
+            slug: c.slug,
             title: c.name || "Сбор",
             description: c.descr || "",
             goal: c.goal || 0,
@@ -109,10 +112,10 @@ export const OtherDonations = ({ campaigns, transparent = false }: OtherDonation
             icon
           };
         })
-      : otherDonationsData.map((d, i) => ({ ...d, id: `fallback-${i}`, closed: false, imageUrl: null }));
+      : otherDonationsData.map((d, i) => ({ ...d, id: `fallback-${i}`, slug: `fallback-${i}`, closed: false, imageUrl: null }));
   }, [secondaryCampaigns]);
   return (
-    <section className={`relative z-30 pt-6 md:pt-8 pb-16 md:pb-24 lg:pb-28 overflow-hidden content-auto ${transparent ? 'bg-transparent' : 'bg-white'}`}>
+    <section className={`relative z-30 pt-6 md:pt-8 pb-16 md:pb-24 lg:pb-28 overflow-hidden content-auto ${transparent ? 'bg-transparent' : 'bg-white'} ${className}`}>
       <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12">
         <div className="flex items-center justify-between mb-8 md:mb-12">
           <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-black text-brand-brown tracking-tighter">
@@ -140,7 +143,13 @@ export const OtherDonations = ({ campaigns, transparent = false }: OtherDonation
           </div>
         </div>
 
-        <div className="relative w-full overflow-hidden rounded-2xl md:rounded-[3rem]">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="relative w-full overflow-hidden rounded-2xl md:rounded-[3rem]"
+        >
           <Swiper
             modules={[Navigation]}
             navigation={{
@@ -172,16 +181,12 @@ export const OtherDonations = ({ campaigns, transparent = false }: OtherDonation
 
               return (
                 <SwiperSlide key={idx} className="h-auto! flex select-none outline-none">
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: idx * 0.1 }}
-                    className="flex flex-col w-full h-full bg-white rounded-2xl md:rounded-[2.5rem] border border-brand-brown/5 overflow-hidden group transition-shadow duration-500 cursor-grab active:cursor-grabbing select-none outline-none focus:outline-none focus-visible:outline-none"
+                  <div 
+                    className="flex flex-col w-full h-full bg-white hover:bg-brand-cream/15 rounded-2xl md:rounded-[2.5rem] border border-brand-brown/5 hover:border-brand-orange/30 overflow-hidden group transition-all duration-300 cursor-grab active:cursor-grabbing select-none outline-none focus:outline-none focus-visible:outline-none"
                     style={{ outline: 'none', WebkitTapHighlightColor: 'transparent', WebkitUserSelect: 'none', userSelect: 'none' }}
                   >
                     {/* Header Icon Placeholder wrapped in Link */}
-                    <Link href={`/campaigns/${donation.id}`} draggable="false" className={`relative h-48 md:h-64 w-full flex items-center justify-center shrink-0 transition-colors duration-700 overflow-hidden rounded-b-4xl md:rounded-b-[2.5rem] block select-none outline-none ${donation.color}`} style={{ outline: 'none', WebkitTapHighlightColor: 'transparent', WebkitUserDrag: 'none' } as any}>
+                    <Link href={`/campaigns/${donation.slug || donation.id}`} draggable="false" className={`relative h-48 md:h-64 w-full flex items-center justify-center shrink-0 transition-colors duration-700 overflow-hidden rounded-b-4xl md:rounded-b-[2.5rem] block select-none outline-none ${donation.color}`} style={{ outline: 'none', WebkitTapHighlightColor: 'transparent', WebkitUserDrag: 'none' } as any}>
                       {donation.imageUrl ? (
                         <Image 
                           src={donation.imageUrl} 
@@ -213,7 +218,7 @@ export const OtherDonations = ({ campaigns, transparent = false }: OtherDonation
                     {/* Content */}
                     <div className="p-5 md:p-6 lg:p-8 flex flex-col flex-1">
                       <h3 className="font-heading text-lg md:text-xl lg:text-2xl font-black text-brand-brown mb-2 md:mb-3 group-hover:text-brand-orange transition-colors line-clamp-2">
-                        <Link href={`/campaigns/${donation.id}`} draggable="false" className="hover:text-brand-orange transition-colors block select-none outline-none" style={{ outline: 'none', WebkitTapHighlightColor: 'transparent', WebkitUserDrag: 'none' } as any}>
+                        <Link href={`/campaigns/${donation.slug || donation.id}`} draggable="false" className="hover:text-brand-orange transition-colors block select-none outline-none" style={{ outline: 'none', WebkitTapHighlightColor: 'transparent', WebkitUserDrag: 'none' } as any}>
                           {donation.title}
                         </Link>
                       </h3>
@@ -242,12 +247,13 @@ export const OtherDonations = ({ campaigns, transparent = false }: OtherDonation
                       {/* Action Buttons split */}
                       <div className="mt-6 flex gap-3 shrink-0">
                         <Link 
-                          href={`/campaigns/${donation.id}`}
+                          href={`/campaigns/${donation.slug || donation.id}`}
                           draggable="false"
-                          className="flex-1 py-3.5 rounded-xl border border-brand-brown/10 hover:border-brand-orange bg-brand-cream hover:bg-brand-orange hover:text-white text-brand-brown transition-all duration-300 text-xs font-bold uppercase tracking-widest flex items-center justify-center select-none cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/20"
+                          className="flex-1 py-4 rounded-xl border border-brand-brown/10 hover:border-brand-orange bg-brand-cream hover:bg-brand-orange hover:text-white text-brand-brown transition-all duration-300 text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-1.5 select-none cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/20 group/btn"
                           style={{ outline: 'none', WebkitTapHighlightColor: 'transparent', WebkitUserDrag: 'none' } as any}
                         >
-                          Подробнее
+                          <span>Подробнее</span>
+                          <ArrowUpRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
                         </Link>
                         <button 
                           disabled={isCompleted}
@@ -263,18 +269,29 @@ export const OtherDonations = ({ campaigns, transparent = false }: OtherDonation
                               );
                             }
                           }}
-                          className={`flex-1 py-3.5 rounded-xl flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest transition-all duration-300 ${isCompleted ? 'bg-brand-cream/50 text-brand-brown/40 cursor-not-allowed border border-brand-brown/5' : 'cursor-pointer bg-brand-orange text-white hover:bg-brand-orange-dark hover:scale-[1.02] hover:shadow-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/30 shadow-md shadow-brand-orange/15'}`}
+                          className={`flex-1 py-4 rounded-xl flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest transition-all duration-300 group/btn ${isCompleted ? 'bg-brand-cream/50 text-brand-brown/40 cursor-not-allowed border border-brand-brown/5' : 'cursor-pointer bg-brand-orange text-white hover:bg-[#cc492a] hover:scale-[1.02] hover:shadow-lg focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/30 shadow-md shadow-brand-orange/15'}`}
                         >
                           {isCompleted ? 'Завершен' : 'Помочь'}
-                          {!isCompleted && <Heart className="w-3.5 h-3.5 fill-current" />}
+                          {!isCompleted && <Heart className="w-3.5 h-3.5 fill-current transition-transform duration-300 group-hover/btn:scale-110 transform-gpu" />}
                         </button>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 </SwiperSlide>
               );
             })}
           </Swiper>
+        </motion.div>
+
+        {/* Bottom Call to Action: Все сборы */}
+        <div className="mt-8 md:mt-12 flex justify-center">
+          <Link
+            href="/campaigns"
+            className="inline-flex items-center gap-2 px-10 py-5 bg-[#E65C3D] hover:bg-[#cc492a] text-white rounded-full text-sm font-semibold uppercase tracking-widest cursor-pointer hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/30 transition-all duration-300 group"
+          >
+            <span>Все сборы</span>
+            <span className="inline-block group-hover:translate-x-1 transition-transform ml-1">→</span>
+          </Link>
         </div>
       </div>
     </section>

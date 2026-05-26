@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { Heart, Menu, X, ArrowRight } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { MagneticButton } from "../../ui/magnetic-button";
 import { DonationModal } from "../../ui/donation-modal";
 import { useLenis } from "lenis/react";
@@ -13,6 +14,10 @@ const Header = () => {
   const [heroHeight, setHeroHeight] = useState(0);
   const [isDonationOpen, setIsDonationOpen] = useState(false);
   const [modalCampaign, setModalCampaign] = useState<{ id: string; title: string } | null>(null);
+  
+  const pathname = usePathname();
+  const router = useRouter();
+
 
   const { scrollY } = useScroll();
 
@@ -75,8 +80,13 @@ const Header = () => {
 
   const scrollTo = (id: string) => {
     setIsOpen(false);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    if (pathname !== "/" && pathname !== "") {
+      router.push(`/#${id}`);
+    } else {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    }
   };
+
 
   // Listen for global donation modal event (single source of truth)
   useEffect(() => {
@@ -96,7 +106,7 @@ const Header = () => {
   return (
     <>
       <motion.header
-        className={`fixed top-0 left-0 right-0 z-50 transition-[background,padding,box-shadow] duration-500 px-4 md:px-12 ${
+        className={`fixed top-0 left-0 right-0 z-[150] transition-[background,padding,box-shadow] duration-500 px-4 md:px-12 ${
           isScrolled && !isOpen ? "bg-[#F9F8F6] shadow-md py-3 md:py-4" : "bg-transparent py-4 md:py-8"
         }`}
       >
@@ -148,10 +158,10 @@ const Header = () => {
           <div className="flex-1 flex items-center justify-end">
             <MagneticButton
               onClick={() => setIsDonationOpen(true)}
-              className={`group flex cursor-pointer items-center gap-2 rounded-full font-bold uppercase tracking-widest transition-[background,color,box-shadow,padding] duration-500 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 ${
+              className={`group flex cursor-pointer items-center gap-2 rounded-full font-bold uppercase tracking-widest transition-all duration-300 focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/50 hover:scale-[1.02] active:scale-[0.98] ${
                 isScrolled && !isOpen
-                  ? "bg-brand-orange text-white shadow-md hover:shadow-brand-orange/40 px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm"
-                  : "bg-brand-orange text-white lg:bg-brand-cream lg:text-brand-brown hover:bg-brand-orange hover:text-white px-5 sm:px-7 py-2.5 sm:py-3.5 text-sm"
+                  ? "bg-brand-orange text-white hover:bg-[#cc492a] shadow-md hover:shadow-lg hover:shadow-brand-orange/20 px-4 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm"
+                  : "bg-brand-orange text-white hover:bg-[#cc492a] lg:bg-brand-cream lg:text-brand-brown lg:hover:bg-[#cc492a] hover:text-white lg:hover:text-white px-5 sm:px-7 py-2.5 sm:py-3.5 text-sm"
               }`}
             >
               <Heart
@@ -174,47 +184,65 @@ const Header = () => {
             animate={{ clipPath: "circle(150% at 100% 0%)" }}
             exit={{ clipPath: "circle(0% at 100% 0%)" }}
             transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
-            className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-brand-orange px-6 text-brand-cream"
+            className="fixed inset-0 z-[140] flex flex-col bg-brand-orange px-6 text-brand-cream"
           >
-            <div className="flex flex-col items-start gap-6 sm:gap-8 text-3xl sm:text-5xl md:text-6xl font-heading font-medium w-full max-w-2xl mx-auto pl-4">
-              {[
-                { label: "О нас", id: "about", href: "https://domlobova.ru/" },
-                { label: "Истории подопечных", id: "stories" },
-                { label: "Наши потребности", id: "funds" },
-                { label: "Сборы", id: "campaigns" },
-                { label: "Контакты", id: "contacts" },
-              ].map((item, i) => {
-                const isExternal = !!item.href;
-                return (
-                  <motion.a
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 + i * 0.1 }}
-                    key={item.id}
-                    href={isExternal ? item.href : `#${item.id}`}
-                    target={isExternal ? "_blank" : undefined}
-                    rel={isExternal ? "noopener noreferrer" : undefined}
-                    onClick={(e) => {
-                      if (!isExternal) {
-                        e.preventDefault();
-                        scrollTo(item.id);
-                      }
-                    }}
-                    className="group flex items-center justify-between w-full text-left transition-all duration-300 hover:text-[#FFEAB0]"
-                  >
-                    <span className="relative inline-block overflow-hidden pb-2">
-                      <span className="relative z-10 transition-transform duration-500 ease-out inline-block group-hover:-translate-y-full">
-                        {item.label}
+            {/* Top spacer to balance visual weight of the header logo */}
+            <div className="h-24 md:h-32 shrink-0" />
+
+            {/* Vertically centered container for menu items */}
+            <div className="flex-1 flex items-center justify-center w-full">
+              <div className="flex flex-col items-start gap-6 sm:gap-8 text-3xl sm:text-5xl md:text-6xl font-heading font-medium w-full max-w-2xl mx-auto pl-4">
+                {[
+                  ...(pathname !== "/" && pathname !== "" ? [{ label: "Главная", id: "home", href: "/" }] : []),
+                  { label: "О нас", id: "about", href: "https://domlobova.ru/" },
+                  { label: "Истории подопечных", id: "stories" },
+                  { label: "Наши потребности", id: "funds" },
+                  { label: "Сборы", id: "campaigns", href: "/campaigns" },
+                  { label: "Контакты", id: "contacts" },
+                ].map((item, i) => {
+                  const isExternal = !!item.href && item.href.startsWith("http");
+                  const isInternalPage = !!item.href && !item.href.startsWith("http");
+                  return (
+                    <motion.a
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 + i * 0.1 }}
+                      key={item.id}
+                      href={isExternal ? item.href : (isInternalPage ? item.href : (pathname !== "/" && pathname !== "" ? `/#${item.id}` : `#${item.id}`))}
+                      target={isExternal ? "_blank" : undefined}
+                      rel={isExternal ? "noopener noreferrer" : undefined}
+                      onClick={(e) => {
+                        if (isInternalPage) {
+                          e.preventDefault();
+                          setIsOpen(false);
+                          const targetHref = item.href || "/";
+                          if (pathname !== targetHref) {
+                            router.push(targetHref);
+                          }
+                        } else if (!isExternal) {
+                          e.preventDefault();
+                          scrollTo(item.id);
+                        }
+                      }}
+                      className="group flex items-center justify-between w-full text-left transition-all duration-300 hover:text-[#FFEAB0]"
+                    >
+                      <span className="relative inline-block overflow-hidden pb-2">
+                        <span className="relative z-10 transition-transform duration-500 ease-out inline-block group-hover:-translate-y-full">
+                          {item.label}
+                        </span>
+                        <span className="absolute left-0 top-full z-10 text-[#FFEAB0] transition-transform duration-500 ease-out inline-block group-hover:-translate-y-full">
+                          {item.label}
+                        </span>
                       </span>
-                      <span className="absolute left-0 top-full z-10 text-[#FFEAB0] transition-transform duration-500 ease-out inline-block group-hover:-translate-y-full">
-                        {item.label}
-                      </span>
-                    </span>
-                    <ArrowRight className="w-8 h-8 sm:w-12 sm:h-12 opacity-0 -translate-x-8 transition-all duration-500 ease-out group-hover:opacity-100 group-hover:translate-x-0" />
-                  </motion.a>
-                );
-              })}
+                      <ArrowRight className="w-8 h-8 sm:w-12 sm:h-12 opacity-0 -translate-x-8 transition-all duration-500 ease-out group-hover:opacity-100 group-hover:translate-x-0" />
+                    </motion.a>
+                  );
+                })}
+              </div>
             </div>
+
+            {/* Symmetrical bottom spacer to achieve visual equilibrium */}
+            <div className="h-24 md:h-32 shrink-0" />
           </motion.div>
         )}
       </AnimatePresence>

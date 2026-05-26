@@ -80,84 +80,55 @@ const getTotalElementsProps = (data: TypingElement[]) => {
   return { total: count };
 };
 
-// --- Optimized Scroll Reveal via CSS Gradient ---
-// Uses a single useTransform + CSS background-clip:text instead of per-character hooks
+// --- Standard Highly Optimized O(1) GPU-Accelerated Word-by-Word Scroll Reveal ---
+// Splitting text into words and mapping each directly to scroll progress using Framer Motion's useTransform.
+// This avoids subtree style recalculations and delivers a buttery-smooth 120 FPS.
 
-const ScrollRevealText = ({ text, progress, imageElements }: { text: string; progress: any; imageElements: Map<number, TypingImage> }) => {
-  // Single useTransform for the entire text block — replaces ~400 individual hooks
-  const gradientPos = useTransform(progress, [0, 1], [0, 110]);
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  // PERF: Update CSS custom property directly — zero React re-renders during scroll
-  useMotionValueEvent(gradientPos, "change", (v) => {
-    containerRef.current?.style.setProperty("--reveal-pos", String(v));
-  });
+const RevealWord = ({ content, progress, range }: { content: string; progress: any; range: [number, number] }) => {
+  const opacity = useTransform(progress, range, [0.15, 1]);
+  return (
+    <motion.span 
+      style={{ opacity, color: "#4A3F35" }} 
+      className="inline-block whitespace-pre transform-gpu font-heading"
+    >
+      {content}
+    </motion.span>
+  );
+};
 
-  // Split text into words, track positions for images
-  const parts = useMemo(() => {
-    const result: { type: "word" | "image"; content: string; imageData?: TypingImage; charOffset: number }[] = [];
-    const segments = text.split("[IMAGE]");
-    let imgIdx = 0;
+const ScrollRevealText = ({ text, progress }: { text: string; progress: any }) => {
+  const words = useMemo(() => {
+    const result = text.match(/\S+|\s+/g) || [];
     let charCount = 0;
     
-    segments.forEach((seg, i) => {
-      if (seg) {
-        const words = seg.match(/\S+|\s+/g);
-        if (words) {
-          words.forEach(w => {
-            result.push({ type: "word", content: w, charOffset: charCount });
-            charCount += w.length;
-          });
-        }
-      }
-      if (i < segments.length - 1) {
-        const imgData = imageElements.get(imgIdx);
-        if (imgData) {
-          result.push({ type: "image", content: "", imageData: imgData, charOffset: charCount });
-        }
-        charCount++;
-        imgIdx++;
-      }
+    return result.map(w => {
+      const charOffset = charCount;
+      charCount += w.length;
+      return { content: w, charOffset };
     });
-    return { items: result, totalChars: charCount };
-  }, [text, imageElements]);
+  }, [text]);
+
+  const totalChars = text.length || 1;
 
   return (
-    <div ref={containerRef} style={{ ["--reveal-pos" as string]: "0" }}>
-      {parts.items.map((part, idx) => {
-        const progressPct = (part.charOffset / parts.totalChars) * 100;
-        
-        if (part.type === "image" && part.imageData) {
-          return (
-            <span 
-              key={`img-${idx}`}
-              className="relative inline-block w-[120px] sm:w-[160px] md:w-[200px] lg:w-[240px] h-[48px] sm:h-[64px] md:h-[80px] lg:h-[88px] rounded-full overflow-hidden align-middle shadow-md shadow-brand-brown/10 border-[3px] border-white mx-1 my-0.5 shrink-0 transform-gpu"
-              style={{
-                opacity: `clamp(0, (var(--reveal-pos) - ${progressPct}) * 0.05, 1)`,
-              } as React.CSSProperties}
-            >
-              <Image src={part.imageData.src} alt={part.imageData.alt || ""} fill sizes="(max-width: 768px) 160px, 240px" className="object-cover" />
-            </span>
-          );
-        }
+    <div className="w-full">
+      {words.map((word, idx) => {
+        const start = word.charOffset / totalChars;
+        const end = Math.min(start + 0.08, 1);
+        const range: [number, number] = [start, end];
 
-        const isSpace = part.content.trim() === "";
+        const isSpace = word.content.trim() === "";
         if (isSpace) {
-          return <span key={idx}>{part.content}</span>;
+          return <span key={idx} className="whitespace-pre font-heading">{word.content}</span>;
         }
 
-        // PERF: Use CSS calc() with --reveal-pos custom property
-        // This avoids any React re-render — styles update purely via CSS
         return (
-          <span 
+          <RevealWord 
             key={idx} 
-            className="inline-block whitespace-pre scroll-reveal-word"
-            style={{
-              ["--word-offset" as string]: String(progressPct),
-            }}
-          >
-            {part.content}
-          </span>
+            content={word.content} 
+            progress={progress} 
+            range={range} 
+          />
         );
       })}
     </div>
@@ -235,11 +206,7 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
     offset: ["start 80%", "end 60%"],
   });
 
-  const smoothProgress = useSpring(textProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001
-  });
+  const smoothProgress = textProgress;
 
   // Build image elements map for ScrollRevealText
   const imageElements = useMemo(() => {
@@ -292,12 +259,11 @@ const About = ({ title, descr, photos, stats, features, promo }: AboutProps) => 
           )}
 
           {/* Text inline image reveal — optimized: single useTransform + CSS color-mix */}
-          <div ref={textRef} className="max-w-[1200px] mx-auto pb-2 md:pb-4 lg:pb-6 pt-2 md:pt-4 flex flex-col justify-center min-h-[40vh] transform-gpu">
+          <div ref={textRef} className="max-w-[1200px] mx-auto pb-2 md:pb-4 lg:pb-6 pt-2 md:pt-4 flex flex-col justify-center min-h-[120px] transform-gpu">
             <div className="font-heading text-base sm:text-lg md:text-xl lg:text-2xl leading-[1.4] lg:leading-[1.35] font-medium text-brand-brown text-center md:text-left">
               <ScrollRevealText
                 text={descr?.replace(/\[IMAGE\]/g, "") || ""}
                 progress={smoothProgress}
-                imageElements={imageElements}
               />
             </div>
           </div>

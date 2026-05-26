@@ -1,45 +1,43 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useMemo, useCallback, memo } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, useInView } from "framer-motion";
 import { Heart } from "lucide-react";
 import { useLenis } from "lenis/react";
 import Image from "next/image";
 
-// Morph keyframes — static CSS, rendered once via memo
+// GPU-accelerated floating keyframes — static CSS, rendered once via memo.
+// Animating translate3d and scale matrices instead of border-radius completely bypasses CPU clip-mask paint phases,
+// keeping the rendering entirely on the hardware GPU and restoring flawless scroll FPS.
 const MorphStyles = memo(() => (
   <style>{`
-    @keyframes morph1 {
-      0%   { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-      50%  { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
-      100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+    @keyframes float-organic-1 {
+      0%   { transform: translate3d(0, 0, 0) scale(1); }
+      50%  { transform: translate3d(15px, -20px, 0) scale(1.03); }
+      100% { transform: translate3d(0, 0, 0) scale(1); }
     }
-    @keyframes morph2 {
-      0%   { border-radius: 40% 60% 60% 40% / 70% 30% 70% 30%; }
-      50%  { border-radius: 70% 30% 40% 60% / 30% 70% 30% 70%; }
-      100% { border-radius: 40% 60% 60% 40% / 70% 30% 70% 30%; }
+    @keyframes float-organic-2 {
+      0%   { transform: translate3d(0, 0, 0) scale(1); }
+      50%  { transform: translate3d(-20px, 15px, 0) scale(0.97); }
+      100% { transform: translate3d(0, 0, 0) scale(1); }
     }
-    @keyframes morph3 {
-      0%   { border-radius: 70% 30% 30% 70% / 60% 40% 60% 40%; }
-      50%  { border-radius: 30% 70% 70% 30% / 40% 60% 40% 60%; }
-      100% { border-radius: 70% 30% 30% 70% / 60% 40% 60% 40%; }
+    @keyframes float-organic-3 {
+      0%   { transform: translate3d(0, 0, 0) scale(1); }
+      50%  { transform: translate3d(12px, 18px, 0) scale(1.04); }
+      100% { transform: translate3d(0, 0, 0) scale(1); }
     }
-    @keyframes morph4 {
-      0%   { border-radius: 40% 60% 70% 30% / 40% 40% 60% 50%; }
-      50%  { border-radius: 60% 40% 50% 50% / 50% 50% 50% 60%; }
-      100% { border-radius: 40% 60% 70% 30% / 40% 40% 60% 50%; }
+    @keyframes float-organic-4 {
+      0%   { transform: translate3d(0, 0, 0) scale(1); }
+      50%  { transform: translate3d(-15px, -15px, 0) scale(0.98); }
+      100% { transform: translate3d(0, 0, 0) scale(1); }
     }
-    @keyframes morph5 {
-      0%   { border-radius: 50% 50% 40% 60% / 60% 40% 70% 30%; }
-      50%  { border-radius: 40% 60% 50% 50% / 40% 60% 40% 60%; }
-      100% { border-radius: 50% 50% 40% 60% / 60% 40% 70% 30%; }
-    }
-    .blob-1 { animation: morph1 12s ease-in-out infinite; }
-    .blob-2 { animation: morph2 15s ease-in-out infinite reverse; }
-    .blob-3 { animation: morph3 10s ease-in-out infinite; }
-    .blob-4 { animation: morph2 14s ease-in-out infinite; }
-    .blob-5 { animation: morph4 11s ease-in-out infinite alternate; }
-    .blob-6 { animation: morph5 13s ease-in-out infinite alternate-reverse; }
+
+    .blob-1 { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; animation: float-organic-1 16s ease-in-out infinite; }
+    .blob-2 { border-radius: 40% 60% 60% 40% / 70% 30% 70% 30%; animation: float-organic-2 20s ease-in-out infinite; }
+    .blob-3 { border-radius: 70% 30% 30% 70% / 60% 40% 60% 40%; animation: float-organic-3 14s ease-in-out infinite; }
+    .blob-4 { border-radius: 40% 60% 70% 30% / 40% 40% 60% 50%; animation: float-organic-4 18s ease-in-out infinite; }
+    .blob-5 { border-radius: 50% 50% 40% 60% / 60% 40% 70% 30%; animation: float-organic-1 15s ease-in-out infinite alternate; }
+    .blob-6 { border-radius: 60% 40% 50% 50% / 50% 50% 50% 60%; animation: float-organic-2 17s ease-in-out infinite alternate-reverse; }
   `}</style>
 ));
 MorphStyles.displayName = "MorphStyles";
@@ -62,10 +60,11 @@ const DEFAULT_IMAGES = [
 ];
 
 // Individual blob — memoized to prevent re-renders when siblings change
-const Blob = memo(({ blob, mouseX, mouseY }: {
+const Blob = memo(({ blob, mouseX, mouseY, isHeroInView }: {
   blob: typeof DESKTOP_BLOBS[number];
   mouseX: ReturnType<typeof useMotionValue<number>>;
   mouseY: ReturnType<typeof useMotionValue<number>>;
+  isHeroInView: boolean;
 }) => {
   const x = useTransform(mouseX, (v) => v * blob.mx);
   const y = useTransform(mouseY, (v) => v * blob.my);
@@ -81,14 +80,31 @@ const Blob = memo(({ blob, mouseX, mouseY }: {
         transform: "translate(-50%, -50%)",
       }}
     >
+      {/* Outer element handles mouse-driven parallax */}
       <motion.div
         initial={{ opacity: 0, scale: 0.82 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.6, delay: blob.delay, ease: [0.22, 1, 0.36, 1] }}
-        style={{ x, y, width: "100%", height: "100%", willChange: "border-radius, transform" }}
-        className={`relative shadow-2xl overflow-hidden transform-gpu ${blob.blobClass}`}
+        style={{
+          x,
+          y,
+          width: "100%",
+          height: "100%",
+          willChange: "transform",
+        }}
+        className="w-full h-full transform-gpu"
       >
-        <Image src={blob.img} alt="" aria-hidden="true" fill sizes="33vw" priority={blob.id <= 3} className="object-cover scale-110" />
+        {/* Inner element handles CSS organic floating keyframes */}
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            animationPlayState: isHeroInView ? "running" : "paused",
+          }}
+          className={`relative w-full h-full shadow-2xl overflow-hidden transform-gpu ${blob.blobClass}`}
+        >
+          <Image src={blob.img} alt="" aria-hidden="true" fill sizes="33vw" priority={blob.id <= 3} className="object-cover scale-110" />
+        </div>
       </motion.div>
     </div>
   );
@@ -118,6 +134,8 @@ export const HeroTransition = ({
 }: HeroTransitionProps) => {
   const lenis = useLenis();
   const [mobileSlide, setMobileSlide] = useState(0);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const isHeroInView = useInView(heroRef, { margin: "0px 0px -100px 0px" });
 
   // Motion values for mouse — update WITHOUT triggering React re-renders
   const mouseX = useMotionValue(0);
@@ -175,6 +193,7 @@ export const HeroTransition = ({
       <MorphStyles />
 
       <div
+        ref={heroRef}
         id="hero"
         className="relative min-h-screen bg-[#FDFCF8] overflow-hidden"
         onMouseMove={handleMouseMove}
@@ -188,7 +207,7 @@ export const HeroTransition = ({
           {/* Desktop blobs */}
           <div className="absolute inset-0 pointer-events-none z-10">
             {desktopBlobs.map((blob) => (
-              <Blob key={blob.id} blob={blob} mouseX={mouseX} mouseY={mouseY} />
+              <Blob key={blob.id} blob={blob} mouseX={mouseX} mouseY={mouseY} isHeroInView={isHeroInView} />
             ))}
           </div>
 
@@ -221,7 +240,7 @@ export const HeroTransition = ({
             <div className="pointer-events-auto flex justify-center">
               <button
                 onClick={openDonation}
-                className="px-10 py-5 bg-[#E65C3D] text-white rounded-full font-semibold hover:bg-[#1A1A1A] transition-all duration-500 flex items-center gap-3 group shadow-xl cursor-pointer"
+                className="px-10 py-5 bg-[#E65C3D] text-white rounded-full font-semibold hover:bg-[#cc492a] hover:scale-[1.02] hover:shadow-2xl hover:shadow-brand-orange/20 active:scale-[0.98] transition-all duration-300 flex items-center gap-3 group shadow-xl cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/30"
               >
                 <Heart size={18} className="fill-white group-hover:scale-110 transition-transform duration-300" />
                 ПОМОЧЬ
@@ -243,7 +262,7 @@ export const HeroTransition = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
             className="blob-1 overflow-hidden shadow-2xl shrink-0 relative transform-gpu"
-            style={{ width: "74vw", height: "74vw", willChange: "border-radius, transform" }}
+            style={{ width: "74vw", height: "74vw", willChange: "transform", animationPlayState: isHeroInView ? "running" : "paused" }}
           >
             <AnimatePresence mode="sync">
               <motion.div
@@ -296,7 +315,7 @@ export const HeroTransition = ({
             <div className="flex flex-col items-center justify-center gap-3 pb-8">
               <button
                 onClick={openDonation}
-                className="w-full sm:w-auto px-8 py-4 bg-[#E65C3D] text-white rounded-full font-semibold hover:bg-[#1A1A1A] transition-all duration-500 flex items-center justify-center gap-2.5 shadow-lg cursor-pointer"
+                className="w-full sm:w-auto px-8 py-4 bg-[#E65C3D] text-white rounded-full font-semibold hover:bg-[#cc492a] hover:scale-[1.02] hover:shadow-2xl hover:shadow-brand-orange/20 active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2.5 shadow-lg cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/30"
               >
                 <Heart size={16} className="fill-white" />
                 ПОМОЧЬ

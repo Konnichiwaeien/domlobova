@@ -1,8 +1,9 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useRef } from "react";
 import Image from "next/image";
 import { HeartHandshake, ShieldCheck, Users, Star, ArrowRight } from "lucide-react";
+import { useInView } from "framer-motion";
 
 // Inline keyframes — bypasses Tailwind CSS processing, guaranteed to work
 const MarqueeStyles = memo(() => (
@@ -20,6 +21,8 @@ interface FeaturesMarqueeProps {
 }
 
 const FeaturesMarquee = ({ features }: FeaturesMarqueeProps) => {
+  const containerRef = useRef(null);
+  const inView = useInView(containerRef, { once: false, margin: "200px" });
   const fallbackFeatures = [
     {
       title: "Комплексный уход",
@@ -49,12 +52,15 @@ const FeaturesMarquee = ({ features }: FeaturesMarqueeProps) => {
   const loopFeatures = [...displayFeatures, ...displayFeatures, ...displayFeatures];
 
   return (
-    <section className="relative z-30 pt-4 md:pt-6 pb-0 overflow-hidden pointer-events-none">
+    <section ref={containerRef} className="relative z-30 pt-4 md:pt-6 pb-0 overflow-hidden pointer-events-none">
       <MarqueeStyles />
       <div className="w-full flex">
-        {/* Pure CSS animation — runs on compositor thread, zero main-thread cost */}
+        {/* Pure CSS animation — runs on compositor thread, zero main-thread cost, optimized: paused when out of view */}
         <div
-          style={{ animation: "marquee-third 40s linear infinite" }}
+          style={{
+            animation: "marquee-third 40s linear infinite",
+            animationPlayState: inView ? "running" : "paused",
+          }}
           className="flex gap-4 md:gap-6 pointer-events-auto w-max px-3 will-change-transform transform-gpu"
         >
           {loopFeatures.map((feature, idx) => {
@@ -71,15 +77,15 @@ const FeaturesMarquee = ({ features }: FeaturesMarqueeProps) => {
             return (
               <div
                 key={idx}
-                className={`relative h-[280px] w-[400px] md:h-[300px] md:w-[460px] shrink-0 overflow-hidden rounded-2xl md:rounded-[2rem] shadow-xl shadow-brand-brown/5 border border-brand-brown/5 group cursor-pointer ${style.bgColor} transform-gpu`}
+                className={`relative h-[280px] w-[400px] md:h-[300px] md:w-[460px] shrink-0 overflow-hidden rounded-2xl md:rounded-[2rem] border border-brand-brown/5 group cursor-pointer ${style.bgColor} transform-gpu`}
               >
                 <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none transform-gpu">
-                  <Image
+                  <img
                     src={imgSrc}
-                    fill
-                    sizes="(max-width: 768px) 400px, 460px"
-                    className="object-cover scale-105 group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] select-none opacity-90 transform-gpu"
+                    className="absolute inset-0 w-full h-full object-cover scale-105 group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] select-none opacity-90 transform-gpu"
                     alt={feature.title}
+                    decoding="async"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 pointer-events-none transform-gpu" />
                 </div>

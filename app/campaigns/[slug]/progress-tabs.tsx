@@ -56,14 +56,12 @@ export function ProgressTabs({ campaign, donations }: ProgressTabsProps) {
   const current = Number(campaign.current) || 0;
   const percent = goal > 0 ? Math.min((current / goal) * 100, 100) : (current > 0 ? 100 : 0);
   const displayPercent = Math.round(percent);
-  // Ensure a visual fill of at least 6% if there is any progress, so the capsule is always rounded and visual slice looks beautiful
-  const fillPercent = current > 0 ? Math.max(percent, 6) : 0;
 
   return (
     <div className="bg-white rounded-2xl md:rounded-[2.5rem] border border-brand-brown/5 shadow-[0_20px_50px_rgba(74,63,53,0.04)] overflow-hidden flex flex-col">
       
       {/* Dynamic Tab Switchers (Capsule Style matching the Form) */}
-      <div className="flex justify-center bg-brand-cream/10 py-3 px-4 shrink-0 relative z-10">
+      <div className="flex justify-center bg-brand-cream/10 pt-6 pb-3 px-5 md:pt-8 md:px-6 shrink-0 relative z-10">
         <div className="bg-brand-cream p-1 rounded-full flex relative w-full max-w-sm border border-brand-brown/5 shadow-inner">
           <motion.div
             className="absolute top-1 bottom-1 left-1 bg-white rounded-full shadow-sm"
@@ -94,8 +92,8 @@ export function ProgressTabs({ campaign, donations }: ProgressTabsProps) {
         </div>
       </div>
 
-      {/* Tab Contents with a stable absolute fixed height to completely prevent container jump */}
-      <div className="p-5 md:p-6 h-[360px] sm:h-[270px] flex flex-col justify-start overflow-hidden relative">
+      {/* Tab Contents with a stable height to completely prevent vertical layout jumps and clipping */}
+      <div className="p-5 md:p-6 h-[380px] sm:h-[300px] flex flex-col justify-start overflow-hidden relative">
         <AnimatePresence mode="wait">
           {activeTab === "progress" ? (
             <motion.div
@@ -104,9 +102,9 @@ export function ProgressTabs({ campaign, donations }: ProgressTabsProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
-              className="space-y-4 sm:space-y-5 h-full w-full flex flex-col justify-between"
+              className="space-y-6 w-full flex flex-col justify-start"
             >
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-3">
                   <div>
                     <span className="text-xs font-black uppercase tracking-[0.2em] text-brand-orange block mb-1">
@@ -147,30 +145,36 @@ export function ProgressTabs({ campaign, donations }: ProgressTabsProps) {
                   </div>
                 </div>
 
-                {/* Elegant thick progress bar (thickened to h-16 as requested) */}
-                <div className="relative h-16 w-full overflow-hidden rounded-full bg-brand-cream border border-brand-brown/5 p-1 shadow-inner">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${fillPercent}%` }}
-                    transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-                    className="h-full rounded-full bg-gradient-to-r from-brand-orange to-brand-yellow flex items-center justify-end px-4 shadow-md overflow-hidden relative"
-                  >
-                    <div
-                      className="absolute inset-0 pointer-events-none"
-                      style={{
-                        background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 15%, rgba(255,255,255,0.2) 40%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.2) 60%, rgba(255,255,255,0.05) 85%, transparent 100%)",
-                      }}
-                    />
-                    {displayPercent >= 8 && (
-                      <span className="text-white font-black text-sm md:text-base drop-shadow-md z-10 select-none">
-                        {displayPercent}%
-                      </span>
-                    )}
-                  </motion.div>
+                {/* Elegant sleek progress bar (taller h-12) */}
+                <div className="relative h-12 w-full overflow-hidden rounded-full bg-brand-cream border border-brand-brown/5 p-1 shadow-inner select-none">
+                  {current > 0 && (
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${percent}%` }}
+                      transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+                      className="h-full rounded-full bg-gradient-to-r from-brand-orange to-brand-yellow flex items-center justify-end px-4 shadow-md overflow-hidden relative min-w-[40px]"
+                      style={{ width: `max(${percent}%, 40px)` }}
+                    >
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                          background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 15%, rgba(255,255,255,0.2) 40%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.2) 60%, rgba(255,255,255,0.05) 85%, transparent 100%)",
+                        }}
+                      />
+                      {displayPercent >= 8 && (
+                        <span className="text-white font-black text-sm drop-shadow-md z-10 select-none">
+                          {displayPercent}%
+                        </span>
+                      )}
+                    </motion.div>
+                  )}
                   {displayPercent < 8 && (
-                    <span className={`absolute top-1/2 -translate-y-1/2 text-brand-brown font-black text-sm md:text-base z-10 select-none transition-all duration-300 ${
-                      current > 0 ? "left-[calc(6%+16px)]" : "left-5"
-                    }`}>
+                    <span 
+                      style={{ 
+                        left: current > 0 ? `calc(max(${percent}%, 40px) + 10px)` : "14px" 
+                      }}
+                      className="absolute top-1/2 -translate-y-1/2 text-brand-brown font-black text-sm z-10 select-none transition-all duration-300"
+                    >
                       {displayPercent}%
                     </span>
                   )}
@@ -207,9 +211,9 @@ export function ProgressTabs({ campaign, donations }: ProgressTabsProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
-              className="h-full w-full flex flex-col overflow-hidden"
+              className="w-full flex flex-col overflow-hidden"
             >
-              <div data-lenis-prevent="true" className="overflow-y-auto flex-grow h-full pr-2 scrollbar-thin scrollbar-thumb-brand-cream scrollbar-track-transparent space-y-4">
+              <div data-lenis-prevent="true" className="overflow-y-auto h-[320px] sm:h-[240px] pr-2 scrollbar-thin scrollbar-thumb-brand-cream scrollbar-track-transparent space-y-4">
                 {donations.length > 0 ? (
                   donations.map((donation, idx) => (
                     <div 

@@ -21,6 +21,7 @@ interface ElegantProgressProps {
     active?: boolean;
     primary?: boolean;
     documentId?: string;
+    slug?: string;
   }[];
   recentDonations?: DonationRecord[];
 }
@@ -165,7 +166,7 @@ const ElegantProgress = ({ title, descr, partners, recentDonations = [] }: Elega
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="lg:col-span-8 overflow-hidden rounded-2xl md:rounded-[3rem] bg-brand-cream text-brand-brown p-5 md:p-8 lg:px-14 lg:py-12 relative flex flex-col justify-between group shadow-2xl shadow-brand-brown/10 border border-brand-brown/5"
+            className="lg:col-span-8 overflow-hidden rounded-2xl md:rounded-[3rem] bg-brand-cream hover:bg-[#F8F3EA] text-brand-brown p-5 md:p-8 lg:px-14 lg:py-12 relative flex flex-col justify-between group shadow-2xl shadow-brand-brown/10 border border-brand-brown/5 hover:border-brand-orange/20 transition-all duration-300"
           >
             {/* Subtle bg decoration — PERF: using radial-gradient instead of blur filter */}
             <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(235,108,57,0.20) 0%, transparent 70%)' }} />
@@ -189,7 +190,7 @@ const ElegantProgress = ({ title, descr, partners, recentDonations = [] }: Elega
                   </div>
                   <h3 className="font-heading text-xl md:text-3xl font-black uppercase tracking-wide text-brand-brown hover:text-brand-orange transition-colors">
                     {primaryCampaign ? (
-                      <Link href={`/campaigns/${primaryCampaign.documentId || primaryCampaign.id}`} className="block">
+                      <Link href={`/campaigns/${primaryCampaign.slug || primaryCampaign.documentId || primaryCampaign.id}`} className="block">
                         {primaryCampaign.name}
                       </Link>
                     ) : (
@@ -268,8 +269,8 @@ const ElegantProgress = ({ title, descr, partners, recentDonations = [] }: Elega
                   <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto shrink-0">
                     {primaryCampaign && (
                       <Link
-                        href={`/campaigns/${primaryCampaign.documentId || primaryCampaign.id}`}
-                        className="w-full sm:w-auto bg-white border border-brand-brown/10 hover:border-brand-orange text-brand-brown hover:text-brand-orange transition-all duration-300 rounded-full px-8 py-4.5 text-sm md:text-base font-bold uppercase tracking-widest flex items-center justify-center gap-2 group shrink-0"
+                        href={`/campaigns/${primaryCampaign.slug || primaryCampaign.documentId || primaryCampaign.id}`}
+                        className="w-full sm:w-auto bg-white border border-brand-brown/10 hover:border-brand-orange text-brand-brown hover:text-brand-orange transition-all duration-300 rounded-full px-8 py-4.5 text-sm md:text-base font-bold uppercase tracking-widest flex items-center justify-center gap-2 group shrink-0 cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/30 hover:scale-[1.02] active:scale-[0.98]"
                       >
                         Подробнее
                       </Link>
@@ -285,7 +286,7 @@ const ElegantProgress = ({ title, descr, partners, recentDonations = [] }: Elega
                           })
                         );
                       }}
-                      className="w-full sm:w-auto bg-brand-orange hover:bg-white hover:text-brand-orange text-white transition-colors duration-500 rounded-full px-8 py-5 text-sm md:text-base font-bold uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 group shrink-0"
+                      className="w-full sm:w-auto bg-brand-orange hover:bg-white hover:text-brand-orange text-white transition-all duration-300 rounded-full px-8 py-5 text-sm md:text-base font-bold uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 group shrink-0 cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/30 hover:scale-[1.02] active:scale-[0.98]"
                     >
                       Помочь <Heart className="w-5 h-5 group-hover:scale-110 transition-transform fill-current" />
                     </MagneticButton>
@@ -302,7 +303,7 @@ const ElegantProgress = ({ title, descr, partners, recentDonations = [] }: Elega
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="absolute inset-0 rounded-2xl md:rounded-[3rem] bg-white border border-brand-brown/5 shadow-[0_20px_60px_rgba(74,63,53,0.05)] p-5 md:p-8 lg:p-10 flex flex-col overflow-hidden"
+              className="absolute inset-0 rounded-2xl md:rounded-[3rem] bg-white hover:bg-[#FAF8F5] border border-brand-brown/5 hover:border-brand-orange/20 shadow-[0_20px_60px_rgba(74,63,53,0.05)] p-5 md:p-8 lg:p-10 flex flex-col overflow-hidden transition-all duration-300 group/card"
             >
             <div className="flex items-center justify-between mb-8 pb-6 border-b border-brand-cream relative z-10 shrink-0">
               <div className="flex items-center gap-3">
@@ -312,14 +313,14 @@ const ElegantProgress = ({ title, descr, partners, recentDonations = [] }: Elega
             </div>
             
             <div className="flex-1 overflow-hidden relative z-10 -mx-2 px-2">
-              <div className="absolute top-0 left-0 right-0 h-4 bg-linear-to-b from-white to-transparent pointer-events-none z-10" />
-              <div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-white to-transparent pointer-events-none z-10" />
+              <div className="absolute top-0 left-0 right-0 h-4 bg-linear-to-b from-white group-hover/card:from-[#FAF8F5] to-transparent pointer-events-none z-10 transition-colors duration-300" />
+              <div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-white group-hover/card:from-[#FAF8F5] to-transparent pointer-events-none z-10 transition-colors duration-300" />
               
               <div data-lenis-prevent="true" className="h-full overflow-y-auto space-y-4 pr-3 scrollbar-thin scrollbar-thumb-brand-cream scrollbar-track-transparent">
                   {recentDonations.length > 0 ? recentDonations.map((donation, idx) => (
                     <div 
                       key={donation.id}
-                      className="group flex flex-col gap-2 p-4 rounded-2xl hover:bg-brand-cream/80 transition-colors duration-300"
+                      className="group flex flex-col gap-2 p-4 rounded-2xl transition-colors duration-300"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">

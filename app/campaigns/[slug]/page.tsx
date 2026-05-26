@@ -11,12 +11,14 @@ import { Footer } from "../../components/sections/footer";
 import { FormDonation } from "../../components/form-donation";
 import { OtherDonations } from "../../components/other-donations";
 import { ProgressTabs } from "./progress-tabs";
+import { CompletedCard } from "./completed-card";
+import { Breadcrumbs } from "../../components/ui/breadcrumbs";
 import { getCampaignData, getLandingData } from "../../services/landing.service";
 import { getRecentDonationsForCampaign } from "../../services/donation.service";
 
 interface CampaignPageProps {
   params: Promise<{
-    id: string;
+    slug: string;
   }>;
 }
 
@@ -56,8 +58,8 @@ function formatCampaignTitle(title?: string) {
 }
 
 export async function generateMetadata({ params }: CampaignPageProps): Promise<Metadata> {
-  const { id } = await params;
-  const campaign = await getCampaignData(id);
+  const { slug } = await params;
+  const campaign = await getCampaignData(slug);
 
   if (!campaign) {
     return {
@@ -95,18 +97,20 @@ export async function generateMetadata({ params }: CampaignPageProps): Promise<M
 }
 
 export default async function CampaignPage({ params }: CampaignPageProps) {
-  const { id } = await params;
+  const { slug } = await params;
   
-  // Fetch details of the current campaign, landing details, and campaign-specific donations in parallel
-  const [campaign, landing, donations] = await Promise.all([
-    getCampaignData(id),
-    getLandingData(process.env.NEXT_PUBLIC_SITE_SLUG || "domlobova"),
-    getRecentDonationsForCampaign(id, 30) // Retrieve up to 30 recent donations for this campaign
-  ]);
+  // Fetch details of the current campaign first using the slug to resolve its database document ID
+  const campaign = await getCampaignData(slug);
 
   if (!campaign) {
     notFound();
   }
+
+  // Fetch landing details and campaign-specific donations in parallel using the resolved documentId
+  const [landing, donations] = await Promise.all([
+    getLandingData(process.env.NEXT_PUBLIC_SITE_SLUG || "domlobova"),
+    getRecentDonationsForCampaign(campaign.documentId || String(campaign.id), 30)
+  ]);
 
   const isCompleted = !!campaign.closed;
 
@@ -132,7 +136,7 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
       <div className="min-h-screen bg-brand-cream font-sans selection:bg-brand-yellow selection:text-brand-brown">
         <Header />
 
-        <main className="pt-24 md:pt-28 pb-12 md:pb-16">
+        <main className="pt-28 md:pt-36 lg:pt-40 pb-0">
           <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12">
             
             {/* Breadcrumbs */}
@@ -155,24 +159,24 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
             {/* Main Content Layout Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
               
-              {/* Left Column: Campaign Details (8/12 cols) */}
-              <div className="lg:col-span-7 xl:col-span-8 space-y-8 md:space-y-10">
+              {/* Left Column: Campaign Details (7/12 cols) */}
+              <div className="lg:col-span-7 xl:col-span-7 space-y-8 md:space-y-10">
                 
                 {/* Header Information */}
                 <div className="space-y-4">
                   {/* Status Badge */}
                   <div className="flex flex-wrap gap-3">
                     {isCompleted ? (
-                      <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest bg-brand-brown/10 text-brand-brown/60 border border-brand-brown/10">
+                      <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest bg-[#52B788]/10 text-[#52B788] border border-[#52B788]/20 animate-pulse-slow">
                         Сбор успешно завершен 🎉
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest bg-brand-orange/10 text-brand-orange border border-brand-orange/20 animate-pulse">
+                      <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest bg-brand-orange/10 text-brand-orange border border-brand-orange/20 animate-pulse-slow">
                         <Sparkles className="w-3.5 h-3.5 fill-current" /> Активный сбор
                       </span>
                     )}
                     {campaign.primary && (
-                      <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest bg-brand-yellow/20 text-[#D28900] border border-[#D28900]/10">
+                      <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest bg-brand-yellow/20 text-[#5A3B00] border border-[#5A3B00]/10">
                         Важный сбор
                       </span>
                     )}
@@ -229,6 +233,25 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
                   </div>
                 )}
 
+                {/* Mobile/Tablet Widget: Form or Celebratory Card rendered immediately after image */}
+                <div className="lg:hidden">
+                  {isCompleted ? (
+                    <CompletedCard 
+                      campaignName={campaign.name} 
+                      goalAmount={campaign.goal || campaign.current || 0} 
+                      donationsCount={donations.length} 
+                    />
+                  ) : (
+                    <FormDonation 
+                      initialCampaignId={campaign.documentId || String(campaign.id)} 
+                      initialCampaignTitle={campaign.name}
+                      isSidebar={true}
+                      title="Поддержать сбор"
+                      className="shadow-2xl shadow-brand-brown/10"
+                    />
+                  )}
+                </div>
+
                 {/* Progress Card Section - Integrates the Two-Tab Interactive Component */}
                 <ProgressTabs campaign={campaign} donations={donations} />
 
@@ -255,24 +278,28 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
                       <Sparkles className="w-4 h-4 text-brand-orange shrink-0" />
                       <span>Официальный сбор фонда</span>
                     </div>
-                    {/* <div className="flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-[#81B29A] shrink-0" />
-                      <span>Проверено и безопасно</span>
-                    </div> */}
                   </div>
                 </div>
 
               </div>
 
-              {/* Right Column: Donation Widget (4/12 cols, sticky on large viewports) */}
-              <div className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-28">
-                <FormDonation 
-                  initialCampaignId={campaign.documentId || String(campaign.id)} 
-                  initialCampaignTitle={campaign.name}
-                  isSidebar={true}
-                  title="Поддержать сбор"
-                  className="shadow-2xl shadow-brand-brown/10"
-                />
+              {/* Right Column: Donation Widget or Completed Celebration Card (5/12 cols, sticky on large viewports, hidden on mobile/tablet) */}
+              <div className="hidden lg:block lg:col-span-5 xl:col-span-5 lg:sticky lg:top-28">
+                {isCompleted ? (
+                  <CompletedCard 
+                    campaignName={campaign.name} 
+                    goalAmount={campaign.goal || campaign.current || 0} 
+                    donationsCount={donations.length} 
+                  />
+                ) : (
+                  <FormDonation 
+                    initialCampaignId={campaign.documentId || String(campaign.id)} 
+                    initialCampaignTitle={campaign.name}
+                    isSidebar={true}
+                    title="Поддержать сбор"
+                    className="shadow-2xl shadow-brand-brown/10"
+                  />
+                )}
               </div>
 
             </div>
@@ -280,7 +307,7 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
             {/* Bottom Section: Recommend Other Campaigns with Transparent Background */}
             {landing?.campaigns?.campaigns && (
               <div className="mt-16 md:mt-20 pt-8 md:pt-10 border-t border-brand-brown/10">
-                <OtherDonations campaigns={landing.campaigns.campaigns} transparent />
+                <OtherDonations campaigns={landing.campaigns.campaigns} transparent className="!pb-20 md:!pb-28 lg:!pb-32" />
               </div>
             )}
 

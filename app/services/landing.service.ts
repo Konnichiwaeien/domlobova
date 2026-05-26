@@ -144,7 +144,7 @@ export async function getLandingData(slug: string): Promise<LandingData | null> 
 
     const response = await fetch(url, {
       next: {
-        revalidate: 60,
+        revalidate: 3600, // Revalidate every hour
         tags: [`landing-${slug}`]
       },
       headers: {
@@ -184,7 +184,7 @@ export async function getLandingData(slug: string): Promise<LandingData | null> 
  * @param documentId - The unique document identifier for the campaign.
  * @returns A promise resolving to the campaign data object, or null if it cannot be retrieved.
  */
-export async function getCampaignData(documentId: string): Promise<any | null> {
+export async function getCampaignData(idOrSlug: string): Promise<any | null> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   if (!apiUrl) {
@@ -193,17 +193,23 @@ export async function getCampaignData(documentId: string): Promise<any | null> {
 
   try {
     const query = qs.stringify({
+      filters: {
+        $or: [
+          { slug: { $eq: idOrSlug } },
+          { documentId: { $eq: idOrSlug } }
+        ]
+      },
       populate: ['image']
     }, {
       encodeValuesOnly: true
     });
 
-    const url = `${apiUrl}/campaigns/${documentId}?${query}`;
+    const url = `${apiUrl}/campaigns?${query}`;
 
     const response = await fetch(url, {
       next: {
         revalidate: 60,
-        tags: [`campaign-${documentId}`]
+        tags: [`campaign-${idOrSlug}`]
       },
       headers: {
         'Content-Type': 'application/json',
@@ -213,12 +219,12 @@ export async function getCampaignData(documentId: string): Promise<any | null> {
     if (!response.ok) {
       throw new ApiError(
         response.status,
-        `Failed to fetch campaign data for ID "${documentId}": ${response.statusText}`
+        `Failed to fetch campaign data for identifier "${idOrSlug}": ${response.statusText}`
       );
     }
 
     const { data } = await response.json();
-    return data || null;
+    return (data && data.length > 0) ? data[0] : null;
   } catch (error) {
     if (error instanceof ApiError) {
       console.error(`[API Error] ${error.status}: ${error.message}`);
@@ -228,4 +234,59 @@ export async function getCampaignData(documentId: string): Promise<any | null> {
     return null;
   }
 }
+
+/**
+ * Fetches all campaigns.
+ *
+ * @returns A promise resolving to an array of all campaigns.
+ */
+export async function getAllCampaigns(): Promise<any[]> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  if (!apiUrl) {
+    throw new Error('Configuration Error: NEXT_PUBLIC_API_URL environment variable is missing.');
+  }
+
+  try {
+    const query = qs.stringify({
+      populate: ['image'],
+      sort: ['createdAt:desc'],
+      pagination: {
+        limit: 100
+      }
+    }, {
+      encodeValuesOnly: true
+    });
+
+    const url = `${apiUrl}/campaigns?${query}`;
+
+    const response = await fetch(url, {
+      next: {
+        revalidate: 60,
+        tags: ['campaigns-all']
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new ApiError(
+        response.status,
+        `Failed to fetch all campaigns: ${response.statusText}`
+      );
+    }
+
+    const { data } = await response.json();
+    return data || [];
+  } catch (error) {
+    if (error instanceof ApiError) {
+      console.error(`[API Error] ${error.status}: ${error.message}`);
+    } else {
+      console.error(`[Fetch Error] Failed to retrieve all campaigns:`, error);
+    }
+    return [];
+  }
+}
+
 

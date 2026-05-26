@@ -88,8 +88,11 @@ const FundsUsage = ({ data }: FundsUsageProps) => {
                 whileHover={{ boxShadow: "0px 20px 40px rgba(235,108,57,0.08)" }}
                 className="group relative bg-white rounded-4xl p-8 md:p-10 flex flex-col justify-between border border-brand-brown/5 shadow-sm overflow-hidden"
               >
-                {/* Soft background glow on hover */}
-                <div className="absolute -inset-20 bg-linear-to-br from-brand-orange/0 via-brand-orange/0 to-brand-orange/10 opacity-0 group-hover:opacity-100 blur-2xl transition-opacity duration-700 pointer-events-none" />
+                {/* Soft background glow on hover — optimized: using radial-gradient instead of expensive blur filter */}
+                <div 
+                  className="absolute -inset-20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" 
+                  style={{ background: 'radial-gradient(circle at center, rgba(235, 108, 57, 0.08) 0%, transparent 70%)' }}
+                />
 
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-8">
@@ -125,7 +128,7 @@ const FundsUsage = ({ data }: FundsUsageProps) => {
             onClick={() => {
               window.dispatchEvent(new Event('open-donation-modal'));
             }}
-            className="bg-brand-orange hover:bg-brand-brown text-white transition-colors duration-500 rounded-full px-10 py-5 text-sm md:text-base font-bold uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 cursor-pointer"
+            className="bg-[#E65C3D] hover:bg-[#cc492a] text-white hover:scale-[1.02] hover:shadow-2xl hover:shadow-brand-orange/20 active:scale-[0.98] transition-all duration-300 rounded-full px-10 py-5 text-sm md:text-base font-bold uppercase tracking-widest shadow-xl flex items-center justify-center gap-3 cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-orange/30"
           >
             Помочь <Heart className="w-5 h-5 fill-current" />
           </button>
