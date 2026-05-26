@@ -146,7 +146,7 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
                   Главная
                 </Link>
                 <span>/</span>
-                <Link href="/#campaigns" className="inline-block relative z-10 cursor-pointer hover:text-brand-orange transition-colors duration-300 pb-0.5 after:absolute after:pointer-events-none after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-brand-orange after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:origin-left after:duration-300">
+                <Link href="/campaigns" className="inline-block relative z-10 cursor-pointer hover:text-brand-orange transition-colors duration-300 pb-0.5 after:absolute after:pointer-events-none after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-brand-orange after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:origin-left after:duration-300">
                   Сборы
                 </Link>
                 <span>/</span>
