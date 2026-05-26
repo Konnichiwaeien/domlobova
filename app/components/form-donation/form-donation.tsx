@@ -378,37 +378,31 @@ export const FormDonation = ({
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* Mobile/Tablet: Horizontally Scrollable Amounts snapped (hidden on lg+) */}
-        <div className="lg:hidden mb-8 px-5 sm:px-6 md:px-8 relative overflow-hidden group">
-          <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none z-10" />
-          <div 
-            className="flex gap-3 overflow-x-auto pb-2 pr-12 scrollbar-none scroll-smooth snap-x snap-mandatory"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {AMOUNTS.map((amount) => {
-              const isSelected = safeAmount === amount;
-              return (
-                <button
-                  key={amount}
-                  type="button"
-                  onClick={() => handleAmountSelect(amount)}
-                  className={cn(
-                    'flex items-center justify-center rounded-xl border-2 outline-none transition-all duration-300 shrink-0 w-[110px] sm:w-[125px] py-4 snap-center cursor-pointer',
-                    isSelected
-                      ? 'border-brand-orange bg-brand-orange text-white shadow-lg shadow-brand-orange/25'
-                      : 'border-brand-brown/10 bg-brand-cream text-brand-brown hover:border-brand-orange/40 hover:bg-white'
-                  )}
-                >
-                  <span className={cn(
-                    'font-heading font-black text-lg sm:text-xl whitespace-nowrap',
-                    isSelected ? 'text-white' : 'text-brand-brown'
-                  )}>
-                    {formatAmount(amount)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+        {/* Mobile/Tablet: 2-column Grid of preset amounts (hidden on lg+) */}
+        <div className="grid lg:hidden grid-cols-2 gap-3 mb-8 px-5 sm:px-6 md:px-8">
+          {AMOUNTS.map((amount) => {
+            const isSelected = safeAmount === amount;
+            return (
+              <button
+                key={amount}
+                type="button"
+                onClick={() => handleAmountSelect(amount)}
+                className={cn(
+                  'flex items-center justify-center rounded-xl border-2 outline-none transition-all duration-300 py-4 cursor-pointer w-full',
+                  isSelected
+                    ? 'border-brand-orange bg-brand-orange text-white shadow-lg shadow-brand-orange/25'
+                    : 'border-brand-brown/10 bg-brand-cream text-brand-brown hover:border-brand-orange/40 hover:bg-white'
+                )}
+              >
+                <span className={cn(
+                  'font-heading font-black text-lg sm:text-xl whitespace-nowrap',
+                  isSelected ? 'text-white' : 'text-brand-brown'
+                )}>
+                  {formatAmount(amount)}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Desktop: Grid for Amount selection (visible on lg+) */}
