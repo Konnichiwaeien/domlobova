@@ -4,7 +4,8 @@ import { Header } from "../components/sections/header";
 import { Footer } from "../components/sections/footer";
 import { ScrollToTop } from "../components/ui/scroll-to-top";
 import { SmoothScroll } from "../components/ui/smooth-scroll";
-import { CampaignsFilterList } from "./campaigns-filter-list";
+import { CampaignsFilterList } from "./components/campaigns-filter-list";
+import { filterCampaigns, sortCampaigns } from "./utils/filter-sort";
 
 export const metadata: Metadata = {
   title: "Все сборы — Благотворительный фонд Дом Лобова",
@@ -28,71 +29,9 @@ export default async function CampaignsListPage({ searchParams }: PageProps) {
   const { search = "", filter = "all", sort = "newest" } = await searchParams;
   const rawCampaigns = await getAllCampaigns();
 
-  // 1. SSR Text Search logic
-  let filtered = [...rawCampaigns];
-  if (search.trim()) {
-    const q = search.toLowerCase().trim();
-    filtered = filtered.filter(
-      (c) => 
-        (c.name && c.name.toLowerCase().includes(q)) || 
-        (c.descr && c.descr.toLowerCase().includes(q))
-    );
-  }
-
-  // 2. SSR Filter tab logic
-  if (filter === "active") {
-    filtered = filtered.filter((c) => !c.closed);
-  } else if (filter === "primary") {
-    filtered = filtered.filter((c) => c.primary);
-  } else if (filter === "closed") {
-    filtered = filtered.filter((c) => c.closed);
-  }
-
-  // 3. SSR Sort logic (V3 Bidirectional)
-  filtered.sort((a, b) => {
-    const aGoal = a.goal || 0;
-    const aCurrent = a.current || 0;
-    const aPercent = aGoal > 0 ? (aCurrent / aGoal) * 100 : 0;
-    
-    const bGoal = b.goal || 0;
-    const bCurrent = b.current || 0;
-    const bPercent = bGoal > 0 ? (bCurrent / bGoal) * 100 : 0;
-
-    const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-    const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-
-    if (sort === "newest") {
-      return bDate - aDate;
-    }
-    if (sort === "oldest") {
-      return aDate - bDate;
-    }
-    
-    if (sort === "progress_desc") {
-      return bPercent - aPercent;
-    }
-    if (sort === "progress_asc") {
-      return aPercent - bPercent;
-    }
-
-    if (sort === "urgency") {
-      // Active first, then closed
-      if (!!a.closed !== !!b.closed) {
-        return a.closed ? 1 : -1;
-      }
-      // Active closest to completion first (highest percentage)
-      return bPercent - aPercent;
-    }
-
-    if (sort === "goal_desc") {
-      return bGoal - aGoal;
-    }
-    if (sort === "goal_asc") {
-      return aGoal - bGoal;
-    }
-
-    return 0;
-  });
+  // Clean, professional, and modular server-side filtering and sorting via pure helper functions
+  const filteredCampaigns = filterCampaigns(rawCampaigns, search, filter);
+  const sortedCampaigns = sortCampaigns(filteredCampaigns, sort);
 
   return (
     <SmoothScroll>
@@ -102,7 +41,7 @@ export default async function CampaignsListPage({ searchParams }: PageProps) {
         {/* Unified internal page vertical padding system */}
         <main className="pt-28 md:pt-36 lg:pt-40 pb-20 md:pb-28 lg:pb-32">
           <CampaignsFilterList 
-            initialCampaigns={filtered} 
+            initialCampaigns={sortedCampaigns} 
             activeFilter={filter}
             activeSort={sort}
             searchQuery={search}
