@@ -5,9 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
-import { Navigation } from "swiper/modules";
+import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
+import "swiper/css/pagination";
 import { Copy, Heart, Users, Bed, Home, Package, Activity, ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -116,12 +117,12 @@ export const OtherDonations = ({ campaigns, transparent = false, className = "" 
   }, [secondaryCampaigns]);
   return (
     <section className={`relative z-30 pt-6 md:pt-8 pb-16 md:pb-24 lg:pb-28 overflow-hidden content-auto ${transparent ? 'bg-transparent' : 'bg-white'} ${className}`}>
-      <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12">
+      <div className="mx-auto max-w-[1400px] px-4 md:px-8 lg:px-12">
         <div className="flex items-center justify-between mb-8 md:mb-12">
           <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-black text-brand-brown tracking-tighter">
             ДРУГИЕ <span className="text-brand-orange italic">СБОРЫ</span>
           </h2>
-          <div className="hidden md:flex gap-2">
+          <div className="flex gap-2">
             <button 
                aria-label="Предыдущие сборы"
                className={`swiper-prev w-12 h-12 rounded-full border border-brand-brown/10 flex items-center justify-center text-brand-brown hover:bg-brand-orange hover:text-white hover:border-brand-orange transition-all duration-300 disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-brand-brown disabled:hover:border-brand-brown/10 disabled:cursor-not-allowed`}
@@ -151,16 +152,19 @@ export const OtherDonations = ({ campaigns, transparent = false, className = "" 
           className="relative w-full overflow-hidden rounded-2xl md:rounded-[3rem]"
         >
           <Swiper
-            modules={[Navigation]}
+            modules={[Navigation, Pagination]}
             navigation={{
               prevEl: '.swiper-prev',
               nextEl: '.swiper-next',
             }}
-            spaceBetween={24}
-            slidesPerView={1.1}
+            pagination={{
+              clickable: true,
+            }}
+            spaceBetween={16}
+            slidesPerView={1}
             breakpoints={{
-              768: { slidesPerView: 2.2 },
-              1280: { slidesPerView: 3 },
+              768: { slidesPerView: 2.2, spaceBetween: 20 },
+              1280: { slidesPerView: 3, spaceBetween: 24 },
             }}
             grabCursor={true}
             onBeforeInit={(swiper) => {
@@ -171,7 +175,7 @@ export const OtherDonations = ({ campaigns, transparent = false, className = "" 
               setIsBeginning(swiper.isBeginning);
               setIsEnd(swiper.isEnd);
             }}
-            className="w-full pb-10 px-2 [&>.swiper-wrapper]:items-stretch"
+            className="w-full pb-14 px-2 [&>.swiper-wrapper]:items-stretch [&_.swiper-pagination-bullet]:w-2 [&_.swiper-pagination-bullet]:h-2 [&_.swiper-pagination-bullet]:bg-brand-brown/20 [&_.swiper-pagination-bullet-active]:bg-brand-orange [&_.swiper-pagination-bullet-active]:w-5 [&_.swiper-pagination-bullet]:transition-all [&_.swiper-pagination-bullet]:duration-300 [&_.swiper-pagination-bullet]:rounded-full"
           >
             {mappedCampaigns.map((donation, idx) => {
               const goal = donation.goal || 0;
@@ -245,7 +249,7 @@ export const OtherDonations = ({ campaigns, transparent = false, className = "" 
                       </div>
 
                       {/* Action Buttons split */}
-                      <div className="mt-6 flex gap-3 shrink-0">
+                      <div className="mt-6 flex flex-col md:flex-row gap-3 shrink-0">
                         <Link 
                           href={`/campaigns/${donation.slug || donation.id}`}
                           draggable="false"

@@ -61,7 +61,7 @@ export function ProgressTabs({ campaign, donations }: ProgressTabsProps) {
     <div className="bg-white rounded-2xl md:rounded-[2.5rem] border border-brand-brown/5 shadow-[0_20px_50px_rgba(74,63,53,0.04)] overflow-hidden flex flex-col">
       
       {/* Dynamic Tab Switchers (Capsule Style matching the Form) */}
-      <div className="flex justify-center bg-brand-cream/10 pt-6 pb-3 px-5 md:pt-8 md:px-6 shrink-0 relative z-10">
+      <div className="flex justify-center bg-brand-cream/10 pt-6 pb-3 px-3 md:pt-8 md:px-6 shrink-0 relative z-10">
         <div className="bg-brand-cream p-1 rounded-full flex relative w-full max-w-sm border border-brand-brown/5 shadow-inner">
           <motion.div
             className="absolute top-1 bottom-1 left-1 bg-white rounded-full shadow-sm"
@@ -72,22 +72,22 @@ export function ProgressTabs({ campaign, donations }: ProgressTabsProps) {
           <button
             type="button"
             onClick={() => setActiveTab("progress")}
-            className={`relative z-10 flex-1 py-2.5 text-xs sm:text-sm font-black uppercase tracking-wider rounded-full transition-colors duration-300 flex items-center justify-center gap-2 cursor-pointer focus:outline-none ${
+            className={`relative z-10 flex-1 py-2 md:py-2.5 text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-wider rounded-full transition-colors duration-300 flex items-center justify-center gap-1 sm:gap-2 cursor-pointer focus:outline-none whitespace-nowrap ${
               activeTab === "progress" ? "text-brand-orange" : "text-brand-brown/50 hover:text-brand-brown"
             }`}
           >
-            <TrendingUp className="w-4 h-4" />
-            <span>О сборе</span>
+            <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span className="whitespace-nowrap">О сборе</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("donations")}
-            className={`relative z-10 flex-1 py-2.5 text-xs sm:text-sm font-black uppercase tracking-wider rounded-full transition-colors duration-300 flex items-center justify-center gap-2 cursor-pointer focus:outline-none ${
+            className={`relative z-10 flex-1 py-2 md:py-2.5 text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-wider rounded-full transition-colors duration-300 flex items-center justify-center gap-1 sm:gap-2 cursor-pointer focus:outline-none whitespace-nowrap ${
               activeTab === "donations" ? "text-brand-orange" : "text-brand-brown/50 hover:text-brand-brown"
             }`}
           >
-            <HeartHandshake className="w-4 h-4" />
-            <span>Поддержали ({donations.length})</span>
+            <HeartHandshake className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span className="whitespace-nowrap">Поддержали ({donations.length})</span>
           </button>
         </div>
       </div>

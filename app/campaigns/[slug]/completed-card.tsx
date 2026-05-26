@@ -85,17 +85,20 @@ export function CompletedCard({ campaignName, goalAmount = 0, donationsCount = 0
       </p>
 
       {/* Statistics display */}
-      <div className="relative z-20 w-full bg-brand-cream/40 rounded-2xl p-4 border border-brand-brown/5 grid grid-cols-2 gap-4">
-        <div className="text-center">
+      <div className="relative z-20 w-full bg-brand-cream/40 rounded-2xl p-4 border border-brand-brown/5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="text-center flex flex-col justify-center items-center pb-3 sm:pb-0 border-b sm:border-b-0 sm:border-r border-brand-brown/10">
           <span className="text-[9px] font-black uppercase tracking-widest text-brand-brown/40 block mb-1">Собрано средств</span>
-          <span className="font-heading text-lg md:text-xl font-black text-[#52B788] tracking-tight">
+          <span className="font-heading text-lg md:text-2xl font-black text-[#52B788] tracking-tight">
             {goalAmount.toLocaleString("ru-RU")} ₽
           </span>
         </div>
-        <div className="text-center border-l border-brand-brown/10">
+        <div className="text-center flex flex-col justify-center items-center pt-3 sm:pt-0 sm:pl-2">
           <span className="text-[9px] font-black uppercase tracking-widest text-brand-brown/40 block mb-1">Поддержали сбор</span>
-          <span className="font-heading text-lg md:text-xl font-black text-brand-orange tracking-tight">
-            {donationsCount} {donationsCount === 1 ? "благотворитель" : donationsCount > 1 && donationsCount < 5 ? "благотворителя" : "благотворителей"}
+          <span className="font-heading text-lg md:text-2xl font-black text-brand-orange tracking-tight block">
+            {donationsCount}
+          </span>
+          <span className="text-[9px] font-black uppercase tracking-wider text-brand-orange/80 block -mt-0.5">
+            {donationsCount === 1 ? "благотворитель" : donationsCount > 1 && donationsCount < 5 ? "благотворителя" : "благотворителей"}
           </span>
         </div>
       </div>
@@ -104,10 +107,10 @@ export function CompletedCard({ campaignName, goalAmount = 0, donationsCount = 0
       <div className="relative z-20 w-full pt-2">
         <Link 
           href="/campaigns" 
-          className="w-full py-4 bg-[#52B788] hover:bg-[#409a71] text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 shadow-md shadow-[#52B788]/15 hover:scale-[1.02] active:scale-[0.98] inline-flex items-center justify-center gap-2 cursor-pointer focus:outline-none"
+          className="w-full py-4 bg-[#52B788] hover:bg-[#409a71] text-white rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 shadow-md shadow-[#52B788]/15 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer focus:outline-none px-4 text-center"
         >
           <Heart className="w-4 h-4 fill-current shrink-0 animate-pulse" />
-          <span>Посмотреть другие сборы</span>
+          <span className="text-center">Другие сборы</span>
         </Link>
       </div>
     </div>

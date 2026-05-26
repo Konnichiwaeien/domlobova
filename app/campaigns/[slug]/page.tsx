@@ -183,7 +183,7 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
                   </div>
 
                   {/* Title */}
-                  <h1 className="font-heading text-3xl md:text-5xl lg:text-6xl font-black text-brand-brown tracking-tighter leading-[0.95] uppercase">
+                  <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-black text-brand-brown tracking-tighter leading-[0.95] uppercase">
                     {formatCampaignTitle(campaign.name)}
                   </h1>
 
@@ -221,7 +221,7 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
 
                 {/* Campaign Image */}
                 {imageUrl && (
-                  <div className="relative aspect-video w-full overflow-hidden rounded-2xl md:rounded-[2.5rem] border border-brand-brown/5 shadow-2xl shadow-brand-brown/5 group">
+                  <div className="relative aspect-square md:aspect-video w-full overflow-hidden rounded-2xl md:rounded-[2.5rem] border border-brand-brown/5 shadow-2xl shadow-brand-brown/5 group">
                     <Image 
                       src={imageUrl} 
                       alt={campaign.name || "Изображение сбора"} 
@@ -256,7 +256,7 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
                 <ProgressTabs campaign={campaign} donations={donations} />
 
                 {/* Polished Card-Styled Description details */}
-                <div className="bg-white rounded-2xl md:rounded-[2.5rem] border border-brand-brown/5 p-6 md:p-10 shadow-[0_20px_50px_rgba(74,63,53,0.04)] space-y-8 relative overflow-hidden">
+                <div className="bg-white rounded-2xl md:rounded-[2.5rem] border border-brand-brown/5 p-4 md:p-10 shadow-[0_20px_50px_rgba(74,63,53,0.04)] space-y-6 md:space-y-8 relative overflow-hidden">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-brand-orange-light/20 border border-brand-orange/30 flex items-center justify-center shrink-0 shadow-xs">
                       <HeartHandshake className="w-6 h-6 text-brand-orange" />
@@ -266,7 +266,7 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
                     </h3>
                   </div>
 
-                  <div className="relative pl-6 border-l-3 border-brand-orange/40 text-base md:text-lg text-brand-brown-light font-medium leading-relaxed space-y-4">
+                  <div className="relative pl-0 border-l-0 md:pl-6 md:border-l-3 md:border-brand-orange/40 text-base md:text-lg text-brand-brown-light font-medium leading-relaxed space-y-4">
                         <p className="last:mb-0">
                           Дом милосердия кузнеца Лобова с 2018 года оказывает профессиональную медико-социальную помощь людям с неизлечимыми заболеваниями и их семьям. В отделении милосердия снимают боль, создают комфортные условия жизни, приближенные к домашним, организуют круглосуточный уход. Здесь одновременно может проживать 20 человек. Также работает выездная служба «Забота на дому», которая оказывает помощь жителям Ростовского, Борисоглебского, Гаврилов -Ямского и Переславского районов. Ежемесячно выездная бригада обслуживает 60 человек. Все услуги благотворительной организации абсолютно бесплатны, это стало возможным благодаря поддержке партнеров, спонсоров и сотен людей. Обратиться за помощью можно по телефону горячей линии +7 (920) 122-97-37, будни с 8:00 до 17:00
                         </p>
@@ -307,7 +307,16 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
             {/* Bottom Section: Recommend Other Campaigns with Transparent Background */}
             {landing?.campaigns?.campaigns && (
               <div className="mt-16 md:mt-20 pt-8 md:pt-10 border-t border-brand-brown/10">
-                <OtherDonations campaigns={landing.campaigns.campaigns} transparent className="!pb-20 md:!pb-28 lg:!pb-32" />
+                <OtherDonations 
+                  campaigns={landing.campaigns.campaigns.filter(
+                    (c: any) => 
+                      c.documentId !== campaign.documentId && 
+                      c.id !== campaign.id && 
+                      c.slug !== campaign.slug
+                  )} 
+                  transparent 
+                  className="!pb-20 md:!pb-28 lg:!pb-32" 
+                />
               </div>
             )}
 
