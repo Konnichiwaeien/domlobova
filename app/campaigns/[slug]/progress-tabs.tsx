@@ -72,7 +72,7 @@ export function ProgressTabs({ campaign, donations }: ProgressTabsProps) {
           <button
             type="button"
             onClick={() => setActiveTab("progress")}
-            className={`relative z-10 flex-1 py-2 md:py-2.5 text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-wider rounded-full transition-colors duration-300 flex items-center justify-center gap-1 sm:gap-2 cursor-pointer focus:outline-none whitespace-nowrap ${
+            className={`relative z-10 flex-1 py-2 md:py-2.5 text-[9px] sm:text-xs md:text-sm font-black uppercase tracking-wider rounded-full transition-colors duration-300 flex items-center justify-center gap-1 sm:gap-2 cursor-pointer focus:outline-none whitespace-nowrap ${
               activeTab === "progress" ? "text-brand-orange" : "text-brand-brown/50 hover:text-brand-brown"
             }`}
           >
@@ -82,7 +82,7 @@ export function ProgressTabs({ campaign, donations }: ProgressTabsProps) {
           <button
             type="button"
             onClick={() => setActiveTab("donations")}
-            className={`relative z-10 flex-1 py-2 md:py-2.5 text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-wider rounded-full transition-colors duration-300 flex items-center justify-center gap-1 sm:gap-2 cursor-pointer focus:outline-none whitespace-nowrap ${
+            className={`relative z-10 flex-1 py-2 md:py-2.5 text-[9px] sm:text-xs md:text-sm font-black uppercase tracking-wider rounded-full transition-colors duration-300 flex items-center justify-center gap-1 sm:gap-2 cursor-pointer focus:outline-none whitespace-nowrap ${
               activeTab === "donations" ? "text-brand-orange" : "text-brand-brown/50 hover:text-brand-brown"
             }`}
           >

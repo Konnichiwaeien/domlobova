@@ -158,6 +158,7 @@ export const OtherDonations = ({ campaigns, transparent = false, className = "" 
               nextEl: '.swiper-next',
             }}
             pagination={{
+              el: '.swiper-pagination-custom',
               clickable: true,
             }}
             spaceBetween={16}
@@ -175,7 +176,7 @@ export const OtherDonations = ({ campaigns, transparent = false, className = "" 
               setIsBeginning(swiper.isBeginning);
               setIsEnd(swiper.isEnd);
             }}
-            className="w-full pb-14 px-2 [&>.swiper-wrapper]:items-stretch [&_.swiper-pagination-bullet]:w-2 [&_.swiper-pagination-bullet]:h-2 [&_.swiper-pagination-bullet]:bg-brand-brown/20 [&_.swiper-pagination-bullet-active]:bg-brand-orange [&_.swiper-pagination-bullet-active]:w-5 [&_.swiper-pagination-bullet]:transition-all [&_.swiper-pagination-bullet]:duration-300 [&_.swiper-pagination-bullet]:rounded-full"
+            className="w-full pb-4 px-2 [&>.swiper-wrapper]:items-stretch"
           >
             {mappedCampaigns.map((donation, idx) => {
               const goal = donation.goal || 0;
@@ -285,6 +286,9 @@ export const OtherDonations = ({ campaigns, transparent = false, className = "" 
               );
             })}
           </Swiper>
+          
+          {/* Custom Swiper Pagination outside/after the card */}
+          <div className="swiper-pagination-custom flex justify-center items-center gap-2 mt-6 [&_.swiper-pagination-bullet]:w-2 [&_.swiper-pagination-bullet]:h-2 [&_.swiper-pagination-bullet]:!bg-brand-brown/20 [&_.swiper-pagination-bullet]:rounded-full [&_.swiper-pagination-bullet-active]:!bg-brand-orange [&_.swiper-pagination-bullet-active]:!w-5 [&_.swiper-pagination-bullet]:transition-all [&_.swiper-pagination-bullet]:duration-300 [&_.swiper-pagination-bullet]:cursor-pointer" />
         </motion.div>
 
         {/* Bottom Call to Action: Все сборы */}
