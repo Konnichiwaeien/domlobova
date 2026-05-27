@@ -266,7 +266,7 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
                     </h3>
                   </div>
 
-                  <div className="relative pl-0 border-l-0 md:pl-6 md:border-l-3 md:border-brand-orange/40 text-base md:text-lg text-brand-brown-light font-medium leading-relaxed space-y-4">
+                  <div className="relative pl-0 border-l-0 md:pl-6 md:border-l-3 md:border-brand-orange/40 text-[13px] sm:text-sm md:text-lg text-brand-brown-light font-medium leading-relaxed space-y-4">
                         <p className="last:mb-0">
                           Дом милосердия кузнеца Лобова с 2018 года оказывает профессиональную медико-социальную помощь людям с неизлечимыми заболеваниями и их семьям. В отделении милосердия снимают боль, создают комфортные условия жизни, приближенные к домашним, организуют круглосуточный уход. Здесь одновременно может проживать 20 человек. Также работает выездная служба «Забота на дому», которая оказывает помощь жителям Ростовского, Борисоглебского, Гаврилов -Ямского и Переславского районов. Ежемесячно выездная бригада обслуживает 60 человек. Все услуги благотворительной организации абсолютно бесплатны, это стало возможным благодаря поддержке партнеров, спонсоров и сотен людей. Обратиться за помощью можно по телефону горячей линии +7 (920) 122-97-37, будни с 8:00 до 17:00
                         </p>
@@ -304,23 +304,26 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
 
             </div>
 
-            {/* Bottom Section: Recommend Other Campaigns with Transparent Background */}
-            {landing?.campaigns?.campaigns && (
-              <div className="mt-16 md:mt-20 pt-8 md:pt-10 border-t border-brand-brown/10">
-                <OtherDonations 
-                  campaigns={landing.campaigns.campaigns.filter(
-                    (c: any) => 
-                      c.documentId !== campaign.documentId && 
-                      c.id !== campaign.id && 
-                      c.slug !== campaign.slug
-                  )} 
-                  transparent 
-                  className="!pb-20 md:!pb-28 lg:!pb-32" 
-                />
-              </div>
-            )}
-
           </div>
+
+          {/* Bottom Section: Recommend Other Campaigns with Transparent Background */}
+          {landing?.campaigns?.campaigns && (
+            <div className="mt-12 md:mt-16">
+              <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12">
+                <div className="border-t border-brand-brown/10 w-full" />
+              </div>
+              <OtherDonations 
+                campaigns={landing.campaigns.campaigns.filter(
+                  (c: any) => 
+                    c.documentId !== campaign.documentId && 
+                    c.id !== campaign.id && 
+                    c.slug !== campaign.slug
+                )} 
+                transparent 
+                className="!pb-20 md:!pb-28 lg:!pb-32" 
+              />
+            </div>
+          )}
         </main>
 
         <Footer />

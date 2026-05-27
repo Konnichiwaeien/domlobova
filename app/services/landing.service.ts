@@ -112,30 +112,40 @@ export async function getLandingData(slug: string): Promise<LandingData | null> 
           $eq: slug
         }
       },
-      populate: [
-        'marqueePhotos',
-        'hero',
-        'hero.video',
-        'hero.photos',
-        'welcome.photos',
-        'about.photos',
-        'about.stats',
-        'about.features',
-        'about.features.image',
-        'about.promo',
-        'about.promo.images',
-        'campaigns.campaigns',
-        'campaigns.campaigns.image',
-        'fundraisings',
-        'stories',
-        'stories.image',
-        'needs',
-        'needs.needs',
-        'needs.needs.image',
-        'volunteers_needs',
-        'volunteers_needs.volunteers_needs',
-        'volunteers_needs.volunteers_needs.image'
-      ]
+      populate: {
+        marqueePhotos: true,
+        hero: {
+          populate: ['video', 'photos']
+        },
+        welcome: {
+          populate: ['photos']
+        },
+        about: {
+          populate: ['photos', 'stats', 'features', 'features.image', 'promo', 'promo.images']
+        },
+        campaigns: {
+          populate: {
+            campaigns: {
+              filters: {
+                closed: {
+                  $ne: true
+                }
+              },
+              populate: ['image']
+            }
+          }
+        },
+        fundraisings: true,
+        stories: {
+          populate: ['image']
+        },
+        needs: {
+          populate: ['needs', 'needs.image']
+        },
+        volunteers_needs: {
+          populate: ['volunteers_needs', 'volunteers_needs.image']
+        }
+      }
     }, {
       encodeValuesOnly: true
     });

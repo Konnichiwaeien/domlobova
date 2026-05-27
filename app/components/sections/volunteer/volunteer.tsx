@@ -260,7 +260,7 @@ export const VolunteerSection = ({ data }: VolunteerSectionProps) => {
           </Swiper>
 
           {/* Pagination — OUTSIDE the rounded container */}
-          <div className="volunteer-pagination flex justify-center gap-2 mt-6" />
+          <div className="volunteer-pagination flex justify-center items-center gap-2 mt-6 py-2" />
         </div>
       </div>
 

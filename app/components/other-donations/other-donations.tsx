@@ -77,13 +77,9 @@ export const OtherDonations = ({ campaigns, transparent = false, className = "" 
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
 
-  // Show all non-primary campaigns, sorted: active first, closed last
+  // Show all non-primary campaigns
   const secondaryCampaigns = useMemo(() => {
-    return (campaigns?.filter((c) => !c.primary) || [])
-      .sort((a, b) => {
-        if (a.closed === b.closed) return 0;
-        return a.closed ? 1 : -1;
-      });
+    return (campaigns?.filter((c) => !c.primary) || []);
   }, [campaigns]);
   
   // Use our real campaigns if available, otherwise fallback to the dummy data
@@ -117,7 +113,7 @@ export const OtherDonations = ({ campaigns, transparent = false, className = "" 
   }, [secondaryCampaigns]);
   return (
     <section className={`relative z-30 pt-6 md:pt-8 pb-16 md:pb-24 lg:pb-28 overflow-hidden content-auto ${transparent ? 'bg-transparent' : 'bg-white'} ${className}`}>
-      <div className="mx-auto max-w-[1400px] px-4 md:px-8 lg:px-12">
+      <div className="mx-auto max-w-[1400px] px-5 md:px-8 lg:px-12">
         <div className="flex items-center justify-between mb-8 md:mb-12">
           <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-black text-brand-brown tracking-tighter">
             ДРУГИЕ <span className="text-brand-orange italic">СБОРЫ</span>
@@ -149,7 +145,7 @@ export const OtherDonations = ({ campaigns, transparent = false, className = "" 
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full overflow-hidden rounded-2xl md:rounded-[3rem]"
+          className="relative w-full"
         >
           <Swiper
             modules={[Navigation, Pagination]}
@@ -160,6 +156,8 @@ export const OtherDonations = ({ campaigns, transparent = false, className = "" 
             pagination={{
               el: '.swiper-pagination-custom',
               clickable: true,
+              bulletClass: 'donation-bullet',
+              bulletActiveClass: 'donation-bullet-active',
             }}
             spaceBetween={16}
             slidesPerView={1}
@@ -288,7 +286,7 @@ export const OtherDonations = ({ campaigns, transparent = false, className = "" 
           </Swiper>
           
           {/* Custom Swiper Pagination outside/after the card */}
-          <div className="swiper-pagination-custom flex justify-center items-center gap-2 mt-6 [&_.swiper-pagination-bullet]:w-2 [&_.swiper-pagination-bullet]:h-2 [&_.swiper-pagination-bullet]:!bg-brand-brown/20 [&_.swiper-pagination-bullet]:rounded-full [&_.swiper-pagination-bullet-active]:!bg-brand-orange [&_.swiper-pagination-bullet-active]:!w-5 [&_.swiper-pagination-bullet]:transition-all [&_.swiper-pagination-bullet]:duration-300 [&_.swiper-pagination-bullet]:cursor-pointer" />
+          <div className="swiper-pagination-custom flex justify-center items-center gap-2 mt-6 py-2" />
         </motion.div>
 
         {/* Bottom Call to Action: Все сборы */}
